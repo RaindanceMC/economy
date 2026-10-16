@@ -6,18 +6,19 @@
 
     <parent>
         <groupId>de.raindancer.modules</groupId>
-        <artifactId>rains-flexible-modules</artifactId>
+        <artifactId>economy-build</artifactId>
         <version>1.0.0</version>
     </parent>
 
     <artifactId>economy-standalone</artifactId>
+    <!-- Published at the plugin's own version. -->
+    <version>${plugin.version}</version>
     <packaging>jar</packaging>
 
     <name>Rain's Economy</name>
     <description>Rain's Economy as a plugin of its own: the economy module and the standard wrapper.</description>
 
     <properties>
-        <maven.deploy.skip>true</maven.deploy.skip>
         <plugin.name>RainsEconomy</plugin.name>
         <!-- 0.19.0: role discounts (Core PriceModifiers) in the shop, sell capped under the buyer's own buy price; packs (packs.yml, /eco packs). -->
         <!-- 0.20.0: bulk discount on building blocks and iron (shop.bulk-*, hard cap 30%), role and bulk shown on their own lines, every seed priced, more packs. -->
