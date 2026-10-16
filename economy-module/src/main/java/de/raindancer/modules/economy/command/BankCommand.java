@@ -36,7 +36,9 @@ public final class BankCommand extends EconomyCommand {
                                 ? "economy.sidebar.on" : "economy.sidebar.off");
                         return;
                     }
-                    live.screens().bank(player);
+                    if (!ServiceDesks.refuseRemote(player, ServiceDesk.BANK)) {
+                        live.screens().bank(player);
+                    }
                 }
                 case CASINO, SLOTS -> {
                     if (!allowed(live, sender, PermissionNodes.GAMBLE)) {

@@ -446,7 +446,8 @@ public record EconomySettings(
         @Key("gamble.cooldown-seconds") int gambleCooldownSeconds,
 
         @In("economy/gambling") @Title("Dealers wear the skin of")
-        @Describe("A player name. Empty: a black suit with a red tie.")
+        @Describe("A player name, a MineSkin link (mineskin.org) or mineskin:<id>; several, comma-separated, are "
+                + "shared out between the dealers. Empty: a black suit with a red tie.")
         @Key("casino.dealer-skin") String dealerSkin,
 
         @In("economy/gambling") @Title("Play only at a dealer")

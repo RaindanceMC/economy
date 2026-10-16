@@ -38,17 +38,19 @@ public final class DealerService implements IEconomyService {
 
     /** A dealer where the player stands, facing them. On the player's own region thread. */
     public Mannequin place(Player player, DealerGame game) {
-        return Attendants.place(player, Component.text("Dealer · " + game.title(), NamedTextColor.GOLD),
-                Component.text("Right click to play", NamedTextColor.GRAY), Attendants.look(settings.dealerSkin()),
-                dealer -> dealer.getPersistentDataContainer().set(GAME, PersistentDataType.STRING, game.name()));
+        Mannequin dealer = Attendants.place(player, Component.text("Dealer · " + game.title(), NamedTextColor.GOLD),
+                Component.text("Right click to play", NamedTextColor.GRAY), Attendants.look(null),
+                placed -> placed.getPersistentDataContainer().set(GAME, PersistentDataType.STRING, game.name()));
+        dress(dealer);
+        return dealer;
     }
 
     /**
-     * The suit, or the skin of the player the owner named. Also for dealers placed before: they wore a plain
-     * leather chestplate over the default look, which would hide the suit, so that comes off.
+     * The suit, or one of the skins the owner named (each dealer always the same one). Also for dealers placed
+     * before: they wore a plain leather chestplate over the default look, which would hide the suit, so that comes off.
      */
     public void dress(Mannequin dealer) {
-        dealer.setProfile(Attendants.look(settings.dealerSkin()));
+        Attendants.dress(dealer, settings.dealerSkin());
         ItemStack chest = dealer.getEquipment().getChestplate();
         if (chest != null && chest.getType() == Material.LEATHER_CHESTPLATE && !chest.hasItemMeta()) {
             dealer.getEquipment().setChestplate(null);

@@ -87,7 +87,7 @@ import java.util.UUID;
  */
 public final class EconomyModule implements FlexModule {
 
-    private static final ModuleInfo INFO = ModuleInfo.of("economy", "Economy", "0.43.0")
+    private static final ModuleInfo INFO = ModuleInfo.of("economy", "Economy", "0.44.0")
             .describedAs("A bank, paying and hiring, coins you can carry, a creative-style shop priced from recipes, "
                     + "passive income, live auctions and raffles, and a casino with sounds and animations — every part switchable.")
             .by("Raindancer118");
@@ -391,6 +391,9 @@ public final class EconomyModule implements FlexModule {
                 new BetInsuranceOffer(() -> services);
         de.raindancer.core.social.desk.ServiceDesks.offer(de.raindancer.core.social.desk.ServiceDesk.INSURANCE, betInsurance);
         context.closeWith(() -> de.raindancer.core.social.desk.ServiceDesks.withdraw(betInsurance));
+        BankDeskOffer bankDesk = new BankDeskOffer(() -> services);
+        de.raindancer.core.social.desk.ServiceDesks.offer(de.raindancer.core.social.desk.ServiceDesk.BANK, bankDesk);
+        context.closeWith(() -> de.raindancer.core.social.desk.ServiceDesks.withdraw(bankDesk));
         log.info("The economy is up: {} account(s), {} item(s) priced from {} recipe(s), money is {}.",
                 book.all().size(), prices.priced().size(), recipes, economy.currency().format(economy.currency().ofMajor(1)));
         long books = prices.priced().stream().filter(de.raindancer.modules.economy.model.EnchantKey::isKey).count();

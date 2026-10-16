@@ -27,7 +27,7 @@ import java.util.function.Supplier;
 public final class EcoCommand extends EconomyCommand {
 
     private static final List<String> SUBCOMMANDS = List.of("give", "take", "set", "reset", "freeze", "unfreeze",
-            "history", "menu", "price", "reprice", "draw", "calm", "coin", "leaderboard", "dealer", "agent", "auction", "raffle", "giveaway", "tax", "loan", "packs", "health", "fund", "season");
+            "history", "menu", "price", "reprice", "draw", "calm", "coin", "leaderboard", "dealer", "agent", "banker", "auction", "raffle", "giveaway", "tax", "loan", "packs", "health", "fund", "season");
 
     public EcoCommand(Supplier<EconomyServices> services) {
         super(services);
@@ -89,6 +89,15 @@ public final class EcoCommand extends EconomyCommand {
                 }
                 de.raindancer.core.social.desk.ServiceDesks.place(player, de.raindancer.core.social.desk.ServiceDesk.INSURANCE);
                 live.messages().send(player, "economy.admin.agent-placed");
+            });
+            case "banker" -> player(live, sender).ifPresent(player -> {
+                if (args.length > 1 && args[1].equalsIgnoreCase("remove")) {
+                    live.messages().send(player, de.raindancer.core.social.desk.ServiceDesks.removeNearest(player)
+                            ? "economy.admin.banker-removed" : "economy.admin.banker-none");
+                    return;
+                }
+                de.raindancer.core.social.desk.ServiceDesks.place(player, de.raindancer.core.social.desk.ServiceDesk.BANK);
+                live.messages().send(player, "economy.admin.banker-placed");
             });
             case "leaderboard" -> player(live, sender).ifPresent(player -> {
                 boolean removing = args.length > 1 && args[1].equalsIgnoreCase("remove");
@@ -440,7 +449,8 @@ public final class EcoCommand extends EconomyCommand {
         if (args.length == 3 && args[0].equalsIgnoreCase("loan")) {
             return starting(args[2], List.of("forgive"));
         }
-        if (args.length == 2 && (args[0].equalsIgnoreCase("leaderboard") || args[0].equalsIgnoreCase("agent"))) {
+        if (args.length == 2 && (args[0].equalsIgnoreCase("leaderboard") || args[0].equalsIgnoreCase("agent")
+                || args[0].equalsIgnoreCase("banker"))) {
             return starting(args[1], List.of("place", "remove"));
         }
         return args.length == 2 ? players(source, args[1]) : List.of();
