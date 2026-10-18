@@ -842,8 +842,8 @@ public record EconomySettings(
 
         // ------------------------------------------------------------------ bulk
         @In("economy/shop") @Title("Cheaper in bulk")
-        @Describe("Building blocks and iron (the list below) cost less bought in quantity. Never the "
-                + "valuable things: a discount on diamonds would be a discount on money.")
+        @Describe("Whatever is on the list below costs less bought in quantity — by default everything that stacks, "
+                + "but enchanted books. Weapons, armour, tools and anything else that does not stack never.")
         @Key("features.bulk-discount") boolean bulkDiscount,
 
         @In("economy/shop") @Title("Bulk discount steps")
@@ -857,7 +857,7 @@ public record EconomySettings(
 
         @In("economy/shop") @Title("Cheaper in bulk")
         @Describe("Shop drawers (building_blocks, decorations…) and items ('iron_ingot', '*_planks'), comma "
-                + "separated; '!diamond_block' leaves one out.")
+                + "separated; '*' is everything, '!diamond_block' leaves one out.")
         @Key("shop.bulk-items") List<String> bulkItems,
 
         @In("economy/shop/rains-enchantments") @Title("Rain's enchantments in the shop")
@@ -937,12 +937,7 @@ public record EconomySettings(
             true, 10,
             // bulk
             true, List.of("128 5", "640 10", "1280 15", "1920 20"), 20,
-            List.of("building_blocks", "iron_ingot", "iron_nugget", "raw_iron", "*glass*", "*glass_pane",
-                    "*_planks", "scaffolding", "ladder", "torch", "lantern", "*_wool", "*_carpet", "*_concrete",
-                    "*_concrete_powder", "*terracotta", "rail",
-                    "!*_ore", "!ancient_debris", "!diamond_block", "!emerald_block", "!gold_block",
-                    "!netherite_block", "!lapis_block", "!redstone_block", "!coal_block", "!raw_gold_block",
-                    "!raw_copper_block", "!amethyst_block", "!glass_bottle", "!*_shulker_box"),
+            List.of("*", "!enchanted_book"),
             // Rain's enchantments
             true, List.of("8", "24", "64", "128", "256"), "250", "20",
             List.of("flight 60", "launch 60", "soulbound 60", "veinminer 35", "excavator 35", "chest_link 35",

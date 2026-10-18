@@ -442,7 +442,7 @@ public final class ShopService implements IEconomyService, ShopDesk {
             setup = new BulkSetup(live, ItemSelection.parse(live.bulkItems()), BulkRule.tiers(live.bulkTiers()));
             bulkSetup = setup;
         }
-        return bulk.forItem(material, setup.items(), setup.tiers(), live.bulkMostPercent());
+        return bulk.forItem(material, prices.stackSizeOf(material), setup.items(), setup.tiers(), live.bulkMostPercent());
     }
 
     /** The owner's bulk lists, read once per settings change rather than once per price drawn. */

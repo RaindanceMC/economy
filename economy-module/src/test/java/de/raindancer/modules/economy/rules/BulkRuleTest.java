@@ -22,7 +22,11 @@ class BulkRuleTest {
     private final ItemSelection building = ItemSelection.parse(EconomySettings.DEFAULTS.bulkItems());
 
     private Bulk bulk(String material) {
-        return rule.forItem(material, building, BulkRule.tiers(EconomySettings.DEFAULTS.bulkTiers()),
+        return bulk(material, 64);
+    }
+
+    private Bulk bulk(String material, int stackSize) {
+        return rule.forItem(material, stackSize, building, BulkRule.tiers(EconomySettings.DEFAULTS.bulkTiers()),
                 EconomySettings.DEFAULTS.bulkMostPercent());
     }
 
@@ -32,19 +36,19 @@ class BulkRuleTest {
     }
 
     @Test
-    @DisplayName("building blocks and iron are cheaper in bulk; diamonds, gold, ores and food are not")
+    @DisplayName("everything that stacks is cheaper in bulk — beef, diamonds, ores — but no weapon, armour or book")
     void which() {
         assertThat(bulk("STONE_BRICKS").applies()).isTrue();
-        assertThat(bulk("OAK_PLANKS").applies()).isTrue();
-        assertThat(bulk("GLASS").applies()).isTrue();
-        assertThat(bulk("IRON_INGOT").applies()).isTrue();
-        assertThat(bulk("IRON_BLOCK").applies()).isTrue();
-        assertThat(bulk("DIAMOND").applies()).isFalse();
-        assertThat(bulk("DIAMOND_BLOCK").applies()).isFalse();
-        assertThat(bulk("GOLD_BLOCK").applies()).isFalse();
-        assertThat(bulk("NETHERITE_BLOCK").applies()).isFalse();
-        assertThat(bulk("IRON_ORE").applies()).isFalse();
-        assertThat(bulk("COOKED_BEEF").applies()).isFalse();
+        assertThat(bulk("COOKED_BEEF").applies()).isTrue();
+        assertThat(bulk("BEEF").applies()).isTrue();
+        assertThat(bulk("DIAMOND").applies()).isTrue();
+        assertThat(bulk("IRON_ORE").applies()).isTrue();
+        assertThat(bulk("ENDER_PEARL", 16).applies()).as("stacks of sixteen too").isTrue();
+        assertThat(bulk("DIAMOND_SWORD", 1).applies()).as("a weapon").isFalse();
+        assertThat(bulk("NETHERITE_CHESTPLATE", 1).applies()).as("armour").isFalse();
+        assertThat(bulk("IRON_PICKAXE", 1).applies()).isFalse();
+        assertThat(bulk("ENCHANTED_BOOK", 1).applies()).as("enchantments").isFalse();
+        assertThat(bulk("ENCHANTED_BOOK", 64).applies()).as("even if it stacked").isFalse();
     }
 
     @Test
@@ -65,10 +69,10 @@ class BulkRuleTest {
     @Test
     @DisplayName("the cap is hard: an owner's 90% tier or 90% cap is held at 30%")
     void hardCap() {
-        Bulk greedy = rule.forItem("STONE", building, BulkRule.tiers(List.of("64 90", "128 95")), 90);
+        Bulk greedy = rule.forItem("STONE", 64, building, BulkRule.tiers(List.of("64 90", "128 95")), 90);
         assertThat(greedy.percentFor(64)).isEqualTo(BulkRule.HARD_CAP);
         assertThat(greedy.most()).isEqualTo(BulkRule.HARD_CAP);
-        Bulk modest = rule.forItem("STONE", building, BulkRule.tiers(List.of("64 50")), 12);
+        Bulk modest = rule.forItem("STONE", 64, building, BulkRule.tiers(List.of("64 50")), 12);
         assertThat(modest.percentFor(64)).as("the owner's own cap still holds under the hard one").isEqualTo(12);
     }
 

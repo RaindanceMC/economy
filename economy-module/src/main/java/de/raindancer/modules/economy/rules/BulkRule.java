@@ -8,18 +8,18 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * Which items get cheaper bought in quantity, and by how much — building blocks and iron, by default, never
- * the valuable ones: buying a lot of something is a builder's need, and a discount on diamonds is a discount
- * on the server's money.
+ * Which items get cheaper bought in quantity, and by how much: everything that stacks and is on the owner's list
+ * (by default all of it but enchanted books). What does not stack — weapons, armour, tools, books, potions — never:
+ * a bulk of 128 of them could not fit into anybody's inventory.
  */
 public final class BulkRule implements IEconomyRule {
 
     /** The most any bulk discount may be, whatever an owner writes. */
     public static final int HARD_CAP = 30;
 
-    public Bulk forItem(String material, ItemSelection items, List<Bulk.Tier> tiers, int mostPercent) {
+    public Bulk forItem(String material, int stackSize, ItemSelection items, List<Bulk.Tier> tiers, int mostPercent) {
         int most = Math.clamp(mostPercent, 0, HARD_CAP);
-        if (most == 0 || tiers.isEmpty() || !items.covers(material)) {
+        if (most == 0 || tiers.isEmpty() || stackSize <= 1 || !items.covers(material)) {
             return Bulk.NONE;
         }
         return new Bulk(tiers, most);
