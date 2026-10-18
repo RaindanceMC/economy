@@ -591,6 +591,8 @@ public final class ShopService implements IEconomyService, ShopDesk {
             io.papermc.paper.registry.RegistryAccess.registryAccess()
                     .getRegistry(io.papermc.paper.registry.RegistryKey.ENCHANTMENT).stream()
                     .filter(enchantment -> enchantment.getKey().getNamespace().equals("rainsenchants"))
+                    .filter(enchantment -> !de.raindancer.core.content.enchant.CustomEnchantments
+                            .isSwitchedOff(enchantment.getKey().asString()))
                     .sorted(java.util.Comparator.comparing(enchantment -> rainsName(enchantment.getKey().asString())))
                     .forEach(enchantment -> {
                         String key = enchantment.getKey().asString();
