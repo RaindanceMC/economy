@@ -186,9 +186,12 @@ class RulesTest {
         }
 
         @Test
-        @DisplayName("limits that make no sense are kept sensible: never free, never a hundredfold")
+        @DisplayName("limits that make no sense are kept sensible: down to nothing, never below, never a hundredfold")
         void sensibleLimits() {
-            assertThat(rule.multiplier(-1000, 0, 2.0)).isGreaterThanOrEqualTo(0.05);
+            assertThat(rule.multiplier(-1000, 0, 2.0)).as("a flooded market: worth nothing").isEqualTo(0.0);
+            assertThat(rule.multiplier(-1000, -1, 2.0)).isEqualTo(0.0);
+            assertThat(rule.multiplier(-3, 0, 2.0)).as("thirty stacks at 0.1 each").isLessThan(0.01);
+            assertThat(rule.multiplier(-1, 0, 2.0)).as("ten").isBetween(0.2, 0.3);
             assertThat(rule.multiplier(-1000, 3.0, 2.0)).as("a lowest above 1 does not raise a sold-off price")
                     .isEqualTo(1.0);
             assertThat(rule.multiplier(1000, 0.5, 500)).isLessThanOrEqualTo(10.0);
@@ -205,7 +208,17 @@ class RulesTest {
         void rounding() {
             assertThat(rule.unitBuy(m(100), 1.0, 1.005)).isEqualTo(m(101));
             assertThat(rule.unitSell(m(100), 1.0, 0.405)).isEqualTo(m(40));
-            assertThat(rule.unitBuy(m(1), 1.0, 0.01)).as("never free").isEqualTo(m(1));
+            assertThat(rule.unitBuy(m(1), 1.0, 0.01)).as("never free while the market is normal").isEqualTo(m(1));
+        }
+
+        @Test
+        @DisplayName("a flooded market: the shop pays nothing, and below half a coin what it sells is free")
+        void flooded() {
+            assertThat(rule.unitBuy(m(5), 0.05, 1.25)).as("0.31 of a coin: free").isEqualTo(Money.ZERO);
+            assertThat(rule.unitBuy(m(5), 0.9, 1.25)).isEqualTo(m(6));
+            assertThat(rule.unitSell(m(5), 0.1, 0.4)).as("nobody buys it").isEqualTo(Money.ZERO);
+            assertThat(rule.unitSell(m(2), 0.9, 0.4)).as("not even one coin once it is falling").isEqualTo(Money.ZERO);
+            assertThat(rule.unitSell(m(2), 1.0, 0.4)).as("a normal market still pays a coin").isEqualTo(m(1));
         }
 
         @Test

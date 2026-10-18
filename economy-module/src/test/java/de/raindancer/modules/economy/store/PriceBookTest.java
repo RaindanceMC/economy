@@ -249,7 +249,8 @@ class PriceBookTest {
     @Test
     @DisplayName("supply and demand: sold off it is worth less, bought up it costs more, each up to its limit")
     void supplyAndDemand() {
-        PriceBook book = book(EconomySettingsTest.with("shop.buy-prices", "raw_iron 500"), PLANKS);
+        PriceBook book = book(EconomySettingsTest.with("shop.buy-prices", "raw_iron 500",
+                "shop.lowest-multiplier", "0.5", "shop.highest-multiplier", "2"), PLANKS);
         pressure.put("DIAMOND", -1000.0);
         assertThat(book.multiplier("DIAMOND")).isCloseTo(0.5, org.assertj.core.data.Offset.offset(0.01));
         assertThat(book.tag("DIAMOND").buy()).isEqualTo(Money.of(5_000));
@@ -470,5 +471,23 @@ class PriceBookTest {
                 assertThat(org.bukkit.Material.getMaterial(name)).as(name + " is an item of this game").isNotNull();
             }
         }
+    }
+
+    @Test
+    @DisplayName("flooded: the shop stops buying it, and sells it for nothing until buying it back raises the price")
+    void flooded() {
+        PriceBook book = book(EconomySettings.DEFAULTS, PLANKS);
+        pressure.put("DIAMOND", -50.0);
+        PriceTag flooded = book.tag("DIAMOND");
+        assertThat(flooded.buyable()).as("for free").isTrue();
+        assertThat(flooded.buy()).isEqualTo(Money.ZERO);
+        assertThat(flooded.sellable()).as("nobody buys it").isFalse();
+        assertThat(book.isFlooded("DIAMOND")).isTrue();
+
+        pressure.put("DIAMOND", -1.0);
+        assertThat(book.tag("DIAMOND").buy().isPositive()).as("bought back, it costs again").isTrue();
+        assertThat(book.tag("DIAMOND").sellable()).isTrue();
+        assertThat(book.isFlooded("DIAMOND")).isFalse();
+        assertThat(book.tag("OAK_LOG").buy()).as("a market left alone is untouched").isEqualTo(Money.of(200));
     }
 }

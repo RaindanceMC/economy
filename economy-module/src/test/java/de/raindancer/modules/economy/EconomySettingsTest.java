@@ -89,9 +89,10 @@ public class EconomySettingsTest {
         assertThat(d.craftMarkupClamped()).isEqualTo(0.1);
         assertThat(d.smeltMarkupClamped()).isEqualTo(0.15);
         assertThat(d.dynamicPrices()).isTrue();
-        assertThat(d.lowestMultiplier()).as("selling can halve a price").isEqualTo(0.5);
-        assertThat(d.highestMultiplier()).as("buying can double it").isEqualTo(2.0);
-        assertThat(d.pressurePerStackClamped()).isEqualTo(0.02);
+        assertThat(d.lowestMultiplier()).as("a flooded market can make an item worth nothing").isEqualTo(0.0);
+        assertThat(d.highestMultiplier()).as("buying can triple it").isEqualTo(3.0);
+        assertThat(d.pressurePerStackClamped()).as("a stack leans hard: ten of them more than halve a price")
+                .isEqualTo(0.1);
         assertThat(d.recoveryHoursClamped()).isEqualTo(12.0);
         assertThat(d.enchantedSelling()).isTrue();
         assertThat(d.enchantBooks()).isTrue();
@@ -191,7 +192,7 @@ public class EconomySettingsTest {
     void sellBelowBuy() {
         assertThat(with("shop.sell-ratio", "3").sellRatioClamped()).isEqualTo(0.95);
         assertThat(with("pay.tax-percent", "90").payTax()).isEqualTo(0.5);
-        assertThat(with("shop.lowest-multiplier", "-1").lowestMultiplier()).isEqualTo(0.05);
+        assertThat(with("shop.lowest-multiplier", "-1").lowestMultiplier()).isEqualTo(0.0);
         assertThat(with("shop.highest-multiplier", "50").highestMultiplier()).isEqualTo(10.0);
     }
 

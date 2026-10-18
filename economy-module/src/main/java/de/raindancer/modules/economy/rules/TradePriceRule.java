@@ -9,6 +9,11 @@ public final class TradePriceRule implements IEconomyRule {
 
     public Money unitBuy(Money value, double multiplier, double markup) {
         double exact = value.minor() * multiplier * markup;
+        // A flooded market gives away what nobody wants: under half a coin is nothing. Only once it has fallen —
+        // at a normal price the cheapest thing still costs a coin.
+        if (multiplier < 1 && !(exact >= 0.5)) {
+            return Money.ZERO;
+        }
         if (!(exact > 0)) {
             return Money.of(1);
         }
@@ -22,7 +27,8 @@ public final class TradePriceRule implements IEconomyRule {
         }
         // At least one coin: rounded down, rotten flesh (worth 2) would sell for nothing. Kept under the buy price
         // by capSellBelowBuy, so an item that costs one coin still sells for none.
-        return Money.of((long) Math.max(1, Math.min(Long.MAX_VALUE / 2, Math.floor(exact + 1e-9))));
+        // Falling, it may pay nothing at all: nobody buys a flooded item.
+        return Money.of((long) Math.max(multiplier < 1 ? 0 : 1, Math.min(Long.MAX_VALUE / 2, Math.floor(exact + 1e-9))));
     }
 
     /** A sell price at or above the buy price would be a money machine; it is kept a cent below. */

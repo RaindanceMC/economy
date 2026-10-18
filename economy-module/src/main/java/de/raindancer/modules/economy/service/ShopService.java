@@ -477,11 +477,15 @@ public final class ShopService implements IEconomyService, ShopDesk {
             return;
         }
         String what = amount + " × " + Catalogue.readable(material.name());
-        EconomyResult result = economy.move(player.getUniqueId(), total.get().negate(), TransactionKind.BUY, what);
-        if (!result.succeeded()) {
-            Outcomes.tell(messages, effects, player, EconomyResult.failed(result.outcome(), total.get(),
-                    result.balance()), currency, "");
-            return;
+        // Free from a flooded market: there is no money to move, and a move of nothing is refused.
+        boolean free = !total.get().isPositive();
+        if (!free) {
+            EconomyResult result = economy.move(player.getUniqueId(), total.get().negate(), TransactionKind.BUY, what);
+            if (!result.succeeded()) {
+                Outcomes.tell(messages, effects, player, EconomyResult.failed(result.outcome(), total.get(),
+                        result.balance()), currency, "");
+                return;
+            }
         }
         player.getInventory().addItem(stacks.toArray(ItemStack[]::new)).values()
                 .forEach(left -> player.getWorld().dropItemNaturally(player.getLocation(), left));
@@ -490,8 +494,18 @@ public final class ShopService implements IEconomyService, ShopDesk {
                     live.pressurePerStackClamped(), true, live.recoveryHoursClamped());
         }
         effects.play(player.getUniqueId(), Cues.REWARD);
+        if (free) {
+            messages.send(player, "economy.shop.bought-free", "count", String.valueOf(amount),
+                    "item", Catalogue.readable(material.name()));
+            return;
+        }
         messages.send(player, "economy.shop.bought", "count", String.valueOf(amount),
                 "item", Catalogue.readable(material.name()), "amount", currency.render(total.get()));
+    }
+
+    /** Why the shop will not buy it: a flooded market, or not at all. */
+    private String notBought(Material material) {
+        return prices.isFlooded(material.name()) ? "economy.shop.flooded" : "economy.shop.not-bought";
     }
 
     /** One enchanted book in the shop's drawer. */
@@ -1182,7 +1196,7 @@ public final class ShopService implements IEconomyService, ShopDesk {
             PriceTag tag = tag(material);
             if (!tag.sellable()) {
                 if (!everything) {
-                    refuse(player, "economy.shop.not-bought", "item", Catalogue.readable(material.name()));
+                    refuse(player, notBought(material), "item", Catalogue.readable(material.name()));
                 }
                 continue;
             }
@@ -1513,7 +1527,7 @@ public final class ShopService implements IEconomyService, ShopDesk {
         Currency currency = live.currency();
         Material material = Material.matchMaterial(name == null ? "" : name);
         if (material == null || !material.isItem() || !tag(material).sellable()) {
-            return ShopDesk.Settled.refused("economy.shop.not-bought", "item",
+            return ShopDesk.Settled.refused(material == null ? "economy.shop.not-bought" : notBought(material), "item",
                     material == null ? String.valueOf(name) : Catalogue.readable(material.name()));
         }
         if (!live.sellingEnabled()) {

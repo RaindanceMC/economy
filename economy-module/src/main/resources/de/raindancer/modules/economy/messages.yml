@@ -114,6 +114,8 @@ economy:
     not-for-sale: "<red>The shop does not sell <item>."
     sale-stopped: "<red>The shop does not sell <item> right now: <reason>."
     not-bought: "<red>The shop does not buy <item>."
+    flooded: "<red>Nobody is buying <item> right now — the market is flooded with it. <gray>Its price comes back as it gets bought again."
+    bought-free: "<green>You got <count> × <item> for nothing — the market is flooded with it."
     none-carried: "<red>You are not carrying any plain <item>."
     nothing-in-hand: "<red>You are not holding anything."
     nothing-to-sell: "<red>You carry nothing the shop buys."

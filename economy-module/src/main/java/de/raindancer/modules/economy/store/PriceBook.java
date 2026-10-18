@@ -276,13 +276,29 @@ public final class PriceBook {
         }
         boolean open = name.endsWith(EGG) ? now.eggs().contains(name)
                 : settings.categoryOpen(Catalogue.categoryOf(name));
-        boolean buyable = settings.shopEnabled() && open && raw.buy() != null && raw.buy().isPositive()
+        boolean free = raw.buy() != null && !raw.buy().isPositive() && flooded(name, raw);
+        boolean buyable = settings.shopEnabled() && open && raw.buy() != null && (raw.buy().isPositive() || free)
                 && !now.notSold().contains(name);
         boolean sellable = settings.sellingEnabled() && open && raw.sell() != null && raw.sell().isPositive()
                 && !now.notBought().contains(name);
         PriceTag.Source source = raw.custom() ? PriceTag.Source.CUSTOM
                 : shipped.containsKey(name) ? PriceTag.Source.BASE : PriceTag.Source.RECIPE;
         return raw.tag(name, buyable, sellable, source);
+    }
+
+    /**
+     * Whether so much of it was sold that the shop pays nothing for it any more (and gives it away below half a
+     * coin) — the market's doing, not an owner's: an owner's own price never floods.
+     */
+    public boolean isFlooded(String material) {
+        String name = material.toUpperCase(Locale.ROOT);
+        Raw raw = raw(name, snapshot);
+        return raw != null && flooded(name, raw);
+    }
+
+    private boolean flooded(String name, Raw raw) {
+        return !raw.custom() && raw.value() != null && raw.value().isPositive() && multiplier(name) < 1
+                && (raw.sell() == null || !raw.sell().isPositive());
     }
 
     /** Buy and sell before the gates; either may be null. */

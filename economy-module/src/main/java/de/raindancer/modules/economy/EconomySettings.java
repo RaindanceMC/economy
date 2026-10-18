@@ -243,7 +243,8 @@ public record EconomySettings(
 
         @In("economy/shop") @Title("Sold off, worth at least")
         @Describe("Selling the same item again and again makes it cheaper, down to this times its normal price: 0.5 "
-                + "is half. Between 0.05 and 1.")
+                + "is half. 0 lets a flooded item become worthless — the shop stops buying it and gives it away "
+                + "until it is bought back up. Between 0 and 1.")
         @Key("shop.lowest-multiplier") double lowestMultiplier,
 
         @In("economy/shop") @Title("Bought up, costs at most")
@@ -252,7 +253,8 @@ public record EconomySettings(
         @Key("shop.highest-multiplier") double highestMultiplier,
 
         @In("economy/shop") @Title("Each stack traded pushes the price")
-        @Describe("How hard one stack bought or sold leans on the price.")
+        @Describe("How hard one stack bought or sold leans on the price: at 0.1 ten stacks sold take three quarters "
+                + "off, thirty make it all but worthless. It wears off over the recovery time.")
         @Key("shop.pressure-per-stack") double pressurePerStack,
 
         @In("economy/shop") @Title("Prices recover in")
@@ -893,7 +895,7 @@ public record EconomySettings(
             true, Material.GOLD_NUGGET, "", true, true, 0.0, 2304,
             // shop
             true, true, 1.0, 0.4, SellPricing.AUTOMATIC, List.of(), List.of(), List.of(), List.of(), List.of(),
-            true, 0.1, 0.15, true, 0.5, 2.0, 0.02, 12.0, true, true, List.of(), true, List.of(),
+            true, 0.1, 0.15, true, 0.0, 3.0, 0.1, 12.0, true, true, List.of(), true, List.of(),
             true, List.of(), "800",
             true, "2000", List.of("ender_dragon", "wither"),
             true, true, true, true, true, true, true, true, true,
@@ -1253,15 +1255,15 @@ public record EconomySettings(
     }
 
     public double lowestMultiplier() {
-        return clamp(lowestMultiplier, 0.05, 1, 0.5);
+        return clamp(lowestMultiplier, 0, 1, 0.0);
     }
 
     public double highestMultiplier() {
-        return clamp(highestMultiplier, 1, 10, 2.0);
+        return clamp(highestMultiplier, 1, 10, 3.0);
     }
 
     public double pressurePerStackClamped() {
-        return clamp(pressurePerStack, 0, 1, 0.02);
+        return clamp(pressurePerStack, 0, 1, 0.1);
     }
 
     public double recoveryHoursClamped() {
