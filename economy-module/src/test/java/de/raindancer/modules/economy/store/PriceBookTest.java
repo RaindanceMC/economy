@@ -456,4 +456,19 @@ class PriceBookTest {
         assertThat(book.tag("ENCHANTED_BOOK:SHARPNESS:2").sell().minor())
                 .as("two level-I books at 100 and the anvil").isLessThan(2 * 100 + book.anvil(2));
     }
+
+    @Test
+    @DisplayName("the shipped list prices what no recipe makes and players asked to buy: glow lichen, bushes, dripleaves, blossoms")
+    void plantsForSale() throws Exception {
+        try (var in = de.raindancer.modules.economy.EconomyModule.class.getResourceAsStream(BasePrices.RESOURCE)) {
+            Map<String, Money> shipped = BasePrices.parse(in, EconomySettings.DEFAULTS.currency());
+            assertThat(shipped).containsKeys("GLOW_LICHEN", "BUSH", "FIREFLY_BUSH", "DEAD_BUSH", "SMALL_DRIPLEAF",
+                    "BIG_DRIPLEAF", "SPORE_BLOSSOM", "PINK_PETALS");
+            assertThat(shipped.get("GLOW_LICHEN")).isEqualTo(Money.of(10));
+            assertThat(shipped.get("SPORE_BLOSSOM")).isEqualTo(Money.of(60));
+            for (String name : shipped.keySet()) {
+                assertThat(org.bukkit.Material.getMaterial(name)).as(name + " is an item of this game").isNotNull();
+            }
+        }
+    }
 }

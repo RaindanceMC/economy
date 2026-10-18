@@ -123,6 +123,11 @@ chorus_fruit: 20
 brown_mushroom: 10
 red_mushroom: 10
 vine: 5
+glow_lichen: 10
+small_dripleaf: 20
+big_dripleaf: 25
+# Lush cave ceilings only.
+spore_blossom: 60
 lily_pad: 10
 sea_pickle: 20
 honeycomb: 30
@@ -147,6 +152,9 @@ lilac: 20
 rose_bush: 20
 # Swamps and rivers at night; no recipe makes it.
 firefly_bush: 40
+bush: 10
+dead_bush: 5
+pink_petals: 10
 peony: 20
 torchflower: 50
 pitcher_plant: 50
