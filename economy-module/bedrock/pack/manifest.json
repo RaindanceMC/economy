@@ -1,0 +1,17 @@
+{
+  "format_version": 2,
+  "header": {
+    "name": "Rain's Economy",
+    "description": "The Sell Wand for Bedrock players",
+    "uuid": "ec17ac50-39ae-4de5-a929-b19333bc3896",
+    "version": [1, 0, 0],
+    "min_engine_version": [1, 21, 0]
+  },
+  "modules": [
+    {
+      "type": "resources",
+      "uuid": "3b842382-53d3-4a24-9573-9c81bc8317a4",
+      "version": [1, 0, 0]
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "format_version": 2,
+  "items": {
+    "minecraft:blaze_rod": [
+      {
+        "type": "definition",
+        "model": "rainseconomy:sell_wand",
+        "bedrock_identifier": "rainseconomy:sell_wand",
+        "display_name": "Sell Wand",
+        "bedrock_options": {
+          "icon": "rainseconomy:sell_wand",
+          "display_handheld": true,
+          "creative_category": "items"
+        }
+      }
+    ]
+  }
+}

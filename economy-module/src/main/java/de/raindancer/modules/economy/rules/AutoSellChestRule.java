@@ -47,4 +47,14 @@ public final class AutoSellChestRule implements IEconomyRule {
             default -> 0f;
         };
     }
+
+    /** The crafting recipe, for whoever has no Auto Sell book: dear enough that the book stays the cheap way. */
+    public java.util.List<String> recipeShape() {
+        return java.util.List.of("GHG", "ECE", "GBG");
+    }
+
+    public java.util.Map<Character, Material> recipeIngredients() {
+        return java.util.Map.of('G', Material.GOLD_BLOCK, 'H', Material.HOPPER, 'E', Material.EMERALD,
+                'C', Material.CHEST, 'B', Material.EMERALD_BLOCK);
+    }
 }

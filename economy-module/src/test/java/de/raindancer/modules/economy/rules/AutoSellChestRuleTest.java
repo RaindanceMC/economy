@@ -42,4 +42,13 @@ class AutoSellChestRuleTest {
         assertThat(rule.yaw(BlockFace.EAST)).isEqualTo(270f);
         assertThat(rule.yaw(BlockFace.UP)).as("a chest never faces up; south is the safe guess").isEqualTo(0f);
     }
+
+    @Test
+    @DisplayName("the crafted Auto Sell Chest costs real wealth: a chest and a hopper in gold blocks and emeralds")
+    void recipe() {
+        assertThat(rule.recipeShape()).containsExactly("GHG", "ECE", "GBG");
+        assertThat(rule.recipeIngredients()).containsEntry('G', Material.GOLD_BLOCK).containsEntry('H', Material.HOPPER)
+                .containsEntry('E', Material.EMERALD).containsEntry('C', Material.CHEST)
+                .containsEntry('B', Material.EMERALD_BLOCK).hasSize(5);
+    }
 }

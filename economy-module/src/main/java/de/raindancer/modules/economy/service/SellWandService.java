@@ -89,6 +89,11 @@ public final class SellWandService {
         });
     }
 
+    /** The recipe's key, once it is registered — for unlocking it in players' recipe books. */
+    public Optional<NamespacedKey> recipe() {
+        return Optional.ofNullable(recipe);
+    }
+
     public void stop() {
         if (recipe != null) {
             plugin.getServer().removeRecipe(recipe);

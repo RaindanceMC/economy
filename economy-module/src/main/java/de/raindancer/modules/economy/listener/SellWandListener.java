@@ -18,9 +18,12 @@ import java.util.UUID;
 public final class SellWandListener implements IEconomyListener {
 
     private final SellWandService wands;
+    private final java.util.function.Supplier<java.util.Optional<org.bukkit.NamespacedKey>> chestRecipe;
 
-    public SellWandListener(SellWandService wands) {
+    public SellWandListener(SellWandService wands,
+                            java.util.function.Supplier<java.util.Optional<org.bukkit.NamespacedKey>> chestRecipe) {
         this.wands = wands;
+        this.chestRecipe = chestRecipe;
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -35,6 +38,17 @@ public final class SellWandListener implements IEconomyListener {
         event.setUseItemInHand(Event.Result.DENY);
         if (!refused) {
             wands.preview(event.getPlayer(), block);
+        }
+    }
+
+    /** Both recipes in every recipe book, so nobody has to know they exist. */
+    @EventHandler
+    public void onJoin(org.bukkit.event.player.PlayerJoinEvent event) {
+        java.util.List<org.bukkit.NamespacedKey> keys = new java.util.ArrayList<>();
+        wands.recipe().ifPresent(keys::add);
+        chestRecipe.get().ifPresent(keys::add);
+        if (!keys.isEmpty()) {
+            event.getPlayer().discoverRecipes(keys);
         }
     }
 

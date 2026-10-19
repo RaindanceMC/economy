@@ -234,8 +234,31 @@ public final class AutoSellChestService {
         chests.removeChunk(chunk.getWorld().getUID(), chunk.getX(), chunk.getZ());
     }
 
-    /** Every chunk already loaded when the module starts, each on its own region's thread. */
+    private NamespacedKey recipe;
+
+    /** The recipe's key, once it is registered — for unlocking it in players' recipe books. */
+    public Optional<NamespacedKey> recipe() {
+        return Optional.ofNullable(recipe);
+    }
+
+    private void registerRecipe() {
+        if (CustomEnchantments.find(RainsEnchants.AUTO_SELL).isEmpty()) {
+            // Without the enchants plugin there is no Auto Sell, and a chest crafted here would be a plain one.
+            return;
+        }
+        NamespacedKey key = new NamespacedKey(plugin, "auto_sell_chest");
+        org.bukkit.inventory.ShapedRecipe shaped = new org.bukkit.inventory.ShapedRecipe(key, item());
+        shaped.shape(rule.recipeShape().toArray(String[]::new));
+        rule.recipeIngredients().forEach(shaped::setIngredient);
+        server.removeRecipe(key);
+        if (server.addRecipe(shaped)) {
+            recipe = key;
+        }
+    }
+
+    /** Every chunk already loaded when the module starts, each on its own region's thread; and the recipe. */
     public void start() {
+        registerRecipe();
         for (World world : server.getWorlds()) {
             for (Chunk chunk : world.getLoadedChunks()) {
                 Scheduling.region(plugin, new Location(world, chunk.getX() << 4, 0, chunk.getZ() << 4), () -> {
@@ -250,6 +273,10 @@ public final class AutoSellChestService {
     /** Undresses every chest. A window still open takes nothing more: what is dropped in goes back. */
     public void stop() {
         stopped = true;
+        if (recipe != null) {
+            server.removeRecipe(recipe);
+            recipe = null;
+        }
         for (ChestSpot spot : chests.all().keySet()) {
             block(spot).ifPresent(block -> Scheduling.region(plugin, block.getLocation(), () -> removeDisplay(spot)));
         }
