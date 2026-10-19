@@ -87,7 +87,7 @@ import java.util.UUID;
  */
 public final class EconomyModule implements FlexModule {
 
-    private static final ModuleInfo INFO = ModuleInfo.of("economy", "Economy", "0.51.0")
+    private static final ModuleInfo INFO = ModuleInfo.of("economy", "Economy", "0.52.0")
             .describedAs("A bank, paying and hiring, coins you can carry, a creative-style shop priced from recipes, "
                     + "passive income, live auctions and raffles, and a casino with sounds and animations — every part switchable.")
             .by("Raindancer118");
@@ -325,6 +325,7 @@ public final class EconomyModule implements FlexModule {
             context.closeWith(chestSweep::cancel);
         }
         sellWands.start();
+        shop.goods(List.of(sellWands.good(), autoSellChests.good()));
         context.listener(new de.raindancer.modules.economy.listener.SellWandListener(sellWands,
                 autoSellChests::recipe));
         context.closeWith(() -> {

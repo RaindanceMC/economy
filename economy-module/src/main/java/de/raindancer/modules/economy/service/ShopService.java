@@ -708,6 +708,63 @@ public final class ShopService implements IEconomyService, ShopDesk {
                 "shards", String.valueOf(shown.shards()), "amount", currency.render(shown.money()));
     }
 
+    // ---------------------------------------------------------------------------- made things (Rain's items)
+
+    private volatile List<de.raindancer.modules.economy.model.ShopGood> goods = List.of();
+    private final de.raindancer.modules.economy.rules.GoodPriceRule goodPrice = new de.raindancer.modules.economy.rules.GoodPriceRule();
+
+    /** What the shop's "Rain's items" drawer sells, set by whoever makes them. */
+    public void goods(List<de.raindancer.modules.economy.model.ShopGood> offered) {
+        this.goods = offered == null ? List.of() : List.copyOf(offered);
+    }
+
+    /** The goods that can be made here now, each with this player's price; those it cannot price are left out. */
+    public List<Map.Entry<de.raindancer.modules.economy.model.ShopGood, Money>> goodOffers(UUID player) {
+        if (!settings.shopEnabled()) {
+            return List.of();
+        }
+        List<Map.Entry<de.raindancer.modules.economy.model.ShopGood, Money>> offers = new ArrayList<>();
+        for (var good : goods) {
+            if (good.item().get().isEmpty()) {
+                continue;
+            }
+            goodPrice(player, good).ifPresent(price -> offers.add(Map.entry(good, price)));
+        }
+        return offers;
+    }
+
+    private Optional<Money> goodPrice(UUID player, de.raindancer.modules.economy.model.ShopGood good) {
+        return goodPrice.price(good.ingredients(), (material, count) ->
+                tag(material).buyable() ? priceFor(player, material).buyFor(count) : Optional.empty());
+    }
+
+    /** Buys one, at the price it has now — refused when that is not what the player was shown. */
+    public void buyGood(Player player, de.raindancer.modules.economy.model.ShopGood good, Money shown) {
+        EconomySettings live = settings;
+        Optional<Money> price = live.shopEnabled() ? goodPrice(player.getUniqueId(), good) : Optional.empty();
+        Optional<ItemStack> item = good.item().get();
+        if (price.isEmpty() || item.isEmpty()) {
+            refuse(player, "economy.shop.good-gone", "name", good.name());
+            return;
+        }
+        if (!price.get().equals(shown)) {
+            refuse(player, "economy.shop.good-moved", "name", good.name(), "amount", live.currency().render(price.get()));
+            return;
+        }
+        if (!CashService.fits(player.getInventory(), List.of(item.get()))) {
+            refuse(player, "economy.shop.no-room");
+            return;
+        }
+        EconomyResult result = economy.move(player.getUniqueId(), price.get().negate(), TransactionKind.BUY, good.name());
+        if (!result.succeeded()) {
+            Outcomes.tell(messages, effects, player, result, live.currency(), "");
+            return;
+        }
+        de.raindancer.core.platform.util.Inventories.giveOrDrop(player, List.of(item.get()));
+        effects.play(player.getUniqueId(), Cues.REWARD);
+        messages.send(player, "economy.shop.good-bought", "name", good.name(), "amount", live.currency().render(price.get()));
+    }
+
     /** Selling or stripping these enchantments pushes each one's price down, as selling an item does. */
     /** One bottle in the shop's Potions drawer. */
     public record PotionOffer(PotionKey key) {

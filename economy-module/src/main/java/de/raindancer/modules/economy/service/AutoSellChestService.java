@@ -106,6 +106,13 @@ public final class AutoSellChestService {
         return dress(chest);
     }
 
+    /** The chest as the shop sells it: priced from its crafting recipe; not sold without the enchants plugin. */
+    public de.raindancer.modules.economy.model.ShopGood good() {
+        return new de.raindancer.modules.economy.model.ShopGood("auto-sell-chest", "Auto Sell Chest",
+                () -> CustomEnchantments.find(RainsEnchants.AUTO_SELL).isPresent() ? Optional.of(item()) : Optional.empty(),
+                new de.raindancer.modules.economy.rules.GoodPriceRule().count(rule.recipeShape(), rule.recipeIngredients()));
+    }
+
     /** Whether an anvil may hand this result out: one chest becomes one Auto Sell Chest, a stack never. */
     public boolean anvilMakes(ItemStack input, ItemStack result) {
         return rule.makes(input.getType(), input.getAmount(), CustomEnchantments.levelOn(result, RainsEnchants.AUTO_SELL));

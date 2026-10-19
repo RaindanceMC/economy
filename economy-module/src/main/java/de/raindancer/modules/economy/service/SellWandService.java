@@ -101,6 +101,13 @@ public final class SellWandService {
         }
     }
 
+    /** The wand as the shop sells it: priced from the recipe it is crafted by, the owner's version if changed. */
+    public de.raindancer.modules.economy.model.ShopGood good() {
+        CustomItem wand = items.byKey(KEY).orElse(definition());
+        return new de.raindancer.modules.economy.model.ShopGood(ID, "Sell Wand", this::wand,
+                new de.raindancer.modules.economy.rules.GoodPriceRule().countNamed(wand.recipe()));
+    }
+
     public boolean isWand(ItemStack stack) {
         return stack != null && factory.is(stack, KEY);
     }

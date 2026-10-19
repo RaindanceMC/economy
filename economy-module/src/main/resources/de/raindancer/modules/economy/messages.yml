@@ -106,6 +106,9 @@ economy:
     over-circulation-alert: "<red>[Economy] <white><player></white> offered <count> more coin(s) than are in circulation — somebody may be duplicating coins."
 
   shop:
+    good-bought: "<green>You bought a <white><name></white> for <amount><green>."
+    good-gone: "<red>The <name> is not for sale right now."
+    good-moved: "<yellow>The <name> costs <amount><yellow> now — prices moved. Click again to buy it at that."
     budget-yours: "<red>The shop buys at most so much from one player a day — <left><red> left today."
     budget-server: "<red>The shop has nearly spent what it buys in a day — <left><red> left for everybody."
     off: "<red>The shop is switched off on this server."
