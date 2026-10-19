@@ -87,7 +87,7 @@ import java.util.UUID;
  */
 public final class EconomyModule implements FlexModule {
 
-    private static final ModuleInfo INFO = ModuleInfo.of("economy", "Economy", "0.48.0")
+    private static final ModuleInfo INFO = ModuleInfo.of("economy", "Economy", "0.49.0")
             .describedAs("A bank, paying and hiring, coins you can carry, a creative-style shop priced from recipes, "
                     + "passive income, live auctions and raffles, and a casino with sounds and animations — every part switchable.")
             .by("Raindancer118");
@@ -345,6 +345,9 @@ public final class EconomyModule implements FlexModule {
         ShopItemValuer valuer = new ShopItemValuer(prices::tag, CashTags::isCash, ShopItemValuer::materialName);
         ItemValues.provide(context.plugin(), valuer);
         context.closeWith(() -> ItemValues.retract(valuer));
+        var buyer = new de.raindancer.modules.economy.service.ShopBuyer(shop);
+        de.raindancer.core.social.economy.ItemSales.provide(context.plugin(), buyer);
+        context.closeWith(() -> de.raindancer.core.social.economy.ItemSales.retract(buyer));
 
         var flushing = Scheduling.asyncTimer(context.plugin(), FLUSH_SECONDS, FLUSH_SECONDS, task -> {
             book.flush();
@@ -443,6 +446,11 @@ public final class EconomyModule implements FlexModule {
             shop = java.util.Optional.of(new de.raindancer.modules.economy.service.ClientShop(context.plugin(),
                     context.core().messages(), context.core().effects(), wire, bank::bankName));
         }
+        shop.ifPresent(client -> {
+            var buyer = de.raindancer.modules.economy.service.ShopBuyer.viaTheBank(client);
+            de.raindancer.core.social.economy.ItemSales.provide(context.plugin(), buyer);
+            context.closeWith(() -> de.raindancer.core.social.economy.ItemSales.retract(buyer));
+        });
         EconomyCommands.readyClient(new EconomyClient(context.plugin(), context.plugin().getServer(), context.core().messages(),
                 context.core(), bank, true, shop, context.chat().brand()));
         watchBank(context, bank, true);

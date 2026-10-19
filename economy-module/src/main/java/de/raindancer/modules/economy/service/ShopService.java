@@ -65,6 +65,8 @@ public final class ShopService implements IEconomyService, ShopDesk {
     private final TradePriceRule trade = new TradePriceRule();
     private final PersonalPriceRule personal = new PersonalPriceRule();
     private final BulkRule bulk = new BulkRule();
+    private final de.raindancer.modules.economy.rules.StackSaleRule stackSale =
+            new de.raindancer.modules.economy.rules.StackSaleRule();
     private volatile BulkSetup bulkSetup = new BulkSetup(null, ItemSelection.NOTHING, List.of());
     private final de.raindancer.modules.economy.rules.EnchantValueRule enchants =
             new de.raindancer.modules.economy.rules.EnchantValueRule();
@@ -1219,25 +1221,72 @@ public final class ShopService implements IEconomyService, ShopDesk {
         if (taken.isEmpty()) {
             return;
         }
-        String what = taken.size() == 1
-                ? items + " × " + Catalogue.readable(taken.keySet().iterator().next().name())
-                : items + " items";
+        if (!settle(player, taken, total)) {
+            taken.forEach((material, count) -> giveBack(player, material, count));
+        }
+    }
+
+    /**
+     * Pays for items already taken from the seller, in one payment: the budget, the ledger, the market and the
+     * message. The caller hands the items back when this says no.
+     */
+    private boolean settle(Player player, Map<Material, Integer> taken, Money total) {
+        Currency currency = settings.currency();
+        int items = taken.values().stream().mapToInt(Integer::intValue).sum();
+        String what = stackSale.what(taken);
         Optional<Map.Entry<String, Money>> budget = overBudget(player, total);
         if (budget.isPresent()) {
-            taken.forEach((material, count) -> giveBack(player, material, count));
             refuse(player, budget.get().getKey(), "left", currency.render(budget.get().getValue()));
-            return;
+            return false;
         }
         EconomyResult result = economy.move(player.getUniqueId(), total, TransactionKind.SELL, what, SELL_SOURCE);
         if (!result.succeeded()) {
-            taken.forEach((material, count) -> giveBack(player, material, count));
             Outcomes.tell(messages, effects, player, result, currency, "");
-            return;
+            return false;
         }
         recordSold(player.getUniqueId(), taken);
         effects.play(player.getUniqueId(), Cues.EARNED);
         messages.send(player, "economy.shop.sold", "count", String.valueOf(items), "what", what,
                 "amount", currency.render(total));
+        return true;
+    }
+
+    /** The material of a plain stack this shop buys, or empty — the one test for what a vault may sell here. */
+    public Optional<Material> buysPlain(ItemStack stack) {
+        if (stack == null || stack.isEmpty() || !settings.sellingEnabled()) {
+            return Optional.empty();
+        }
+        Material material = stack.getType();
+        return sellableStack(stack, material) && tag(material).sellable() ? Optional.of(material) : Optional.empty();
+    }
+
+    /**
+     * Sells stacks somebody else already took out — a vault's page — at this player's prices, in one payment.
+     * Only plain items; anything enchanted, worn or named goes back.
+     *
+     * @return per stack, whether it was sold
+     */
+    public List<Boolean> sellStacks(Player player, List<ItemStack> stacks) {
+        if (!settings.sellingEnabled()) {
+            refuse(player, "economy.shop.selling-off");
+            return stackSale.sold(stacks.stream().map(stack -> Optional.<Material>empty()).toList(), java.util.Set.of());
+        }
+        List<Optional<Material>> plain = stacks.stream().map(this::buysPlain).toList();
+        Map<Material, Integer> counts = stackSale.counts(plain, stacks.stream().map(ItemStack::getAmount).toList());
+        Money total = Money.ZERO;
+        Map<Material, Integer> priced = new LinkedHashMap<>();
+        for (Map.Entry<Material, Integer> each : counts.entrySet()) {
+            Optional<Money> worth = priceFor(player.getUniqueId(), each.getKey()).sellFor(each.getValue());
+            if (worth.isPresent() && worth.get().isPositive()) {
+                total = total.plus(worth.get());
+                priced.put(each.getKey(), each.getValue());
+            }
+        }
+        if (priced.isEmpty()) {
+            refuse(player, "economy.shop.nothing-to-sell");
+            return stackSale.sold(plain, java.util.Set.of());
+        }
+        return stackSale.sold(plain, settle(player, priced, total) ? priced.keySet() : java.util.Set.of());
     }
 
     /** A sale moves the market and the seller's own "sold lately", whichever way it was made. */

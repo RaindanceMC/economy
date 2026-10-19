@@ -103,6 +103,35 @@ public final class ClientShop {
         return done;
     }
 
+    /**
+     * Stacks a vault already took out: one sale per material at the bank, in turn. A material the bank refuses, or a
+     * bank that does not answer, is not sold — the vault puts those stacks back.
+     */
+    public CompletableFuture<List<Boolean>> sellStacks(Player player, List<ItemStack> stacks) {
+        de.raindancer.modules.economy.rules.StackSaleRule rule = new de.raindancer.modules.economy.rules.StackSaleRule();
+        List<java.util.Optional<Material>> plain = stacks.stream()
+                .map(stack -> stack != null && ShopService.sellableStack(stack, stack.getType())
+                        ? java.util.Optional.of(stack.getType()) : java.util.Optional.<Material>empty())
+                .toList();
+        java.util.Map<Material, Integer> counts = rule.counts(plain, stacks.stream().map(ItemStack::getAmount).toList());
+        if (counts.isEmpty()) {
+            onPlayer(player, () -> messages.send(player, "economy.shop.nothing-to-sell"));
+            return CompletableFuture.completedFuture(rule.sold(plain, java.util.Set.of()));
+        }
+        java.util.Set<Material> paid = java.util.concurrent.ConcurrentHashMap.newKeySet();
+        CompletableFuture<Void> chain = CompletableFuture.completedFuture(null);
+        for (java.util.Map.Entry<Material, Integer> each : counts.entrySet()) {
+            chain = chain.thenCompose(ignored -> bank.sell(player.getUniqueId(), each.getKey().name(), each.getValue())
+                    .thenAccept(settled -> {
+                        if (settled.map(ShopDesk.Settled::ok).orElse(false)) {
+                            paid.add(each.getKey());
+                        }
+                        onPlayer(player, () -> settled.ifPresentOrElse(answer -> say(player, answer), () -> away(player)));
+                    }));
+        }
+        return chain.handle((done, failed) -> rule.sold(plain, paid));
+    }
+
     /** {@code /sell hand}. */
     public void sellHand(Player player) {
         ItemStack held = player.getInventory().getItemInMainHand();
