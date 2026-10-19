@@ -61,16 +61,22 @@ public final class PriceBook {
                             PricedNames buyPrices, PricedNames sellPrices, Set<String> notSold,
                             Set<String> notBought, List<String> eggs, Map<String, EnchantKind> enchantments,
                             EnchantWorthRule worth, double pointValue, List<String> potionTypes,
-                            Set<String> potionsClosed) {
+                            Set<String> potionsClosed, Set<String> fallback) {
     }
 
     private static final String EGG = "_SPAWN_EGG";
+    /** Priced per enchantment, potion or omen by their keys, never as the bare material. */
+    private static final Set<String> BY_CONTENTS = Set.of("ENCHANTED_BOOK", "POTION", "SPLASH_POTION",
+            "LINGERING_POTION", "TIPPED_ARROW", "OMINOUS_BOTTLE");
 
     private final java.util.function.Function<Currency, Map<String, Money>> shippedIn;
     private volatile Map<String, Money> shipped;
     private final ToDoubleFunction<String> pressure;
     private final ToIntFunction<String> stackSize;
     private final PriceSolverRule solver = new PriceSolverRule();
+    private final de.raindancer.modules.economy.rules.FallbackPriceRule fallbackPrice =
+            new de.raindancer.modules.economy.rules.FallbackPriceRule();
+    private final de.raindancer.modules.economy.rules.SellOnlyRule sellOnly;
     private final TradePriceRule trade = new TradePriceRule();
     private final MarketRule market = new MarketRule();
     private final EnchantCostRule enchantCost = new EnchantCostRule();
@@ -84,13 +90,20 @@ public final class PriceBook {
      */
     public PriceBook(java.util.function.Function<Currency, Map<String, Money>> shipped, ToDoubleFunction<String> pressure,
                      ToIntFunction<String> stackSize) {
+        this(shipped, pressure, stackSize, List.of());
+    }
+
+    /** @param sellOnly the shipped {@code sell-only.yml}: what the shop buys and never sells */
+    public PriceBook(java.util.function.Function<Currency, Map<String, Money>> shipped, ToDoubleFunction<String> pressure,
+                     ToIntFunction<String> stackSize, List<String> sellOnly) {
+        this.sellOnly = new de.raindancer.modules.economy.rules.SellOnlyRule(sellOnly);
         this.shippedIn = shipped;
         this.shipped = Map.copyOf(shipped.apply(EconomySettings.DEFAULTS.currency()));
         this.pressure = pressure;
         this.stackSize = stackSize;
         this.snapshot = new Snapshot(EconomySettings.DEFAULTS, this.shipped, Set.of(), PricedNames.NONE,
                 PricedNames.NONE, Set.of(), Set.of(), List.of(), Map.of(), new EnchantWorthRule(List.of()), 0, List.of(),
-                Set.of());
+                Set.of(), Set.of());
     }
 
     /** Works every price out again — on start, on a settings change, on {@code /eco reprice}. */
@@ -115,6 +128,15 @@ public final class PriceBook {
     /** @param potionTypes every potion type this server knows, by key — each is a potion, a splash and a lingering one */
     public void recompute(EconomySettings settings, List<RecipeShape> recipes, List<String> eggs,
                           List<EnchantKind> enchantments, List<String> potionTypes) {
+        recompute(settings, recipes, eggs, enchantments, potionTypes, Map.of());
+    }
+
+    /**
+     * @param rarities every item on the server, by material name, with the game's rarity — what nothing else
+     *                 prices is worth that, and the shop only buys it
+     */
+    public void recompute(EconomySettings settings, List<RecipeShape> recipes, List<String> eggs,
+                          List<EnchantKind> enchantments, List<String> potionTypes, Map<String, String> rarities) {
         Currency currency = settings.currency();
         // Read again in the current currency: the same "2" is 200 minor units with two decimals and 2 with none.
         shipped = Map.copyOf(shippedIn.apply(currency));
@@ -159,10 +181,18 @@ public final class PriceBook {
         List<String> types = potionTypes == null ? List.of() : potionTypes.stream()
                 .map(type -> type.toLowerCase(Locale.ROOT).replace("minecraft:", "")).distinct().toList();
         pricePotions(values, types, settings);
+        Set<String> fallback = new HashSet<>();
+        rarities.forEach((name, rarity) -> {
+            String upper = name.toUpperCase(Locale.ROOT);
+            if (!values.containsKey(upper) && !BY_CONTENTS.contains(upper)) {
+                values.put(upper, currency.parse(String.valueOf(fallbackPrice.coins(rarity))).orElse(Money.ZERO));
+                fallback.add(upper);
+            }
+        });
         snapshot = new Snapshot(settings, Map.copyOf(values), Set.copyOf(customValues.amounts().keySet()),
                 PricedNames.parse(settings.buyPrices(), currency), PricedNames.parse(settings.sellPrices(), currency),
                 names(settings.notSold()), names(settings.notBought()), List.copyOf(openEggs), Map.copyOf(kinds),
-                worth, pointValue, types, names(settings.potionsClosed()));
+                worth, pointValue, types, names(settings.potionsClosed()), Set.copyOf(fallback));
     }
 
     /**
@@ -274,11 +304,13 @@ public final class PriceBook {
         if (raw == null) {
             return PriceTag.unpriced(name);
         }
-        boolean open = name.endsWith(EGG) ? now.eggs().contains(name)
+        boolean fallback = now.fallback().contains(name);
+        boolean open = name.endsWith(EGG) ? now.eggs().contains(name) || fallback
                 : settings.categoryOpen(Catalogue.categoryOf(name));
         boolean free = raw.buy() != null && !raw.buy().isPositive() && flooded(name, raw);
         boolean buyable = settings.shopEnabled() && open && raw.buy() != null && (raw.buy().isPositive() || free)
-                && !now.notSold().contains(name);
+                && !now.notSold().contains(name)
+                && (now.buyPrices().of(name).isPresent() || !fallback && !sellOnly.matches(name));
         boolean sellable = settings.sellingEnabled() && open && raw.sell() != null && raw.sell().isPositive()
                 && !now.notBought().contains(name);
         PriceTag.Source source = raw.custom() ? PriceTag.Source.CUSTOM

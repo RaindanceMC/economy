@@ -490,4 +490,51 @@ class PriceBookTest {
         assertThat(book.isFlooded("DIAMOND")).isFalse();
         assertThat(book.tag("OAK_LOG").buy()).as("a market left alone is untouched").isEqualTo(Money.of(200));
     }
+
+    @Test
+    @DisplayName("every item has a price: what nothing prices is worth its rarity, and the shop only buys it, never sells it")
+    void everyItemHasAPrice() {
+        byte[] raw = "raw_iron: 800\ndiamond: 10000\n".getBytes(StandardCharsets.UTF_8);
+        PriceBook book = new PriceBook(currency -> BasePrices.parse(new ByteArrayInputStream(raw), currency),
+                material -> 0.0, material -> 64, List.of("*_ORE", "ELYTRA"));
+        List<RecipeShape> ore = List.of(new RecipeShape("IRON_ORE", 1, List.of(List.of("RAW_IRON")),
+                RecipeShape.Process.WORLD));
+        book.recompute(EconomySettings.DEFAULTS, ore, List.of(), List.of(), List.of(), Map.of(
+                "DIAMOND", "COMMON", "IRON_ORE", "COMMON", "BEDROCK", "COMMON", "COMMAND_BLOCK", "EPIC",
+                "WITHER_SPAWN_EGG", "EPIC", "ELYTRA", "EPIC"));
+
+        PriceTag bedrock = book.tag("BEDROCK");
+        assertThat(bedrock.sellable()).isTrue();
+        assertThat(bedrock.buyable()).as("the shop never hands out what only the game or staff can make").isFalse();
+        assertThat(book.tag("COMMAND_BLOCK").value()).isGreaterThan(bedrock.value());
+        assertThat(book.tag("WITHER_SPAWN_EGG").sellable()).as("even a spawn egg the shop does not trade in").isTrue();
+        assertThat(book.tag("WITHER_SPAWN_EGG").buyable()).isFalse();
+
+        PriceTag ironOre = book.tag("IRON_ORE");
+        assertThat(ironOre.value()).isEqualTo(book.tag("RAW_IRON").value());
+        assertThat(ironOre.sellable()).isTrue();
+        assertThat(ironOre.buyable()).as("bought ore and Fortune would print money").isFalse();
+        assertThat(book.tag("ELYTRA").buyable()).as("on the sell-only list by name").isFalse();
+
+        assertThat(book.tag("DIAMOND").buyable()).as("everything else trades both ways as before").isTrue();
+        assertThat(book.tag("DIAMOND").value()).isEqualTo(Money.of(10_000));
+    }
+
+    @Test
+    @DisplayName("a world shape never makes what it is made from cheaper: ore smelts to an ingot, the ingot stays its price")
+    void noCheaperLoops() {
+        byte[] raw = "raw_gold: 900\n".getBytes(StandardCharsets.UTF_8);
+        PriceBook book = new PriceBook(currency -> BasePrices.parse(new ByteArrayInputStream(raw), currency),
+                material -> 0.0, material -> 64, List.of());
+        List<RecipeShape> gold = new java.util.ArrayList<>(List.of(
+                new RecipeShape("GOLD_INGOT", 1, List.of(List.of("RAW_GOLD")), RecipeShape.Process.SMELT),
+                new RecipeShape("GOLD_INGOT", 1, List.of(List.of("NETHER_GOLD_ORE")), RecipeShape.Process.SMELT),
+                new RecipeShape("GOLD_NUGGET", 9, List.of(List.of("GOLD_INGOT")), RecipeShape.Process.CRAFT)));
+        gold.addAll(RecipeReader.inWorld(List.of("GOLD_INGOT", "GOLD_NUGGET", "NETHER_GOLD_ORE", "RAW_GOLD")));
+        book.recompute(EconomySettings.DEFAULTS, gold);
+        Money ingot = book.tag("GOLD_INGOT").value();
+        assertThat(ingot).isGreaterThan(book.tag("RAW_GOLD").value());
+        assertThat(book.tag("NETHER_GOLD_ORE").value()).isGreaterThanOrEqualTo(ingot);
+        assertThat(book.tag("GOLD_NUGGET").sellable()).isTrue();
+    }
 }

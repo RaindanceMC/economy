@@ -87,7 +87,7 @@ import java.util.UUID;
  */
 public final class EconomyModule implements FlexModule {
 
-    private static final ModuleInfo INFO = ModuleInfo.of("economy", "Economy", "0.49.0")
+    private static final ModuleInfo INFO = ModuleInfo.of("economy", "Economy", "0.50.0")
             .describedAs("A bank, paying and hiring, coins you can carry, a creative-style shop priced from recipes, "
                     + "passive income, live auctions and raffles, and a casino with sounds and animations — every part switchable.")
             .by("Raindancer118");
@@ -149,7 +149,9 @@ public final class EconomyModule implements FlexModule {
                 material -> {
                     Material found = Material.matchMaterial(material);
                     return found == null ? 64 : found.getMaxStackSize();
-                });
+                },
+                de.raindancer.modules.economy.store.SellOnlyList.parse(
+                        EconomyModule.class.getResourceAsStream(de.raindancer.modules.economy.store.SellOnlyList.RESOURCE)));
 
         EconomySettings now = settings.current();
         RainEconomy economy = new RainEconomy(book, id -> server.getOfflinePlayer(id).getName(), now);
@@ -291,11 +293,14 @@ public final class EconomyModule implements FlexModule {
             settings.onChange(service::settings);
         }
 
+        shop.pluginItems(stack -> context.core().itemFactory().keyOf(stack).isPresent());
+        var sellWands = new de.raindancer.modules.economy.service.SellWandService(context.plugin(), shop, messages,
+                context.chat().brand(), context.core().items(), context.core().itemFactory());
         services = new EconomyServices(context.plugin(), server, log, messages, context.chat().brand(), context.core(),
                 settings::current, settings, economy, market, payments, bills, cash, shop, rewards, income, hire,
                 statements, interest, daily, leaderboard, sidebar, displays, gambling, lottery, tables, scratch, crash,
                 race, dealers, auctions, raffles, tax, experience, loans, packs, new LiveScreens(), supply, supplyStore,
-                funds, repair, death, seasons, backpay);
+                funds, repair, death, seasons, backpay, sellWands);
         sidebar.pot(lottery::pot);
         this.tables = tables;
         this.crash = crash;
@@ -310,6 +315,22 @@ public final class EconomyModule implements FlexModule {
         context.listener(new de.raindancer.modules.economy.listener.DealerListener(services));
         context.listener(new de.raindancer.modules.economy.listener.PackListener(services));
         context.listener(new de.raindancer.modules.economy.listener.AutoSellListener(services));
+        var autoSellChests = new de.raindancer.modules.economy.service.AutoSellChestService(context.plugin(), shop, messages,
+                context.chat().brand(), context.core().actionBars());
+        context.listener(new de.raindancer.modules.economy.listener.AutoSellChestListener(autoSellChests));
+        autoSellChests.start();
+        de.raindancer.modules.economy.service.EconomyPack.contribute(context.plugin(), context.core());
+        var chestSweep = Scheduling.globalTimer(context.plugin(), 100L, 100L, task -> autoSellChests.sweep());
+        if (chestSweep != null) {
+            context.closeWith(chestSweep::cancel);
+        }
+        sellWands.start();
+        context.listener(new de.raindancer.modules.economy.listener.SellWandListener(sellWands));
+        context.closeWith(() -> {
+            sellWands.stop();
+            autoSellChests.stop();
+            de.raindancer.modules.economy.service.EconomyPack.withdraw(context.core());
+        });
         log.info("{} pack(s) for sale.", packCount);
         // Auto Sell pays every two seconds; closed in reverse order, so the last payout runs before the book shuts.
         var autoSales = Scheduling.globalTimer(context.plugin(), 40L, 40L, task -> shop.payAutoSales(context.plugin()));

@@ -133,6 +133,17 @@ economy:
     sold-enchantments: "<green>You sold the enchantments off your <white><what></white> for <amount><green>. It keeps any curse."
     no-enchantments: "<red>That carries no enchantment the shop buys. Curses cannot be sold off."
 
+  sell-wand:
+    sold: "<green>Sold <white><count></white> item(s) for <amount>. The money arrives in a moment."
+    nothing: "<yellow>There is nothing in there the shop can buy."
+    locked: "<red>That chest is locked."
+    gone: "<red>That chest is out of reach now — nothing was sold."
+    given: "<green><player> has a Sell Wand."
+
+  auto-sell-chest:
+    placed: "<gold>Auto Sell Chest placed.<gray> Whatever goes in — by hand or by hopper — is sold, and the money goes to you."
+    kept: "<yellow>The shop cannot buy that, so it came back to you."
+
   packs:
     off: "<red>Packs are switched off on this server."
     unknown: "<red>There is no such pack. <gray>/eco packs</gray> reads packs.yml again."
@@ -449,6 +460,8 @@ economy:
     not-yours: "<red>You have no contract with anybody of that name."
 
   admin:
+    unpriced: "<yellow><count> item(s) the shop does not buy</yellow> <dark_gray>(page <page>/<pages>, /eco unpriced <page>)</dark_gray><gray>: <items>"
+    unpriced-none: "<green>The shop buys every item there is."
     coin: "<green>Coins are now made of <white><item></white>. Coins already out keep working."
     dealer-placed: "<green>A <white><game></white> dealer stands here now. Players right click them to play. <gray>/eco dealer remove takes them away."
     dealer-removed: "<green>The nearest dealer is gone."

@@ -27,7 +27,7 @@ import java.util.function.Supplier;
 public final class EcoCommand extends EconomyCommand {
 
     private static final List<String> SUBCOMMANDS = List.of("give", "take", "set", "reset", "freeze", "unfreeze",
-            "history", "menu", "price", "reprice", "draw", "calm", "coin", "leaderboard", "dealer", "agent", "banker", "auction", "raffle", "giveaway", "tax", "loan", "packs", "health", "fund", "season");
+            "history", "menu", "price", "unpriced", "wand", "reprice", "draw", "calm", "coin", "leaderboard", "dealer", "agent", "banker", "auction", "raffle", "giveaway", "tax", "loan", "packs", "health", "fund", "season");
 
     public EcoCommand(Supplier<EconomyServices> services) {
         super(services);
@@ -239,6 +239,19 @@ public final class EcoCommand extends EconomyCommand {
                 });
             }
             case "price" -> price(live, sender, rest(args, 1));
+            case "unpriced" -> unpriced(live, sender, args.length > 1 ? args[1] : "1");
+            case "wand" -> {
+                java.util.Optional<org.bukkit.entity.Player> to = args.length > 1
+                        ? java.util.Optional.ofNullable(live.server().getPlayerExact(args[1])) : player(live, sender);
+                if (to.isEmpty()) {
+                    live.messages().send(sender, "economy.not-online", "player", args.length > 1 ? args[1] : "?");
+                    return;
+                }
+                live.sellWands().wand().ifPresent(wand -> {
+                    de.raindancer.core.platform.util.Inventories.giveOrDrop(to.get(), List.of(wand));
+                    live.messages().send(sender, "economy.sell-wand.given", "player", to.get().getName());
+                });
+            }
             case "calm" -> {
                 live.market().calm();
                 live.messages().send(sender, "economy.admin.calmed");
@@ -373,6 +386,27 @@ public final class EcoCommand extends EconomyCommand {
      * ({@code enchantments}), a potion ({@code potion:healing}, {@code splash_potion:strong_swiftness}), an ominous
      * bottle ({@code ominous_bottle:3}) or every bottle ({@code potions}).
      */
+    /** Every item the shop would not buy, a page at a time, so an owner sees what is missing from the price list. */
+    private static void unpriced(EconomyServices live, CommandSender sender, String typedPage) {
+        List<String> missing = live.shop().unpriced();
+        if (missing.isEmpty()) {
+            live.messages().send(sender, "economy.admin.unpriced-none");
+            return;
+        }
+        int perPage = 40;
+        int pages = (missing.size() + perPage - 1) / perPage;
+        int page;
+        try {
+            page = Math.max(1, Math.min(pages, Integer.parseInt(typedPage)));
+        } catch (NumberFormatException notANumber) {
+            page = 1;
+        }
+        List<String> shown = missing.subList((page - 1) * perPage, Math.min(missing.size(), page * perPage));
+        live.messages().send(sender, "economy.admin.unpriced", "count", String.valueOf(missing.size()),
+                "page", String.valueOf(page), "pages", String.valueOf(pages),
+                "items", String.join(", ", shown).toLowerCase(Locale.ROOT));
+    }
+
     private static void price(EconomyServices live, CommandSender sender, String typed) {
         String what = typed.strip();
         if (what.isEmpty()) {

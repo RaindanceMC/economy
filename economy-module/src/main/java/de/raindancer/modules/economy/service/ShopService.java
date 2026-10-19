@@ -40,6 +40,7 @@ import org.bukkit.inventory.PlayerInventory;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -232,8 +233,20 @@ public final class ShopService implements IEconomyService, ShopDesk {
     /** Reads the server's recipes again and reprices everything. On the global thread. */
     public int reprice() {
         knownRecipes = recipes.get();
-        prices.recompute(settings, knownRecipes, spawnEggs(), enchantKinds(), potionTypes());
+        prices.recompute(settings, knownRecipes, spawnEggs(), enchantKinds(), potionTypes(), rarities());
         return knownRecipes.size();
+    }
+
+    /** Every item on the server and how rare the game says it is — what prices an item nothing else does. */
+    private static Map<String, String> rarities() {
+        Map<String, String> rarities = new java.util.HashMap<>();
+        for (Material material : Material.values()) {
+            if (!material.isLegacy() && material.isItem() && !material.isAir()) {
+                org.bukkit.inventory.ItemType type = material.asItemType();
+                rarities.put(material.name(), type == null ? "COMMON" : type.getItemRarity().name());
+            }
+        }
+        return rarities;
     }
 
     public PriceBook prices() {
@@ -258,6 +271,21 @@ public final class ShopService implements IEconomyService, ShopDesk {
         }
         Material material = Material.matchMaterial(name);
         return material == null ? prices.tag(name) : tag(material);
+    }
+
+    /** Every item there is that the shop would not buy, by material name — cash's own material aside. */
+    public List<String> unpriced() {
+        List<String> missing = new ArrayList<>();
+        // Priced by what they hold, not by the material: one key per enchantment, potion or omen.
+        Set<Material> byContents = Set.of(Material.ENCHANTED_BOOK, Material.POTION, Material.SPLASH_POTION,
+                Material.LINGERING_POTION, Material.TIPPED_ARROW, Material.OMINOUS_BOTTLE);
+        for (Material material : Material.values()) {
+            if (!material.isLegacy() && material.isItem() && !material.isAir() && !byContents.contains(material)
+                    && !tag(material).sellable()) {
+                missing.add(material.name());
+            }
+        }
+        return missing;
     }
 
     /** Why the shop does not sell this right now, though it normally would — a server goal collecting it. */
@@ -1071,6 +1099,90 @@ public final class ShopService implements IEconomyService, ShopDesk {
                 label));
     }
 
+    /**
+     * What a stack fetches when it is handed over to be sold — into an Auto Sell Chest, by a sell wand, by Auto
+     * Sell: {@link #appraise} first, and otherwise whatever it is, as is: its material's price shrunk by wear,
+     * its enchantments' parts on top, and what it holds (a shulker box, a bundle) appraised the same way. Never
+     * cash, an insured item or a plugin's own item, and nothing holding one — those go back whole.
+     */
+    public Optional<SaleLot> appraiseAnything(UUID seller, ItemStack stack) {
+        return appraiseAnything(seller, stack, 0);
+    }
+
+    private volatile java.util.function.Predicate<ItemStack> pluginItem = stack -> false;
+
+    /** How to tell a plugin's own item (Core's custom items: wands, tokens) — never sold as its material. */
+    public void pluginItems(java.util.function.Predicate<ItemStack> isPluginItem) {
+        this.pluginItem = isPluginItem == null ? stack -> false : isPluginItem;
+    }
+
+    private Optional<SaleLot> appraiseAnything(UUID seller, ItemStack stack, int depth) {
+        if (stack == null || stack.getType().isAir()) {
+            return Optional.empty();
+        }
+        if (pluginItem.test(stack)) {
+            return Optional.empty();
+        }
+        List<ItemStack> inside = contentsOf(stack);
+        if (inside.isEmpty()) {
+            Optional<SaleLot> lot = appraise(seller, stack, -1);
+            if (lot.isPresent()) {
+                return lot;
+            }
+        }
+        if (depth > 3 || CashTags.isCash(stack) || de.raindancer.core.content.items.NonIngredients.isMarked(stack)
+                || de.raindancer.core.content.items.InsuredItems.isInsured(stack)
+                || de.raindancer.core.content.enchant.EnchantShards.enchantmentOf(stack).isPresent()
+                || potionKeyOf(stack).isPresent() || !settings.sellingEnabled()) {
+            return Optional.empty();
+        }
+        Material material = stack.getType();
+        if (!tag(material).sellable() || !enchants.countable(stack.getAmount(), stack.getMaxStackSize())) {
+            return Optional.empty();
+        }
+        Money held = Money.ZERO;
+        for (ItemStack each : inside) {
+            Optional<SaleLot> lot = appraiseAnything(seller, each, depth + 1);
+            if (lot.isEmpty()) {
+                return Optional.empty();
+            }
+            held = held.plus(lot.get().total());
+        }
+        try {
+            Optional<Money> plain = priceFor(seller, material).sellFor(1);
+            if (plain.isEmpty()) {
+                return Optional.empty();
+            }
+            int damage = stack.getItemMeta() instanceof org.bukkit.inventory.meta.Damageable worn ? worn.getDamage() : 0;
+            Money each = enchants.itemSell(plain.get(), enchants.durabilityLeft(material.getMaxDurability(), damage),
+                    parts(seller, enchantSells(seller, stack, false).orElse(Map.of())), curses(stack));
+            Money contents = held;
+            return trade.total(each, stack.getAmount()).map(total -> total.plus(contents))
+                    .filter(Money::isPositive)
+                    .map(total -> new SaleLot(material, -2, stack.getAmount(), total,
+                            Catalogue.readable(material.name()) + (inside.isEmpty() ? "" : " (full)")));
+        } catch (ArithmeticException tooMuch) {
+            return Optional.empty();
+        }
+    }
+
+    /** What a shulker box or a bundle holds; nothing for anything else. */
+    private static List<ItemStack> contentsOf(ItemStack stack) {
+        org.bukkit.inventory.meta.ItemMeta meta = stack.getItemMeta();
+        List<ItemStack> inside = new ArrayList<>();
+        if (meta instanceof org.bukkit.inventory.meta.BlockStateMeta block && block.hasBlockState()
+                && block.getBlockState() instanceof org.bukkit.block.ShulkerBox box) {
+            for (ItemStack each : box.getInventory().getContents()) {
+                if (each != null && !each.getType().isAir()) {
+                    inside.add(each);
+                }
+            }
+        } else if (meta instanceof org.bukkit.inventory.meta.BundleMeta bundle) {
+            inside.addAll(bundle.getItems());
+        }
+        return inside;
+    }
+
     /** Whether the only differences from a plain item are enchantments, wear, a name and the anvil's cost. */
     private static boolean onlyWornOrEnchanted(ItemStack stack) {
         ItemStack stripped = stripped(stack);
@@ -1314,30 +1426,62 @@ public final class ShopService implements IEconomyService, ShopDesk {
      * @return true for each stack that was sold, in order; the caller takes those off the ground
      */
     public boolean[] autoSell(Player player, List<ItemStack> drops) {
+        return autoSell(player.getUniqueId(), drops);
+    }
+
+    /** The same for somebody who need not be online — an Auto Sell Chest's owner. */
+    public boolean[] autoSell(UUID id, List<ItemStack> drops) {
+        return autoSelling(id, drops).sold();
+    }
+
+    /** The same, and what it all fetched — for saying so. */
+    public de.raindancer.modules.economy.model.AutoSold autoSelling(UUID id, List<ItemStack> drops) {
         boolean[] soldEach = new boolean[drops.size()];
+        Money fetched = Money.ZERO;
         EconomySettings live = settings;
         if (!live.sellingEnabled()) {
-            return soldEach;
+            return new de.raindancer.modules.economy.model.AutoSold(soldEach, fetched);
         }
-        UUID id = player.getUniqueId();
         for (int i = 0; i < drops.size(); i++) {
             ItemStack stack = drops.get(i);
-            if (stack == null || !sellableStack(stack, stack.getType()) || !tag(stack.getType()).sellable()) {
+            if (stack == null || stack.getType().isAir()) {
+                continue;
+            }
+            if (!sellableStack(stack, stack.getType())) {
+                Optional<SaleLot> lot = appraiseAnything(id, stack);
+                Money mine = autoSales.owed(id);
+                if (lot.isEmpty() || overBudget(id, mine.plus(lot.get().total()),
+                        autoSales.owedByAll().minus(mine)).isPresent()) {
+                    continue;
+                }
+                autoSales.addStack(id, stack.clone(), lot.get().total());
+                recordSold(id, Map.of(stack.getType(), stack.getAmount()));
+                fetched = fetched.plus(lot.get().total());
+                soldEach[i] = true;
+                continue;
+            }
+            if (!tag(stack.getType()).sellable()) {
                 continue;
             }
             Optional<Money> worth = priceFor(id, stack.getType()).sellFor(stack.getAmount());
             Money mine = autoSales.owed(id);
             Money others = autoSales.owedByAll().minus(mine);
             if (worth.isEmpty() || !worth.get().isPositive()
-                    || overBudget(player, mine.plus(worth.get()), others).isPresent()) {
+                    || overBudget(id, mine.plus(worth.get()), others).isPresent()) {
                 continue;
             }
             autoSales.add(id, stack.getType(), stack.getAmount(), worth.get());
             // Booked now, not at the payout: the next drop must already see the lower price.
             recordSold(id, Map.of(stack.getType(), stack.getAmount()));
+            fetched = fetched.plus(worth.get());
             soldEach[i] = true;
         }
-        return soldEach;
+        return new de.raindancer.modules.economy.model.AutoSold(soldEach, fetched);
+    }
+
+    /** How the shop's currency writes an amount. */
+    public net.kyori.adventure.text.Component render(Money amount) {
+        return settings.currency().render(amount);
     }
 
     /**
@@ -1369,8 +1513,10 @@ public final class ShopService implements IEconomyService, ShopDesk {
                     "Auto Sell could not pay {} for {} and they are offline; the items are gone.", player, what);
             return;
         }
-        de.raindancer.core.platform.util.Scheduling.entity(plugin, online,
-                () -> batch.counts().forEach((material, count) -> giveBack(online, material, count)));
+        de.raindancer.core.platform.util.Scheduling.entity(plugin, online, () -> {
+            batch.counts().forEach((material, count) -> giveBack(online, material, count));
+            de.raindancer.core.platform.util.Inventories.giveOrDrop(online, batch.stacks());
+        });
     }
 
     /** Takes up to this many plain items, last slots first, so the hotbar is emptied last. */

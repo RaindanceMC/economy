@@ -151,10 +151,61 @@ public final class RecipeReader {
                 shapes.add(new RecipeShape(result, 1, List.of(present), RecipeShape.Process.WORLD));
             }
         };
+        // Several ingredients each, or fewer than one made: a fish in a bucket, an anvil worn down to half.
+        java.util.function.BiConsumer<String, List<String>> addAll = (result, from) -> {
+            if (known.contains(result) && known.containsAll(from)) {
+                shapes.add(new RecipeShape(result, 1, from.stream().map(List::of).toList(), RecipeShape.Process.WORLD));
+            }
+        };
+        java.util.function.BiConsumer<String, Integer> wornAnvil = (result, parts) -> {
+            if (known.contains(result) && known.contains("ANVIL")) {
+                shapes.add(new RecipeShape(result, parts, List.of(List.of("ANVIL")), RecipeShape.Process.WORLD));
+            }
+        };
+        // Water, lava, milk and snow are free; a bucket of them is worth the bucket, so filling one never pays.
+        for (String free : List.of("WATER_BUCKET", "LAVA_BUCKET", "MILK_BUCKET", "POWDER_SNOW_BUCKET",
+                "AXOLOTL_BUCKET", "TADPOLE_BUCKET", "SULFUR_CUBE_BUCKET")) {
+            add.accept(free, List.of("BUCKET"));
+        }
+        for (String fish : List.of("COD", "SALMON", "PUFFERFISH", "TROPICAL_FISH")) {
+            addAll.accept(fish + "_BUCKET", List.of("BUCKET", fish));
+        }
+        // Mined whole with Silk Touch: worth one drop, never what Fortune would make of it.
+        Map<String, String> drops = Map.of("COAL", "COAL", "IRON", "RAW_IRON", "COPPER", "RAW_COPPER",
+                "GOLD", "RAW_GOLD", "DIAMOND", "DIAMOND", "EMERALD", "EMERALD", "LAPIS", "LAPIS_LAZULI",
+                "REDSTONE", "REDSTONE");
+        drops.forEach((ore, drop) -> {
+            add.accept(ore + "_ORE", List.of(drop));
+            add.accept("DEEPSLATE_" + ore + "_ORE", List.of(drop));
+        });
+        // Not its nuggets: it smelts into an ingot, and an ore worth less than that would drag gold down with it.
+        add.accept("NETHER_GOLD_ORE", List.of("GOLD_INGOT"));
+        add.accept("NETHER_QUARTZ_ORE", List.of("QUARTZ"));
+        wornAnvil.accept("CHIPPED_ANVIL", 2);
+        wornAnvil.accept("DAMAGED_ANVIL", 4);
+        add.accept("CARVED_PUMPKIN", List.of("PUMPKIN"));
+        add.accept("WRITTEN_BOOK", List.of("WRITABLE_BOOK"));
+        add.accept("FILLED_MAP", List.of("MAP"));
+        add.accept("WET_SPONGE", List.of("SPONGE"));
+        add.accept("BROWN_MUSHROOM_BLOCK", List.of("BROWN_MUSHROOM"));
+        add.accept("RED_MUSHROOM_BLOCK", List.of("RED_MUSHROOM"));
+        add.accept("MUSHROOM_STEM", List.of("BROWN_MUSHROOM", "RED_MUSHROOM"));
+        add.accept("TALL_GRASS", List.of("SHORT_GRASS"));
+        add.accept("LARGE_FERN", List.of("FERN"));
+        add.accept("TALL_DRY_GRASS", List.of("SHORT_DRY_GRASS"));
+        add.accept("CLOSED_EYEBLOSSOM", List.of("OPEN_EYEBLOSSOM"));
+        addAll.accept("COPPER_GOLEM_STATUE", List.of("COPPER_BLOCK", "CARVED_PUMPKIN"));
         add.accept("DIRT_PATH", List.of("DIRT", "GRASS_BLOCK"));
         add.accept("FARMLAND", List.of("DIRT", "GRASS_BLOCK"));
         add.accept("MUD", List.of("DIRT"));
         for (String name : materials) {
+            if (name.startsWith("DEAD_") && name.contains("CORAL")) {
+                add.accept(name, List.of(name.substring("DEAD_".length())));
+            } else if (name.startsWith("INFESTED_")) {
+                add.accept(name, List.of(name.substring("INFESTED_".length())));
+            } else if (name.startsWith("WAXED_") && name.endsWith("COPPER_GOLEM_STATUE")) {
+                addAll.accept(name, List.of(name.substring("WAXED_".length()), "HONEYCOMB"));
+            }
             if (name.startsWith("STRIPPED_")) {
                 add.accept(name, List.of(name.substring("STRIPPED_".length())));
             } else if (name.endsWith("_CONCRETE")) {

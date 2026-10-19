@@ -57,4 +57,20 @@ class AutoSalesTest {
         sales.drain(ADA);
         assertThat(sales.owedByAll()).isEqualTo(new Money(3));
     }
+
+    @Test
+    @DisplayName("something that is not a plain item is kept as it is, so a failed payment hands back that very thing")
+    void keepsSpecialStacks() {
+        AutoSales sales = new AutoSales();
+        org.bukkit.inventory.ItemStack sword = org.mockito.Mockito.mock(org.bukkit.inventory.ItemStack.class);
+        org.mockito.Mockito.when(sword.getAmount()).thenReturn(1);
+        sales.add(ADA, Material.COBBLESTONE, 4, new Money(20));
+        sales.addStack(ADA, sword, new Money(900));
+
+        AutoSales.Batch batch = sales.drain(ADA).orElseThrow();
+        assertThat(batch.total()).isEqualTo(new Money(920));
+        assertThat(batch.counts()).containsOnlyKeys(Material.COBBLESTONE);
+        assertThat(batch.stacks()).containsExactly(sword);
+        assertThat(batch.items()).as("the sword counts as one item sold").isEqualTo(5);
+    }
 }

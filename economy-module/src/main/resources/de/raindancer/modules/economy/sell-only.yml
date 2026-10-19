@@ -1,0 +1,33 @@
+# What the shop buys from players and never sells, because a bought one is worth more than it cost — an ore
+# mined with Fortune, a map leading to treasure, a key opening a vault — or because only loot or a trade makes it.
+# Whole names, or one star at the start or the end. Anything priced only by its rarity (nothing else prices it:
+# bedrock, command blocks, spawners) is never sold either, without being written here.
+# An owner's own buy price for one (shop.buy-prices) still puts it on sale.
+- "*_ore"
+- infested_*
+- "*_map"
+- "*_pottery_sherd"
+- music_disc_*
+- disc_fragment_5
+- "*_banner_pattern"
+- "*_horse_armor"
+- "*_nautilus_armor"
+- chainmail_*
+- trial_key
+- ominous_trial_key
+- elytra
+- dragon_egg
+- player_head
+- goat_horn
+- sniffer_egg
+- turtle_egg
+- chipped_anvil
+- damaged_anvil
+- written_book
+- "*_copper_golem_statue"
+- copper_golem_statue
+- gilded_blackstone
+- budding_amethyst
+- "*_amethyst_bud"
+- amethyst_cluster
+- creaking_heart

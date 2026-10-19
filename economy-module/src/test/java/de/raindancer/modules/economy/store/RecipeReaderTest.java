@@ -48,4 +48,34 @@ class RecipeReaderTest {
         assertThat(by.get("EXPOSED_CUT_COPPER")).containsExactly(List.of("CUT_COPPER"));
         assertThat(by).doesNotContainKey("DIRT");
     }
+
+    @Test
+    @DisplayName("what is filled, mined whole, left to die or worn down: buckets, ores, coral, infested stone, anvils")
+    void gatheredWhole() {
+        var shapes = RecipeReader.inWorld(List.of("BUCKET", "WATER_BUCKET", "MILK_BUCKET", "COD", "COD_BUCKET",
+                "RAW_IRON", "IRON_ORE", "DEEPSLATE_IRON_ORE", "GOLD_INGOT", "NETHER_GOLD_ORE", "TUBE_CORAL",
+                "DEAD_TUBE_CORAL", "STONE", "INFESTED_STONE", "ANVIL", "CHIPPED_ANVIL", "DAMAGED_ANVIL", "PUMPKIN",
+                "CARVED_PUMPKIN", "WRITABLE_BOOK", "WRITTEN_BOOK", "COPPER_GOLEM_STATUE", "WAXED_COPPER_GOLEM_STATUE",
+                "HONEYCOMB"));
+        java.util.Map<String, de.raindancer.modules.economy.model.RecipeShape> by = new java.util.HashMap<>();
+        shapes.forEach(shape -> by.put(shape.result(), shape));
+        assertThat(by.get("WATER_BUCKET").slots()).as("water is free: a full bucket is worth the bucket")
+                .containsExactly(List.of("BUCKET"));
+        assertThat(by.get("MILK_BUCKET").slots()).containsExactly(List.of("BUCKET"));
+        assertThat(by.get("COD_BUCKET").slots()).containsExactly(List.of("BUCKET"), List.of("COD"));
+        assertThat(by.get("IRON_ORE").slots()).as("worth one drop — never what Fortune makes of it")
+                .containsExactly(List.of("RAW_IRON"));
+        assertThat(by.get("DEEPSLATE_IRON_ORE").slots()).containsExactly(List.of("RAW_IRON"));
+        assertThat(by.get("NETHER_GOLD_ORE").slots()).as("what smelting it makes, so it never prices gold down")
+                .containsExactly(List.of("GOLD_INGOT"));
+        assertThat(by.get("DEAD_TUBE_CORAL").slots()).containsExactly(List.of("TUBE_CORAL"));
+        assertThat(by.get("INFESTED_STONE").slots()).containsExactly(List.of("STONE"));
+        assertThat(by.get("CHIPPED_ANVIL").amount()).as("half an anvil").isEqualTo(2);
+        assertThat(by.get("DAMAGED_ANVIL").amount()).as("a quarter").isEqualTo(4);
+        assertThat(by.get("CARVED_PUMPKIN").slots()).containsExactly(List.of("PUMPKIN"));
+        assertThat(by.get("WRITTEN_BOOK").slots()).containsExactly(List.of("WRITABLE_BOOK"));
+        assertThat(by.get("WAXED_COPPER_GOLEM_STATUE").slots())
+                .containsExactly(List.of("COPPER_GOLEM_STATUE"), List.of("HONEYCOMB"));
+        assertThat(by).as("nothing to fill a bucket with that is not there").doesNotContainKey("SALMON_BUCKET");
+    }
 }

@@ -74,7 +74,8 @@ public record EconomyServices(
         de.raindancer.modules.economy.service.RepairService repair,
         de.raindancer.modules.economy.service.DeathService death,
         de.raindancer.modules.economy.service.SeasonService seasons,
-        de.raindancer.modules.economy.service.BackpayService backpay) {
+        de.raindancer.modules.economy.service.BackpayService backpay,
+        de.raindancer.modules.economy.service.SellWandService sellWands) {
 
     public EconomySettings config() {
         return settings.get();

@@ -59,7 +59,7 @@
         <!-- 0.39.1: PostgreSQL fixes: no INSERT OR IGNORE (auction claims, notes, gamble insurance), the flows report reads its boolean column as one; every store test runs on both dialects. -->
         <!-- 0.43.0: no daily limit on selling experience (settings xp.sell-daily-limit / xp.sell-daily-most removed). -->
         <!-- 0.49.0: sells for other plugins through Core's ItemSales — a vault's "sell this page" is a /sell of its plain items, at the bank on a client server. -->
-        <plugin.version>0.49.0</plugin.version>
+        <plugin.version>0.50.0</plugin.version>
     </properties>
 
     <dependencies>
