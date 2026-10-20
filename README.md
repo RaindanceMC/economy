@@ -15,7 +15,7 @@ Needs Java 25 and read access to `packages.tstieh.de` (server ids `packages-rele
 
 ## Plugins
 
-- `economy-standalone/target/RainsEconomy-0.52.0.jar` — also published as `de.raindancer.modules:economy-standalone:0.52.0`
+- `economy-standalone/target/RainsEconomy-0.52.1.jar` — also published as `de.raindancer.modules:economy-standalone:0.52.1`
 
 ## Versions
 
