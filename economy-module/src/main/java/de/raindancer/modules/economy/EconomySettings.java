@@ -867,7 +867,8 @@ public record EconomySettings(
 
         @In("economy/shop/rains-enchantments") @Title("Shards per level")
         @Describe("How many of its shards a book takes, level I first, comma separated. Past the last, each "
-                + "level doubles it.")
+                + "level doubles it. No level takes more than double the one before: two books make the next "
+                + "level in an anvil.")
         @Key("rains-enchantments.shards") List<String> rainsEnchantShards,
 
         @In("economy/shop/rains-enchantments") @Title("Money per level")
@@ -939,7 +940,7 @@ public record EconomySettings(
             true, List.of("128 5", "640 10", "1280 15", "1920 20"), 20,
             List.of("*", "!enchanted_book"),
             // Rain's enchantments
-            true, List.of("8", "24", "64", "128", "256"), "250", "20",
+            true, List.of("8", "16", "32", "64", "128"), "250", "20",
             List.of("flight 60", "launch 60", "soulbound 60", "veinminer 35", "excavator 35", "chest_link 35",
                     "auto_sell 35", "boost 35"));
 

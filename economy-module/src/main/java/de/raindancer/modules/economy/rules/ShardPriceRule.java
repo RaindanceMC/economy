@@ -8,7 +8,7 @@ import java.util.List;
 /** What a book of one of Rain's enchantments costs at the shop: the level's shards, and money per level. */
 public final class ShardPriceRule implements IEconomyRule {
 
-    private static final List<Integer> BUILT_IN = List.of(8, 24, 64, 128, 256);
+    private static final List<Integer> BUILT_IN = List.of(8, 16, 32, 64, 128);
 
     private final List<Integer> steps;
     private final Money perLevel;
@@ -28,6 +28,12 @@ public final class ShardPriceRule implements IEconomyRule {
                 read.clear();
                 break;
             }
+        }
+        // Two books of a level make the next one in an anvil, so a step past double the one before is never
+        // paid — players buy two of the cheaper level and combine them. Capped here rather than refused,
+        // because servers still have the old 8, 24, 64, … written in their settings.
+        for (int level = 1; level < read.size(); level++) {
+            read.set(level, Math.min(read.get(level), 2 * read.get(level - 1)));
         }
         this.steps = read.isEmpty() ? BUILT_IN : List.copyOf(read);
         this.perLevel = perLevel;
