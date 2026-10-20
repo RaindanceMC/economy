@@ -130,6 +130,7 @@ economy:
     rains-locked: "<red>Your guild has not unlocked <white><name></white> yet. <gray>Pay its shards in at /guild."
     rains-no-shards: "<red>That book takes <white><shards></white> <name> shards, and you carry fewer."
     rains-bought: "<green>You bought <white><name> <level></white> for <shards> shards and <amount><green>."
+    rains-bought-free: "<green>You bought <white><name> <level></white> for <amount><green>."
     enchant-gone: "<red>That book is no longer for sale at that price. Nothing was taken."
     potion-gone: "<red>That bottle is no longer for sale at that price. Nothing was taken."
     sold: "<green>You sold <white><what></white> for <amount><green>."

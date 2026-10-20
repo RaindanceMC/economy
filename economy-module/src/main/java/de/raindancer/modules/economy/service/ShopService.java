@@ -642,7 +642,8 @@ public final class ShopService implements IEconomyService, ShopDesk {
                         String key = enchantment.getKey().asString();
                         boolean unlocked = de.raindancer.core.content.enchant.EnchantUnlocks.isUnlocked(player, key);
                         for (int level = 1; level <= enchantment.getMaxLevel(); level++) {
-                            offers.add(new RainsOffer(key, level, pricing.shards(level), pricing.money(level), unlocked));
+                            offers.add(new RainsOffer(key, level, pricing.shards(level, unlocked), pricing.money(level),
+                                    unlocked));
                         }
                     });
         } catch (RuntimeException | LinkageError noServer) {
@@ -670,7 +671,7 @@ public final class ShopService implements IEconomyService, ShopDesk {
             return;
         }
         de.raindancer.modules.economy.rules.ShardPriceRule pricing = live.shardPricing();
-        if (pricing.shards(shown.level()) != shown.shards() || !pricing.money(shown.level()).equals(shown.money())) {
+        if (pricing.shards(shown.level(), true) != shown.shards() || !pricing.money(shown.level()).equals(shown.money())) {
             refuse(player, "economy.shop.enchant-gone");
             return;
         }
@@ -704,7 +705,8 @@ public final class ShopService implements IEconomyService, ShopDesk {
         }
         de.raindancer.core.platform.util.Inventories.giveOrDrop(player, List.of(book));
         effects.play(player.getUniqueId(), Cues.REWARD);
-        messages.send(player, "economy.shop.rains-bought", "name", name, "level", String.valueOf(shown.level()),
+        messages.send(player, shown.shards() == 0 ? "economy.shop.rains-bought-free" : "economy.shop.rains-bought",
+                "name", name, "level", String.valueOf(shown.level()),
                 "shards", String.valueOf(shown.shards()), "amount", currency.render(shown.money()));
     }
 

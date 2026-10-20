@@ -871,6 +871,11 @@ public record EconomySettings(
                 + "level in an anvil.")
         @Key("rains-enchantments.shards") List<String> rainsEnchantShards,
 
+        @In("economy/shop/rains-enchantments") @Title("No shards once unlocked")
+        @Describe("Once a guild has unlocked an enchantment, its members buy the books for the money alone. "
+                + "Unlocking still takes the shards.")
+        @Key("rains-enchantments.free-once-unlocked") boolean rainsFreeOnceUnlocked,
+
         @In("economy/shop/rains-enchantments") @Title("Money per level")
         @Describe("Paid on top of the shards, times the level.")
         @Key("rains-enchantments.money-per-level") String rainsEnchantMoney,
@@ -940,14 +945,14 @@ public record EconomySettings(
             true, List.of("128 5", "640 10", "1280 15", "1920 20"), 20,
             List.of("*", "!enchanted_book"),
             // Rain's enchantments
-            true, List.of("8", "16", "32", "64", "128"), "250", "20",
+            true, List.of("8", "16", "32", "64", "128"), false, "250", "20",
             List.of("flight 60", "launch 60", "soulbound 60", "veinminer 35", "excavator 35", "chest_link 35",
                     "auto_sell 35", "boost 35"));
 
     /** The currency these settings describe. */
     public de.raindancer.modules.economy.rules.ShardPriceRule shardPricing() {
         return new de.raindancer.modules.economy.rules.ShardPriceRule(rainsEnchantShards,
-                money(rainsEnchantMoney, DEFAULTS.rainsEnchantMoney));
+                money(rainsEnchantMoney, DEFAULTS.rainsEnchantMoney), rainsFreeOnceUnlocked);
     }
 
     /** What the shop pays for one shard of this enchantment ({@code rainsenchants:boost}); zero takes none. */

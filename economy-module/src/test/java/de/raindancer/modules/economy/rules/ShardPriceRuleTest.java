@@ -59,4 +59,15 @@ class ShardPriceRuleTest {
         assertThat(List.of(gentle.shards(1), gentle.shards(2), gentle.shards(3), gentle.shards(4)))
                 .containsExactly(8, 12, 20, 40);
     }
+
+    @Test
+    @DisplayName("free once unlocked: an unlocked enchantment's book takes no shards, a locked one still shows them")
+    void freeOnceUnlocked() {
+        ShardPriceRule free = new ShardPriceRule(List.of("8", "16"), new Money(25_000), true);
+        assertThat(free.shards(2, true)).isZero();
+        assertThat(free.shards(2, false)).isEqualTo(16);
+        assertThat(free.money(2)).as("the money stays").isEqualTo(new Money(50_000));
+        assertThat(rule.shards(2, true)).as("off by default").isEqualTo(16);
+        assertThat(free.shards(0, true)).as("still no level, no book").isEqualTo(Integer.MAX_VALUE);
+    }
 }

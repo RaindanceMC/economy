@@ -12,9 +12,15 @@ public final class ShardPriceRule implements IEconomyRule {
 
     private final List<Integer> steps;
     private final Money perLevel;
+    private final boolean freeOnceUnlocked;
 
     /** @param steps shards for level I, II, …, as written in the settings */
     public ShardPriceRule(List<String> steps, Money perLevel) {
+        this(steps, perLevel, false);
+    }
+
+    /** @param freeOnceUnlocked whether a book of an enchantment the guild unlocked takes no shards at all */
+    public ShardPriceRule(List<String> steps, Money perLevel, boolean freeOnceUnlocked) {
         List<Integer> read = new ArrayList<>();
         for (String step : steps) {
             try {
@@ -37,6 +43,13 @@ public final class ShardPriceRule implements IEconomyRule {
         }
         this.steps = read.isEmpty() ? BUILT_IN : List.copyOf(read);
         this.perLevel = perLevel;
+        this.freeOnceUnlocked = freeOnceUnlocked;
+    }
+
+    /** The shards a book takes for this buyer: none once unlocked, when the server says so. */
+    public int shards(int level, boolean unlocked) {
+        int shards = shards(level);
+        return freeOnceUnlocked && unlocked && shards != Integer.MAX_VALUE ? 0 : shards;
     }
 
     public int shards(int level) {

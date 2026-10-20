@@ -54,9 +54,15 @@ public final class RainsEnchantMenu extends PaginatedMenu<ShopService.RainsOffer
         String name = ShopService.rainsName(offer.enchantment()) + " " + roman(offer.level());
         int carried = EnchantShards.count(viewer.getInventory(), offer.enchantment());
         List<String> lore = new ArrayList<>();
-        lore.add("<gray>Costs <white>" + offer.shards() + "<gray> of its shards");
-        lore.add("<gray>and " + MiniMessage.miniMessage().serialize(services.currency().render(offer.money())) + "<gray>.");
-        lore.add("<gray>You carry <white>" + carried + "<gray>.");
+        String money = MiniMessage.miniMessage().serialize(services.currency().render(offer.money()));
+        if (offer.shards() == 0) {
+            lore.add("<gray>Costs " + money + "<gray>, no shards:");
+            lore.add("<gray>your guild unlocked it.");
+        } else {
+            lore.add("<gray>Costs <white>" + offer.shards() + "<gray> of its shards");
+            lore.add("<gray>and " + money + "<gray>.");
+            lore.add("<gray>You carry <white>" + carried + "<gray>.");
+        }
         lore.add("");
         if (!offer.unlocked()) {
             lore.add("<red>Locked: your guild unlocks it");
