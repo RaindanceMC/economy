@@ -226,6 +226,11 @@ public record EconomySettings(
         @Describe("Item names, comma separated. The shop will not take these.")
         @Key("shop.not-bought") List<String> notBought,
 
+        @In("economy/shop") @Title("Takes worthless items")
+        @Describe("Selling something the shop pays nothing for — sold off until its price fell to nothing — still "
+                + "takes it, for nothing, so players can get rid of it. Not what 'Never bought from players' lists.")
+        @Key("shop.take-worthless") boolean takeWorthless,
+
         @In("economy/shop") @Title("Price crafted things from their recipes")
         @Describe("Planks from logs, iron blocks from ingots — every recipe on the server, worked out "
                 + "from the prices of raw materials. Off prices only what has a price of its own.")
@@ -900,7 +905,7 @@ public record EconomySettings(
             // cash
             true, Material.GOLD_NUGGET, "", true, true, 0.0, 2304,
             // shop
-            true, true, 1.0, 0.4, SellPricing.AUTOMATIC, List.of(), List.of(), List.of(), List.of(), List.of(),
+            true, true, 1.0, 0.4, SellPricing.AUTOMATIC, List.of(), List.of(), List.of(), List.of(), List.of(), false,
             true, 0.1, 0.15, true, 0.0, 3.0, 0.1, 12.0, true, true, List.of(), true, List.of(),
             true, List.of(), "800",
             true, "2000", List.of("ender_dragon", "wither"),

@@ -492,6 +492,29 @@ class PriceBookTest {
     }
 
     @Test
+    @DisplayName("worthless taken: a flooded item still goes to the shop, for nothing — only when switched on")
+    void worthlessTaken() {
+        pressure.put("DIAMOND", -50.0);
+        PriceBook off = book(EconomySettings.DEFAULTS, PLANKS);
+        assertThat(off.tag("DIAMOND").sellable()).isFalse();
+        assertThat(off.takesForNothing("DIAMOND")).as("off by default").isFalse();
+
+        PriceBook on = book(de.raindancer.modules.economy.EconomySettingsTest.with("shop.take-worthless", "on"), PLANKS);
+        assertThat(on.tag("DIAMOND").sellable()).as("still pays nothing, so not sold as such").isFalse();
+        assertThat(on.takesForNothing("DIAMOND")).isTrue();
+        assertThat(on.takesForNothing("OAK_LOG")).as("worth something: sold, not given away").isFalse();
+        assertThat(on.takesForNothing("NO_SUCH_THING")).as("nothing prices it").isFalse();
+
+        PriceBook refused = book(de.raindancer.modules.economy.EconomySettingsTest.with(
+                "shop.take-worthless", "on", "shop.not-bought", "diamond"), PLANKS);
+        assertThat(refused.takesForNothing("DIAMOND")).as("never bought from players means never").isFalse();
+
+        PriceBook closed = book(de.raindancer.modules.economy.EconomySettingsTest.with(
+                "shop.take-worthless", "on", "features.selling", "off"), PLANKS);
+        assertThat(closed.takesForNothing("DIAMOND")).as("selling switched off").isFalse();
+    }
+
+    @Test
     @DisplayName("every item has a price: what nothing prices is worth its rarity, and the shop only buys it, never sells it")
     void everyItemHasAPrice() {
         byte[] raw = "raw_iron: 800\ndiamond: 10000\n".getBytes(StandardCharsets.UTF_8);

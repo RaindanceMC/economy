@@ -319,6 +319,26 @@ public final class PriceBook {
     }
 
     /**
+     * Whether the shop takes it for nothing, though it pays nothing for it ({@code shop.take-worthless}): an item
+     * worth something that it does not buy only because its price fell to nothing. Never what an owner refused.
+     */
+    public boolean takesForNothing(String material) {
+        String name = material.toUpperCase(Locale.ROOT);
+        Snapshot now = snapshot;
+        EconomySettings settings = now.settings();
+        if (!settings.takeWorthless() || !settings.sellingEnabled() || now.notBought().contains(name)) {
+            return false;
+        }
+        Raw raw = raw(name, now);
+        if (raw == null || raw.value() == null || !raw.value().isPositive()) {
+            return false;
+        }
+        boolean open = name.endsWith(EGG) ? now.eggs().contains(name) || now.fallback().contains(name)
+                : settings.categoryOpen(Catalogue.categoryOf(name));
+        return open && !tag(name).sellable();
+    }
+
+    /**
      * Whether so much of it was sold that the shop pays nothing for it any more (and gives it away below half a
      * coin) — the market's doing, not an owner's: an owner's own price never floods.
      */

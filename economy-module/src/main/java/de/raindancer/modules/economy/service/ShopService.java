@@ -1363,10 +1363,21 @@ public final class ShopService implements IEconomyService, ShopDesk {
         Money total = Money.ZERO;
         int items = 0;
         Map<Material, Integer> taken = new LinkedHashMap<>();
+        Map<Material, Integer> givenAway = new LinkedHashMap<>();
         PlayerInventory inventory = player.getInventory();
         for (Map.Entry<Material, Integer> each : wanted.entrySet()) {
             Material material = each.getKey();
             PriceTag tag = tag(material);
+            // Asked for by name only: selling everything never throws away what merely fetches nothing today.
+            if (!tag.sellable() && !everything && prices.takesForNothing(material.name())) {
+                int removed = take(inventory, material, Math.max(1, each.getValue()));
+                if (removed == 0) {
+                    refuse(player, "economy.shop.none-carried", "item", Catalogue.readable(material.name()));
+                } else {
+                    givenAway.put(material, removed);
+                }
+                continue;
+            }
             if (!tag.sellable()) {
                 if (!everything) {
                     refuse(player, notBought(material), "item", Catalogue.readable(material.name()));
@@ -1388,6 +1399,10 @@ public final class ShopService implements IEconomyService, ShopDesk {
             total = total.plus(worth.get());
             items += removed;
             taken.put(material, removed);
+        }
+        if (!givenAway.isEmpty()) {
+            recordSold(player.getUniqueId(), givenAway);
+            messages.send(player, "economy.shop.taken", "what", stackSale.what(givenAway));
         }
         if (taken.isEmpty()) {
             return;

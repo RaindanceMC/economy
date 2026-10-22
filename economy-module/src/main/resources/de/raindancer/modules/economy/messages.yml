@@ -134,6 +134,7 @@ economy:
     enchant-gone: "<red>That book is no longer for sale at that price. Nothing was taken."
     potion-gone: "<red>That bottle is no longer for sale at that price. Nothing was taken."
     sold: "<green>You sold <white><what></white> for <amount><green>."
+    taken: "<gray>The shop took <white><what></white> off your hands, for nothing — nobody pays for it right now."
     sold-enchantments: "<green>You sold the enchantments off your <white><what></white> for <amount><green>. It keeps any curse."
     no-enchantments: "<red>That carries no enchantment the shop buys. Curses cannot be sold off."
 
