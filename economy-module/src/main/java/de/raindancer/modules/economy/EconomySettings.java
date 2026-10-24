@@ -271,6 +271,12 @@ public record EconomySettings(
                 + "takes furnaces down with it, each material counting as much as it makes up of the value.")
         @Key("shop.follow-materials") boolean followMaterials,
 
+        @In("economy/shop") @Title("Raw materials push softer")
+        @Describe("While made things follow their materials, a stack of a raw material — one with a price of its "
+                + "own, made of nothing — pushes its price only this times as hard: everything made of it moves "
+                + "with it, so cobblestone should not run out of worth as fast as furnaces do. 1 pushes in full.")
+        @Key("shop.raw-pressure-share") double rawPressureShare,
+
         @In("economy/shop") @Title("Enchanted books for sale")
         @Describe("An Enchantments drawer in the shop: every enchantment at every level up to its normal maximum, "
                 + "each priced like an item — with supply and demand, the buy markup and sell ratio, roles. A book "
@@ -911,7 +917,7 @@ public record EconomySettings(
             true, Material.GOLD_NUGGET, "", true, true, 0.0, 2304,
             // shop
             true, true, 1.0, 0.4, SellPricing.AUTOMATIC, List.of(), List.of(), List.of(), List.of(), List.of(), false,
-            true, 0.1, 0.15, true, 0.0, 3.0, 0.1, 12.0, true, true, true, List.of(), true, List.of(),
+            true, 0.1, 0.15, true, 0.0, 3.0, 0.1, 12.0, true, 0.25, true, true, List.of(), true, List.of(),
             true, List.of(), "800",
             true, "2000", List.of("ender_dragon", "wither"),
             true, true, true, true, true, true, true, true, true,
@@ -1275,6 +1281,10 @@ public record EconomySettings(
 
     public double pressurePerStackClamped() {
         return clamp(pressurePerStack, 0, 1, 0.1);
+    }
+
+    public double rawPressureShareClamped() {
+        return clamp(rawPressureShare, 0, 1, 0.25);
     }
 
     public double recoveryHoursClamped() {

@@ -521,7 +521,7 @@ public final class ShopService implements IEconomyService, ShopDesk {
                 .forEach(left -> player.getWorld().dropItemNaturally(player.getLocation(), left));
         if (live.dynamicPrices() && tag.source() != PriceTag.Source.CUSTOM) {
             market.traded(material.name(), amount, prices.stackSizeOf(material.name()),
-                    live.pressurePerStackClamped(), true, live.recoveryHoursClamped());
+                    prices.pushPerStack(material.name()), true, live.recoveryHoursClamped());
         }
         effects.play(player.getUniqueId(), Cues.REWARD);
         if (free) {
@@ -603,7 +603,8 @@ public final class ShopService implements IEconomyService, ShopDesk {
         player.getInventory().addItem(book).values()
                 .forEach(left -> player.getWorld().dropItemNaturally(player.getLocation(), left));
         if (live.dynamicPrices() && tag.source() != PriceTag.Source.CUSTOM) {
-            market.traded(offer.key().name(), 1, 1, live.pressurePerStackClamped(), true, live.recoveryHoursClamped());
+            market.traded(offer.key().name(), 1, 1, prices.pushPerStack(offer.key().name()), true,
+                    live.recoveryHoursClamped());
         }
         effects.play(player.getUniqueId(), Cues.REWARD);
         messages.send(player, "economy.shop.bought", "count", "1", "item", "Enchanted Book (" + name + ")",
@@ -824,7 +825,7 @@ public final class ShopService implements IEconomyService, ShopDesk {
         player.getInventory().addItem(stacks.toArray(ItemStack[]::new)).values()
                 .forEach(left -> player.getWorld().dropItemNaturally(player.getLocation(), left));
         if (live.dynamicPrices() && tag.source() != PriceTag.Source.CUSTOM) {
-            market.traded(key.name(), amount, prices.stackSizeOf(key.name()), live.pressurePerStackClamped(), true,
+            market.traded(key.name(), amount, prices.stackSizeOf(key.name()), prices.pushPerStack(key.name()), true,
                     live.recoveryHoursClamped());
         }
         effects.play(player.getUniqueId(), Cues.REWARD);
@@ -838,7 +839,7 @@ public final class ShopService implements IEconomyService, ShopDesk {
             sold.sold(player, key.name(), count);
         }
         if (live.dynamicPrices() && prices.tag(key.name()).source() != PriceTag.Source.CUSTOM) {
-            market.traded(key.name(), count, prices.stackSizeOf(key.name()), live.pressurePerStackClamped(), false,
+            market.traded(key.name(), count, prices.stackSizeOf(key.name()), prices.pushPerStack(key.name()), false,
                     live.recoveryHoursClamped());
         }
     }
@@ -850,7 +851,7 @@ public final class ShopService implements IEconomyService, ShopDesk {
                 sold.sold(player, key.name(), count);
             }
             if (live.dynamicPrices() && prices.tag(key.name()).source() != PriceTag.Source.CUSTOM) {
-                market.traded(key.name(), count, 1, live.pressurePerStackClamped(), false, live.recoveryHoursClamped());
+                market.traded(key.name(), count, 1, prices.pushPerStack(key.name()), false, live.recoveryHoursClamped());
             }
         }
     }
@@ -952,7 +953,7 @@ public final class ShopService implements IEconomyService, ShopDesk {
         for (var each : contents) {
             if (prices.tag(each.material()).source() != PriceTag.Source.CUSTOM) {
                 market.traded(each.material(), each.amount(), prices.stackSizeOf(each.material()),
-                        live.pressurePerStackClamped(), true, live.recoveryHoursClamped());
+                        prices.pushPerStack(each.material()), true, live.recoveryHoursClamped());
             }
         }
     }
@@ -1485,7 +1486,7 @@ public final class ShopService implements IEconomyService, ShopDesk {
             taken.forEach((material, count) -> {
                 if (prices.tag(material.name()).source() != PriceTag.Source.CUSTOM) {
                     market.traded(material.name(), count, prices.stackSizeOf(material.name()),
-                            live.pressurePerStackClamped(), false, live.recoveryHoursClamped());
+                            prices.pushPerStack(material.name()), false, live.recoveryHoursClamped());
                 }
             });
         }
@@ -1783,7 +1784,7 @@ public final class ShopService implements IEconomyService, ShopDesk {
         }
         if (live.dynamicPrices() && tag.source() != PriceTag.Source.CUSTOM) {
             market.traded(material.name(), amount, prices.stackSizeOf(material.name()),
-                    live.pressurePerStackClamped(), true, live.recoveryHoursClamped());
+                    prices.pushPerStack(material.name()), true, live.recoveryHoursClamped());
         }
         return new ShopDesk.Settled(true, "economy.shop.bought", List.of("count", String.valueOf(amount), "item", item,
                 "amount", Mini.of(currency.render(total.get()))));

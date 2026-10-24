@@ -486,6 +486,20 @@ public final class PriceBook {
         return moved(name, now, new HashSet<>());
     }
 
+    /**
+     * How hard one stack of it traded pushes its price: {@code shop.pressure-per-stack}, and for a raw material
+     * only the raw share of that while made things follow their materials — they move with it already.
+     */
+    public double pushPerStack(String material) {
+        String name = material.toUpperCase(Locale.ROOT);
+        Snapshot now = snapshot;
+        EconomySettings settings = now.settings();
+        double full = settings.pressurePerStackClamped();
+        boolean raw = settings.followMaterials() && settings.deriveFromRecipes() && shipped.containsKey(name)
+                && !now.custom().contains(name);
+        return raw ? full * settings.rawPressureShareClamped() : full;
+    }
+
     /** Far deeper than any real chain; only a guard. */
     private static final int MOST_MATERIAL_STEPS = 32;
 

@@ -138,4 +138,19 @@ class PriceBookMaterialsTest {
         assertThat(ingot).isCloseTo(1 - Math.tanh(0.5), CLOSE);
         assertThat(book.multiplier("IRON_BLOCK")).isCloseTo(ingot, CLOSE);
     }
+
+    @Test
+    @DisplayName("a stack of a raw material pushes its price only by the raw share, as everything made of it follows")
+    void rawPushesSofter() {
+        PriceBook book = book();
+        assertThat(book.pushPerStack("COBBLESTONE")).isCloseTo(0.1 * 0.25, CLOSE);
+        assertThat(book.pushPerStack("FURNACE")).as("made things push in full").isCloseTo(0.1, CLOSE);
+        assertThat(book("shop.raw-pressure-share", "1").pushPerStack("COBBLESTONE")).isCloseTo(0.1, CLOSE);
+    }
+
+    @Test
+    @DisplayName("without following materials a raw material pushes in full again")
+    void rawInFullWithoutFollowing() {
+        assertThat(book("shop.follow-materials", "false").pushPerStack("COBBLESTONE")).isCloseTo(0.1, CLOSE);
+    }
 }
