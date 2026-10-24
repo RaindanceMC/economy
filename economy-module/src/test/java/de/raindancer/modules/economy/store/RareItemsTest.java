@@ -66,8 +66,30 @@ class RareItemsTest {
     @DisplayName("the shipped list reads, and holds the end-game items")
     void shippedList() {
         List<String> rare = SellOnlyList.parse(EconomyModule.class.getResourceAsStream(SellOnlyList.RARE_RESOURCE));
-        assertThat(rare).contains("nether_star", "totem_of_undying", "netherite_*", "enchanted_golden_apple");
+        assertThat(rare).contains("nether_star", "totem_of_undying", "netherite_*", "enchanted_golden_apple", "elytra",
+                "sniffer_egg");
         List<String> sellOnly = SellOnlyList.parse(EconomyModule.class.getResourceAsStream(SellOnlyList.RESOURCE));
         assertThat(rare).as("never sold anyway, so not listed twice").doesNotContainAnyElementsOf(sellOnly);
+    }
+
+    @Test
+    @DisplayName("an elytra and a sniffer egg are for sale only while rare items are")
+    void elytraAndSnifferEgg() {
+        List<String> sellOnly = SellOnlyList.parse(EconomyModule.class.getResourceAsStream(SellOnlyList.RESOURCE));
+        List<String> rare = SellOnlyList.parse(EconomyModule.class.getResourceAsStream(SellOnlyList.RARE_RESOURCE));
+        byte[] raw = "elytra: 50000\nsniffer_egg: 2500\n".getBytes(StandardCharsets.UTF_8);
+        java.util.function.Function<EconomySettings, PriceBook> book = settings -> {
+            PriceBook made = new PriceBook(currency -> BasePrices.parse(new ByteArrayInputStream(raw), currency),
+                    material -> 0.0, material -> 64, sellOnly, rare);
+            made.recompute(settings, List.of());
+            return made;
+        };
+        PriceBook off = book.apply(EconomySettings.DEFAULTS);
+        PriceBook on = book.apply(EconomySettingsTest.with("shop.sell-rare", "true"));
+        for (String item : List.of("ELYTRA", "SNIFFER_EGG")) {
+            assertThat(off.tag(item).buyable()).as(item).isFalse();
+            assertThat(off.tag(item).sellable()).as(item).isTrue();
+            assertThat(on.tag(item).buyable()).as(item).isTrue();
+        }
     }
 }

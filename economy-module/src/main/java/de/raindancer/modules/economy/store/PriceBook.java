@@ -53,6 +53,7 @@ public final class PriceBook {
 
     private static final String BOTTLE = "EXPERIENCE_BOTTLE";
     private static final String BOOK = "BOOK";
+    private static final String SPAWNER = "SPAWNER";
     private static final String LAPIS = "LAPIS_LAZULI";
     /** Beyond this a price means nothing; sums of a few of them stay far from overflow. */
     private static final long MOST = Long.MAX_VALUE / 64;
@@ -193,6 +194,12 @@ public final class PriceBook {
         List<String> types = potionTypes == null ? List.of() : potionTypes.stream()
                 .map(type -> type.toLowerCase(Locale.ROOT).replace("minecraft:", "")).distinct().toList();
         pricePotions(values, types, settings);
+        PricedNames buyPrices = PricedNames.parse(settings.buyPrices(), currency);
+        Money spawner = settings.spawnerPriceMoney();
+        if (settings.sellSpawners() && spawner.isPositive() && buyPrices.of(SPAWNER).isEmpty()) {
+            buyPrices = buyPrices.with(SPAWNER, spawner);
+            values.putIfAbsent(SPAWNER, spawner);
+        }
         Set<String> fallback = new HashSet<>();
         rarities.forEach((name, rarity) -> {
             String upper = name.toUpperCase(Locale.ROOT);
@@ -202,7 +209,7 @@ public final class PriceBook {
             }
         });
         snapshot = new Snapshot(settings, Map.copyOf(values), Set.copyOf(customValues.amounts().keySet()),
-                PricedNames.parse(settings.buyPrices(), currency), PricedNames.parse(settings.sellPrices(), currency),
+                buyPrices, PricedNames.parse(settings.sellPrices(), currency),
                 names(settings.notSold()), names(settings.notBought()), List.copyOf(openEggs), Map.copyOf(kinds),
                 worth, pointValue, types, names(settings.potionsClosed()), Set.copyOf(fallback), Map.copyOf(materials),
                 rare(values.keySet(), materials));

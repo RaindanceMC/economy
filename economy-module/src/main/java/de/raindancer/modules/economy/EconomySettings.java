@@ -279,6 +279,15 @@ public record EconomySettings(
                 + "boxes, the shipped list — nor anything made from it, like a beacon. It still buys them.")
         @Key("shop.sell-rare") boolean sellRare,
 
+        @In("economy/shop") @Title("Spawners for sale")
+        @Describe("The shop sells an empty spawner at the price below — exactly that, no markup, no supply and "
+                + "demand. Off, it sells none; rare items being for sale changes nothing here.")
+        @Key("shop.sell-spawners") boolean sellSpawners,
+
+        @In("economy/shop") @Title("A spawner costs")
+        @Describe("While spawners are for sale. An owner's own buy price for spawner (shop.buy-prices) wins.")
+        @Key("shop.spawner-price") String spawnerPrice,
+
         @In("economy/shop") @Title("Enchanted books for sale")
         @Describe("An Enchantments drawer in the shop: every enchantment at every level up to its normal maximum, "
                 + "each priced like an item — with supply and demand, the buy markup and sell ratio, roles. A book "
@@ -919,7 +928,7 @@ public record EconomySettings(
             true, Material.GOLD_NUGGET, "", true, true, 0.0, 2304,
             // shop
             true, true, 1.0, 0.4, SellPricing.AUTOMATIC, List.of(), List.of(), List.of(), List.of(), List.of(), false,
-            true, 0.1, true, 0.0, 3.0, 0.1, 12.0, true, 0.25, false, true, true, List.of(), true, List.of(),
+            true, 0.1, true, 0.0, 3.0, 0.1, 12.0, true, 0.25, false, false, "30000000", true, true, List.of(), true, List.of(),
             true, List.of(), "800",
             true, "2000", List.of("ender_dragon", "wither"),
             true, true, true, true, true, true, true, true, true,
@@ -1145,6 +1154,10 @@ public record EconomySettings(
 
     public Money ominousBottleValueMoney() {
         return money(ominousBottleValue, DEFAULTS.ominousBottleValue);
+    }
+
+    public Money spawnerPriceMoney() {
+        return money(spawnerPrice, DEFAULTS.spawnerPrice);
     }
 
     public Money spawnEggValueMoney() {
