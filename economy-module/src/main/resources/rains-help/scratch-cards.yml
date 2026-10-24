@@ -1,0 +1,27 @@
+id: scratch-cards
+title: Scratch cards
+summary: Buying tickets you can carry or give away, and scratching them for three alike.
+intro: |
+  Paper, hope and a coin. Give one to a friend — it is the thought that counts, and sometimes a thousand times the price.
+icon: MAP
+category: Games
+order: 82
+module: economy
+when: economy:features.gambling && economy:features.scratch
+aliases: [scratch, ticket, scratchcard, card]
+keywords: [scratch, ticket, prize]
+commands: [scratch]
+related: [casino, lottery]
+sections:
+  - question: How do I buy one?
+    title: Buying
+    text: |
+      {cmd:/scratch buy <count>} (or {run:/scratch} for one) — a card costs {setting:economy:scratch.price|money}. At a scratch card dealer you buy them at the table. They land in your inventory.
+  - question: How do I scratch it?
+    title: Scratching
+    text: |
+      Right-click the card. What it wins is drawn at that moment and paid at once; the nine fields only reveal it. Three alike win that symbol's prize: clover, cherry, bell, star, crown, or the diamond jackpot. Each card is numbered and sealed like a cheque — a copy is taken away when scratched.
+  - question: Can I give one away?
+    title: Giving
+    text: |
+      Of course: a card is an item. Whoever scratches it gets the prize. The house keeps {if:economy:scratch.house-edge-percent}{setting:economy:scratch.house-edge-percent|percent}{else}{setting:economy:gamble.house-edge-percent|percent}{/if} on average.

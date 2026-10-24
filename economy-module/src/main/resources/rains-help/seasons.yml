@@ -1,0 +1,32 @@
+id: seasons
+title: Seasons
+summary: Season points, what happens when a season ends and what you keep.
+intro: |
+  Everything resets eventually. Seasons make it a feature.
+icon: NETHER_STAR
+category: Progress & rewards
+order: 30
+module: economy
+when: economy-supply:features.seasons
+aliases: [season, points, reset]
+keywords: [season, points, leaderboard, restart]
+commands: [season]
+related: [economy]
+sections:
+  - question: What is a season?
+    title: Seasons
+    text: |
+      When staff end a season, every balance is turned into season points and everybody starts again with the starting balance of {setting:economy:accounts.starting-balance|money}. It never happens on its own.
+  - question: How are points worked out?
+    title: Points
+    text: |
+      On a sliding scale: the richer you are, the fewer points each further coin is worth, so the leaderboard rewards wealth without making early lead permanent. The scale is {setting:economy-supply:season.points-brackets}, each step reading "from how much, points per coin".
+  - question: Do I keep anything?
+    title: Keeping
+    when: economy-supply:season.keep-percent > 0
+    text: |
+      Yes: {setting:economy-supply:season.keep-percent|percent} of your balance is not converted and carries into the next season, on top of the starting balance.
+  - question: Where do I see my points?
+    title: Your points
+    text: |
+      {run:/season} lists your points from every season so far, and shows the number of the current one. Season points also appear on {run:/bank}.

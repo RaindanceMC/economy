@@ -1,0 +1,54 @@
+id: shop-extras
+title: "Shop drawers: books, potions & more"
+summary: The special drawers — enchanted books, potions, packs, spawn eggs, Rain's enchantments, experience and Rain's items.
+intro: |
+  Beyond sticks and stones the shop also deals in knowledge (books), bottled opinions (potions) and a few bundles for the indecisive.
+icon: ENCHANTED_BOOK
+category: Economy & trade
+order: 22
+module: economy
+when: economy:features.shop
+aliases: [enchanted-books, books, potions, packs, spawn-eggs, spawners, xp, experience]
+keywords: [enchantment, bundle, egg, spawner, levels, shards]
+related: [shop, selling, economy]
+sections:
+  - question: Can I buy enchanted books?
+    title: Enchantments drawer
+    when: economy:shop.enchant-books
+    text: |
+      Yes: every enchantment at every level up to its normal maximum, as a book for the anvil. A book costs a plain book plus what making it costs, times how useful the enchantment is — so Mending costs far more than Bane of Arthropods. Prices move with supply and demand like any item.
+      {if:economy:shop.enchant-treasure}Treasure enchantments (Mending, Frost Walker, Soul Speed…) are for sale too.{else}Treasure enchantments, normally found only as loot, are not for sale here.{/if}
+  - question: What about potions?
+    title: Potions drawer
+    when: economy:shop.potions
+    text: |
+      Every potion type as a drinkable, a splash and a lingering potion, plus Bad Omen I to V and tipped arrows. A potion is worth what brewing it costs. Click buys one, shift-click a handful (arrows: eight, shift-click a stack). Selling potions to the shop works too.
+  - question: What are packs?
+    title: Packs
+    when: economy:features.packs
+    text: |
+      Ready-made bundles — an explorer's, a builder's, a miner's pack and so on. A pack is one item: buy it, right-click to unpack everything inside. It can be given away or kept for later. Unless it has a price of its own, it costs {setting:economy:shop.pack-discount-percent|percent} less than its contents bought one by one. Some, like the starter pack, are one per player.
+  - question: Can I buy spawn eggs?
+    title: Spawn eggs
+    when: economy:shop.spawn-eggs
+    text: |
+      Yes — a drawer with every mob's egg at {setting:economy:shop.spawn-egg-value|money} before markup. A bought egg hatches the mob but never changes a spawner. The mighty ones (wither, ender dragon) are usually left out.
+  - question: Can I buy a spawner?
+    title: Spawners
+    when: economy:shop.sell-spawners
+    text: |
+      An empty spawner costs exactly {setting:economy:shop.spawner-price|money} — no markup, no supply and demand. It is the server's way of saying "are you sure?"
+  - question: Rain's enchantments in the shop?
+    title: Rain's enchantments
+    when: economy:rains-enchantments.enabled
+    text: |
+      Books of Rain's own enchantments, sold to members of a guild that has unlocked them. Each book costs shards of that enchantment plus {setting:economy:rains-enchantments.money-per-level|money} per level. {if:economy:rains-enchantments.free-once-unlocked}Once your guild unlocked an enchantment, books cost only the money.{/if} Unlocking itself is done by paying shards in at {run:/guild}. Shards drop from monsters and also sell to the shop.
+  - question: How do I buy experience?
+    title: Experience
+    when: economy:features.xp-trade
+    text: |
+      The shop's <white>Experience</white> drawer sells levels in lots of 1, 5, 10 and 30, priced per point: {setting:economy:xp.buy-per-point|money} each. A level near 30 holds far more points than one near 5, so it costs more, as it does to earn.
+  - question: What is in Rain's items?
+    title: Rain's items
+    text: |
+      The server's own gadgets, priced from what their ingredients cost: the Sell Wand and the Auto Sell Chest (see {topic:selling}).

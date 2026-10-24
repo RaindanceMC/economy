@@ -1,0 +1,30 @@
+id: coinflip
+title: Coin flip
+summary: Heads or tails against the house, or a duel against another player.
+intro: |
+  The oldest game in the book, and the only one with a plot twist: you can play against a friend.
+icon: SUNFLOWER
+category: Games
+order: 71
+module: economy
+when: economy:features.gambling && economy:features.coinflip
+aliases: [cf, flip, heads, tails, duel]
+keywords: [coin, duel, challenge]
+commands: [coinflip]
+related: [casino, dice]
+sections:
+  - question: How do I flip?
+    title: Against the house
+    text: |
+      {cmd:/coinflip <amount> [heads|tails]}, or {run:/coinflip} for the screen. Call a side; the coin is flipped and paid the moment you call. A win returns your stake and as much again, minus the house's {if:economy:coinflip.house-edge-percent}{setting:economy:coinflip.house-edge-percent|percent}{else}{setting:economy:gamble.house-edge-percent|percent}{/if} edge. The alias is <white>/cf</white>.
+  - question: What is the smallest bet?
+    title: Smallest bet
+    text: |
+      {if:economy:coinflip.min-bet}{setting:economy:coinflip.min-bet|money}{else}{setting:economy:gamble.min-bet|money}{/if}. No upper limit.
+  - question: How do I challenge a player?
+    title: Duels
+    text: |
+      {cmd:/coinflip <player> <amount>}. They get <white>[Accept]</white> and <white>[Decline]</white>; nothing is staked until they accept, and the challenge expires after {setting:economy:gamble.duel-seconds|seconds}. Then a coin decides: the winner takes both stakes, minus the house's edge of the pot. Both of you must be able to afford it.
+      {if:economy:casino.dealers-only}
+
+      Duels are called and taken while standing at a coin flip dealer.{/if}

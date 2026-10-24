@@ -1,0 +1,27 @@
+id: slots
+title: Slot machine
+summary: Three reels, a pay line and a paytable that returns exactly what the owner set.
+intro: |
+  Pull the lever and hope the netherite lines up. It does so rarely, which is why it pays so well.
+icon: DIAMOND
+category: Games
+order: 73
+module: economy
+when: economy:features.gambling && economy:features.slots
+aliases: [slot, machine, reels, jackpot]
+keywords: [slots, netherite, spin]
+commands: [slots]
+related: [casino]
+sections:
+  - question: How do I play?
+    title: Playing
+    text: |
+      {run:/slots} opens the machine. Set your bet and pull the lever; the reels stop one after another and you are paid at once. The book in the corner shows the paytable.
+  - question: What pays?
+    title: Paytable
+    text: |
+      Three alike pay by symbol: coal, iron, gold, emerald, diamond and, rarest of all, netherite. Two netherite pay a lot, one netherite a little more than your stake, and two matching neighbours give your stake back. Common symbols come up far more often than rare ones.
+  - question: What does the house keep?
+    title: Edge and minimum
+    text: |
+      The paytable is scaled so the machine returns exactly one minus the house's edge, which is {if:economy:slots.house-edge-percent}{setting:economy:slots.house-edge-percent|percent}{else}{setting:economy:gamble.house-edge-percent|percent}{/if} on average. Smallest bet: {if:economy:slots.min-bet}{setting:economy:slots.min-bet|money}{else}{setting:economy:gamble.min-bet|money}{/if}.

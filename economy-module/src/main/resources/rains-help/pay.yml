@@ -1,0 +1,64 @@
+id: pay
+title: Paying & billing
+summary: Sending money to another player, asking somebody to pay you, and what the checks and taxes are.
+intro: |
+  Money between friends is easy. Money between strangers needs a few rules, which I will recite so you do not have to find them out the expensive way.
+icon: WRITABLE_BOOK
+category: Economy & trade
+order: 11
+module: economy
+when: economy:features.pay || economy:features.bills
+aliases: [payment, send-money, transfer, invoice, request]
+keywords: [tax, confirm, bill, pay, offline, minimum, cooldown]
+commands: [pay, bill]
+related: [economy, hire, cash, taxes]
+sections:
+  - question: How do I pay somebody?
+    title: Paying
+    when: economy:features.pay
+    text: |
+      {cmd:/pay <player> <amount>} — or press <white>Pay somebody</white> in {run:/bank}, pick the player and type an amount.
+
+      Amounts understand shorthand: <white>1500</white>, <white>1.5k</white>, <white>2m</white>. Whole units only; the least you may send is {setting:economy:pay.minimum|money}. You cannot pay yourself, though I admire the ambition.
+  - question: Why did it ask me to confirm?
+    title: Confirmation
+    when: economy:features.pay
+    text: |
+      A payment above {setting:economy:pay.confirm-above|money} needs a second click, on the <white>[Pay]</white> button that appears in chat. It is there so a stray zero costs you a click and not a fortune. The button stays good for half a minute and only works for you.
+  - question: Is there a tax on payments?
+    title: Payment tax
+    when: economy:features.pay
+    text: |
+      {if:economy-supply:pay.tax-by-brackets && economy-supply:pay.tax-brackets}Payments are taxed in slices, like an income tax: each part of the amount at its own rate, so small payments are taxed lightly and large ones more. {cmd:/treasury} and the tax list in {topic:taxes} show where it goes.{/if}{if:!economy-supply:pay.tax-by-brackets && economy:pay.tax-percent > 0}Yes: {setting:economy:pay.tax-percent|percent} of every payment.{/if}{if:!economy-supply:pay.tax-by-brackets && !economy:pay.tax-percent}No. Payments between players are free.{/if}
+      {if:economy:pay.tax-percent > 0 || economy-supply:pay.tax-by-brackets}
+
+      The tax is taken from what arrives: you are charged the full amount, the other player gets the rest, and the tax simply disappears — it is a money sink, not somebody's pocket.{/if}
+  - question: Can I pay somebody who is offline?
+    title: Offline payments
+    when: economy:features.pay
+    text: |
+      {if:economy:pay.offline}Yes. They will see what arrived the next time they join. The name must belong to somebody who has played here.{else}No — payments only reach players who are online right now.{/if}
+  - question: How often can I pay?
+    title: Wait between payments
+    when: economy:features.pay
+    text: |
+      {if:economy:pay.cooldown-seconds > 0}You must wait {setting:economy:pay.cooldown-seconds|seconds} between two payments. It stops macros from filling the logs with a hundred payments a second.{else}There is no wait between payments.{/if}
+      {if:economy-supply:pay.new-account-lock && economy-supply:pay.new-account-hours > 0}
+
+      One more rule: a brand new account cannot send money away (paying, accepting bills, withdrawing cash) during its first {setting:economy-supply:pay.new-account-hours|hours}. It stops somebody farming money on a fresh account and handing it to their main one.{/if}
+  - question: How do I ask somebody to pay me?
+    title: Bills
+    when: economy:features.bills
+    text: |
+      {cmd:/bill <player> <amount> [what for]} sends them a bill with <white>[Accept]</white> and <white>[Decline]</white> buttons. They must be online. Say what it is for, so it does not look like a scam — <i>"/bill Steve 500 diamonds, delivered"</i> reads better than a bare number.
+
+      A bill stays open for {setting:economy:bills.minutes|minutes}, and you can have only one open bill per player at a time. Paying a bill carries no tax.
+  - question: Somebody sent me a bill. Now what?
+    title: Receiving a bill
+    when: economy:features.bills
+    text: |
+      Click <white>[Accept]</white> to pay it, or <white>[Decline]</white> to say no thank you. Ignoring it works too: it lapses by itself. You are never charged without clicking.
+  - question: Why did my payment fail?
+    title: When a payment fails
+    text: |
+      The common reasons: not enough money, the other account is at its limit, the account is frozen, you paid yourself, the amount was under the minimum, or the other player is offline and offline payments are not allowed. The message tells you which; nothing moves when it fails.

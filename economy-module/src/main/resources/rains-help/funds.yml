@@ -1,0 +1,30 @@
+id: funds
+title: Community funds
+summary: Donating toward a goal everybody shares, and what a full fund does.
+intro: |
+  A fund is a goal and a jar. Everybody throws coins in; when the jar is full, something nice happens to everybody.
+icon: CAULDRON
+category: Economy & trade
+order: 18
+module: economy
+when: economy-supply:features.funds
+aliases: [fund, donate, donation, goal]
+keywords: [community, boost, boss bar]
+commands: [fund]
+related: [treasury, economy]
+sections:
+  - question: What funds are collecting?
+    title: Funds
+    text: |
+      {run:/fund} lists them: name, how much is raised, the target and any boost it will give.
+  - question: How do I donate?
+    title: Donating
+    text: |
+      {cmd:/fund <name> <amount>}. Donations are destroyed — they leave the economy — and cannot be taken back.
+  - question: What happens when it fills?
+    title: A full fund
+    text: |
+      Everybody hears about it. Depending on how staff set it up: payouts from every source rise by a percentage for a number of hours, or a command runs once, or it was simply a goal reached together.
+      {if:economy-supply:funds.boss-bar}
+
+      A boss bar at the top of the screen shows progress while a fund collects.{/if}

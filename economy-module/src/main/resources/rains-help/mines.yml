@@ -1,0 +1,27 @@
+id: mines
+title: Mines
+summary: Clear tiles on a field hiding mines, cash out before you hit one.
+intro: |
+  Twenty-five tiles, some of them explosive. Sweeping is easy; stopping is the hard part.
+icon: TNT
+category: Games
+order: 78
+module: economy
+when: economy:features.gambling && economy:features.mines
+aliases: [minesweeper, minefield]
+keywords: [mines, tiles, cash-out]
+commands: [mines]
+related: [casino, hilo]
+sections:
+  - question: How do I play?
+    title: Playing
+    text: |
+      {run:/mines} opens the field. Choose how many mines hide among the 25 tiles (1 to 24), place your bet and start. Every safe tile you clear raises what you can take. Hit a mine and you lose the stake.
+  - question: When do I get paid?
+    title: Cashing out
+    text: |
+      Press <white>Cash out</white> at any time. More mines means bigger steps per tile and fewer tiles to survive. Clear every safe tile and you are cashed out automatically. Closing the window cashes you out too.
+  - question: Edge and minimum?
+    title: Edge and minimum
+    text: |
+      The house keeps {if:economy:mines.house-edge-percent}{setting:economy:mines.house-edge-percent|percent}{else}{setting:economy:gamble.house-edge-percent|percent}{/if} on average, whatever you cash out at. Smallest bet: {if:economy:mines.min-bet}{setting:economy:mines.min-bet|money}{else}{setting:economy:gamble.min-bet|money}{/if}.

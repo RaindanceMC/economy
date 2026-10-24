@@ -1,0 +1,25 @@
+id: bet-insurance
+title: Bet insurance
+summary: Insuring your casino stakes, what it costs and what a lost bet pays back.
+intro: |
+  For the gambler who wants a safety net. The house is happy to sell you one — at a price, naturally.
+icon: TOTEM_OF_UNDYING
+category: Games
+order: 80
+module: economy
+when: economy:features.gambling && economy-supply:gamble.insurance
+aliases: [insure, insurance, insure-bets]
+keywords: [premium, payback, casino, loss]
+related: [casino]
+sections:
+  - question: How do I insure my bets?
+    title: Switching it on
+    text: |
+      {cmd:/casino insure} toggles it, or press the insurance button in the casino. Once on, it stays on until you switch it off.
+      {if:core:insurance-in-person-only}
+
+      On this server you arrange it with an insurance agent standing in the world.{/if}
+  - question: What does it cost and pay?
+    title: Terms
+    text: |
+      Every stake costs {setting:economy-supply:gamble.insurance-premium-percent|percent} more, paid on top. A lost stake pays {setting:economy-supply:gamble.insurance-payback-percent|percent} of it back. Over time the house keeps the difference, so it is comfort rather than a strategy.

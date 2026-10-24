@@ -1,0 +1,51 @@
+id: hire
+title: Wages & contracts
+summary: Hiring players for a regular wage, and contracts like rent that either side can propose.
+intro: |
+  Running a farm, a shop or a small empire? Pay your staff properly — automatically, on schedule, and with nobody paid without agreeing first.
+icon: IRON_PICKAXE
+category: Economy & trade
+order: 12
+module: economy
+when: economy:features.hire
+aliases: [job, jobs, wage, salary, rent, contracts, employ, employee]
+keywords: [hire, fire, quit, landlord, service, regular, payment]
+commands: [hire, contract]
+related: [pay, economy, taxes]
+sections:
+  - question: How do I hire somebody?
+    title: Hiring
+    text: |
+      {cmd:/hire <player> <wage> <every> [job]} — for example <white>/hire Alex 500 1h Miner</white>. The interval takes the usual shorthand: <white>30m</white>, <white>1h</white>, <white>1d</white>, <white>1w</white>. Both of you must be online.
+
+      The wage comes out of your account and goes into theirs at every interval; the first one is paid after the first full interval, not at once.
+  - question: What can I not do?
+    title: Limits
+    text: |
+      A wage may be paid every {setting:economy:hire.least-minutes|minutes} at the very most often. You may employ (and pay for contracts with) at most {setting:economy:hire.most-contracts|count} people at once, and you cannot hire yourself.
+  - question: Somebody wants to hire me.
+    title: Being hired
+    text: |
+      You get a chat message with <white>[Accept]</white> and <white>[Decline]</white>. Nothing starts until you say yes, and the offer lapses after five minutes. Once you accept you are paid at every interval, whether you are online or not.
+  - question: What if my employer runs out of money?
+    title: Missed wages
+    text: |
+      A wage the employer cannot pay is <i>missed</i>: both of you are told. After {setting:economy:hire.most-missed|count} missed in a row the job simply ends. Top up your account if you employ people — nobody likes working for free.
+  - question: How do I see or end a job?
+    title: Jobs list
+    text: |
+      {run:/hire list} (or {run:/contract list}) opens the jobs screen: who you employ and who employs you, wages and contracts together. Either side can end a job:
+      <white>•</white> {cmd:/hire fire <player>} — the employer lets somebody go.
+      <white>•</white> {cmd:/hire quit <player>} — the employee walks away.
+      Both are told. No notice period, no severance.
+  - question: What is a contract, then?
+    title: Contracts
+    text: |
+      A contract is a regular payment for a service — rent, upkeep, protection, anything. Either side proposes it, and it starts only when the other agrees:
+      <white>•</white> {cmd:/contract pay <player> <amount> <every> <what>} — <i>you</i> will pay them.
+      <white>•</white> {cmd:/contract charge <player> <amount> <every> <what>} — <i>they</i> will pay you, like a landlord.
+      Example: <white>/contract charge Alex 2k 1w Plot rent</white>. Describe what it is for; it is shown in every payment line.
+  - question: How do I end a contract?
+    title: Ending a contract
+    text: |
+      {cmd:/contract end <player>} — either side may, any time. Missed payments end it too, by the same rule as wages ({setting:economy:hire.most-missed|count} in a row). The contracts count toward the same limit as jobs for whoever pays.

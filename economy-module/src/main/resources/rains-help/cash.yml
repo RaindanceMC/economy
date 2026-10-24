@@ -1,0 +1,52 @@
+id: cash
+title: Cash & cheques
+summary: Taking money out as coins or a cheque you can carry and trade, and paying it back in.
+intro: |
+  Money in the bank is safe and boring. Money in your pocket is exciting — and can be dropped, traded, stolen or lost in lava. Your call.
+icon: GOLD_NUGGET
+category: Economy & trade
+order: 13
+module: economy
+when: economy:features.cash
+aliases: [withdraw, deposit, coin, coins, cheque, check, banknote, note]
+keywords: [cash, trade, physical, item, carry]
+commands: [withdraw, deposit]
+related: [economy, pay, taxes]
+sections:
+  - question: How do I take money out?
+    title: Withdrawing
+    text: |
+      {cmd:/withdraw <amount>} turns that much of your balance into coins in your inventory, one coin per unit. {run:/withdraw} on its own opens a screen with buttons.
+
+      At most {setting:economy:cash.most-pieces|count} coins come out at once — a full inventory is as much as the world can hold. For more, write a cheque.
+      {if:economy:cash.withdraw-fee-percent > 0}
+
+      The bank keeps {setting:economy:cash.withdraw-fee-percent|percent} as a fee, taken on top of what you withdraw.{/if}
+  - question: What does a coin look like?
+    title: The coin
+    text: |
+      It is a {setting:economy:cash.coin-item|lower} with your server's seal on it, stacking to 64 whatever it is made of. It is <i>money, not the item</i>: you cannot craft, smelt, trade with villagers or barter with it. The seal, not the look, is what makes it real — copying one gets you nothing.
+  - question: What is a cheque?
+    title: Cheques
+    when: economy:features.cheques
+    text: |
+      One signed paper for any amount: {cmd:/withdraw <amount> cheque}. It is numbered, carries your name, and can be paid in exactly once — a second copy is confiscated and staff are told. Perfect for paying a large sum without a pile of coins.
+  - question: How do I pay cash back in?
+    title: Paying in
+    text: |
+      {if:economy:cash.right-click}Right-click a coin or cheque to pay the stack in; sneak and right-click to pay in everything you carry.{/if}{if:!economy:cash.right-click}Right-click paying is switched off here, so use the commands.{/if}
+
+      Or type {run:/deposit} for everything you carry, {cmd:/deposit hand} for just the stack in your hand. The bank screen has a button too.
+  - question: What happens to forged cash?
+    title: Forgeries
+    text: |
+      Every piece is checked against the server's seal before a coin is credited. Anything forged, copied, already paid in or not this server's is taken from you, and staff are told who tried. Coins beyond what the server ever issued are refused instead — you may be an honest victim. Cash also never moves through the creative inventory.
+  - question: Do notes grow old?
+    title: Expiry
+    when: economy-supply:cash.note-expiry && economy-supply:cash.note-expiry-days > 0
+    text: |
+      Cheques do: one older than {setting:economy-supply:cash.note-expiry-days|days} is only worth {setting:economy-supply:cash.expired-note-percent|percent} of its face value when you pay it in. Coins never expire. Pay your cheques in.
+  - question: What if I die with cash on me?
+    title: Losing cash
+    text: |
+      It is an item: it drops like any other, and whoever picks it up may pay it in. Keep your fortune in the bank and carry only what you intend to spend.

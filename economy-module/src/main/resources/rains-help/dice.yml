@@ -1,0 +1,27 @@
+id: dice
+title: Dice
+summary: Rolling 1 to 100 over or under a number you choose — the longer the odds, the bigger the win.
+intro: |
+  You pick the number and the odds. The dice have no opinion.
+icon: WHITE_WOOL
+category: Games
+order: 72
+module: economy
+when: economy:features.gambling && economy:features.dice
+aliases: [roll, over-under]
+keywords: [dice, odds, number]
+commands: [dice]
+related: [casino, coinflip]
+sections:
+  - question: How do I play?
+    title: Playing
+    text: |
+      {cmd:/dice <amount> <over|under> <number>}, or {run:/dice} for the screen. The dice roll 1 to 100. <white>Over</white> wins when the roll is above your number, <white>under</white> when it is below.
+  - question: Which numbers are allowed?
+    title: Odds
+    text: |
+      Any that give you between a one and a ninety-five percent chance of winning. The payout is your stake times the house's fair return divided by your chance, so a long shot pays a lot and a near-certainty barely anything. The screen shows what a win would pay before you roll.
+  - question: What is the edge and the minimum?
+    title: Edge and minimum
+    text: |
+      The house keeps {if:economy:dice.house-edge-percent}{setting:economy:dice.house-edge-percent|percent}{else}{setting:economy:gamble.house-edge-percent|percent}{/if} on average, whatever number you pick. Smallest bet: {if:economy:dice.min-bet}{setting:economy:dice.min-bet|money}{else}{setting:economy:gamble.min-bet|money}{/if}.

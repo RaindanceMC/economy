@@ -1,0 +1,63 @@
+id: casino
+title: The casino
+summary: How the games of chance work — bets, the house edge, daily loss limit, dealers and the rules every game shares.
+intro: |
+  Feeling lucky? The house adores optimists. Everything here is fair — fair meaning the odds are exactly as stated, and slightly in the casino's favour.
+icon: GOLD_BLOCK
+category: Games
+order: 70
+module: economy
+when: economy:features.gambling
+aliases: [gamble, gambling, games, bets, betting, house-edge, dealer, dealers]
+keywords: [casino, odds, stake, loss, limit, edge, fair, random]
+commands: [casino]
+related: [coinflip, dice, slots, roulette, blackjack, baccarat, hilo, mines, crash, horse-race, scratch-cards, lottery, bet-insurance, loans]
+sections:
+  - question: How do I start?
+    title: Getting started
+    text: |
+      {run:/casino} opens the casino screen: your balance, how much you lost today, a bet row at the top, and one button per game. Set your bet once — click the paper to type one, right-click for all in — and it carries to every game. Each game also has a command of its own, listed on its page.
+      {if:economy:casino.dealers-only}
+
+      <gold>Here every game is played in person.</gold> Find the dealer for that game standing in the casino and right-click them; the casino screen only shows you which dealer deals what.{/if}
+  - question: Are the games fair?
+    title: Fairness
+    text: |
+      Yes, in the mathematical sense. Every outcome is drawn with a secure random generator and settled in one go before anything is shown — closing the window, logging out or crashing changes nothing about the result. The spinning and shuffling are only the show.
+
+      Payouts are worked out from the exact chance of winning, minus the house edge, so the edge you are quoted is the real one, not a guess.
+  - question: What is the house edge?
+    title: House edge
+    text: |
+      On average the casino keeps this share of every stake: {setting:economy:gamble.house-edge-percent|percent} at any game without a figure of its own. Each game's page says what applies to it. Blackjack and baccarat play by real casino rules instead, with their own small edge.
+  - question: Is there a smallest bet?
+    title: Smallest bet
+    text: |
+      {setting:economy:gamble.min-bet|money} at any game without a minimum of its own. There is no largest bet: going all in is always allowed, at every game.
+  - question: Is there a limit to what I can lose?
+    title: Daily loss limit
+    when: economy:gamble.daily-loss-limit
+    text: |
+      Yes: at most {setting:economy:gamble.daily-loss-limit|money} of net losses per day, counted from midnight. A bet that would take you past it is refused; the casino screen shows how much you lost today. Wins offset losses.
+  - question: Can I spam a game?
+    title: Wait between games
+    when: economy:gamble.cooldown-seconds > 0
+    text: |
+      You must wait {setting:economy:gamble.cooldown-seconds|seconds} between bets. Plenty of time to reconsider.
+  - question: Who may not gamble?
+    title: Restrictions
+    text: |
+      {if:economy:loans.overdue-stops-gambling}While a bank loan is overdue, no games. {/if}{if:economy-supply:debts.stop-gambling}While you owe the server money, no games. {/if}Frozen accounts and players without the gambling permission cannot play either.
+  - question: What are the dealers?
+    title: Dealers
+    text: |
+      Figures in a black suit standing in the casino, each dealing one game. Right-click one to sit down at their table. {if:economy:casino.dealers-only}On this server dealers are the only way to play, even for coin flip duels, which are settled at a coin flip dealer.{else}You can also play from anywhere with the commands; dealers are decoration with a function.{/if}
+  - question: What if I leave in the middle of a game?
+    title: Leaving mid-game
+    text: |
+      You never lose out by leaving. Open blackjack hands are finished by standing; Hi-Lo and Mines runs cash out; open crash and race rounds are refunded when the server stops.
+  - question: Can I insure my bets?
+    title: Insurance
+    when: economy-supply:gamble.insurance
+    text: |
+      Yes — {topic:bet-insurance}.

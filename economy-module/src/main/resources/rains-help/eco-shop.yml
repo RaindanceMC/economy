@@ -1,0 +1,38 @@
+id: eco-shop
+title: Staff - the shop's prices
+summary: Looking up and changing prices, repricing, calming the market, packs and the Sell Wand.
+intro: |
+  Prices are mostly automatic, which leaves the staff free to be blamed for them.
+icon: EMERALD_BLOCK
+category: Staff
+order: 911
+module: economy
+permission: rainseconomy.admin
+aliases: [price-edit, reprice, packs-admin]
+keywords: [price, reprice, calm, unpriced, packs, wand, custom]
+related: [eco-money, shop, selling]
+sections:
+  - question: How do I check a price?
+    title: /eco price
+    text: |
+      {cmd:/eco price <item>} shows value, buy price, sell price and the current market push for an item, an enchantment (<white>sharpness</white>, every level), a book (<white>enchanted_book:sharpness:5</white>), a potion (<white>potion:healing</white>), or all with <white>enchantments</white> or <white>potions</white>. Works from the console.
+  - question: How do I change one?
+    title: Editing prices
+    text: |
+      In the shop, right-click an item (or use the staff button on its trade screen) to set its buy and sell price or close it. This writes the same custom lists as the settings: custom values, buy prices, sell prices, never sold, never bought. Closed shop drawers are switched with a right click on the drawer.
+  - question: What is not priced?
+    title: Unpriced items
+    text: |
+      {cmd:/eco unpriced [page]} lists every item the shop would not buy, forty at a time — so you see what is missing from the price list.
+  - question: Prices are weird. Now what?
+    title: Reprice and calm
+    text: |
+      {run:/eco reprice} reads every recipe again and reprices everything from them — after changing recipes or custom values. {run:/eco calm} clears all supply-and-demand pushes: every price back to plain.
+  - question: How do I manage packs?
+    title: Packs
+    text: |
+      Packs are written in <white>packs.yml</white>. {run:/eco packs} reads it again; {cmd:/eco packs give <player> <pack>} hands one out. Delete the file to get the shipped packs back.
+  - question: How do I give out a Sell Wand?
+    title: Sell Wand
+    text: |
+      {cmd:/eco wand [player]} gives one to the player (default you). The Auto Sell Chest and the Sell Wand also sell in the shop's Rain's items drawer.

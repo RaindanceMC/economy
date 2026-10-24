@@ -1,0 +1,65 @@
+id: shop
+title: The shop
+summary: Buying from the server's shop, how prices are worked out, how they move, and bulk discounts.
+intro: |
+  Coins in, items out. Every item in the game, sorted like the creative inventory, at prices worked out from the server's own recipes. I do not haggle, but the market does.
+icon: EMERALD
+category: Economy & trade
+order: 20
+module: economy
+when: economy:features.shop
+aliases: [store, buy, prices, price, drawers]
+keywords: [bulk, discount, supply, demand, markup, search, creative]
+commands: [shop]
+related: [selling, shop-extras, economy, taxes]
+sections:
+  - question: How do I buy something?
+    title: Buying
+    text: |
+      {run:/shop} opens the drawers, sorted like the creative inventory. Click a drawer, click an item, then pick how many: buttons for 1, 8, 16, 32 and 64, or a button to type your own number. Green buys, red sells.
+
+      Shortcuts: {cmd:/shop <drawer>} opens one (try <white>/shop tools</white>), {cmd:/shop <item>} jumps straight to an item, and {cmd:/shop search <words>} looks across everything.
+  - question: How do I find an item?
+    title: Search
+    text: |
+      The <white>Search</white> button in the shop, or {cmd:/shop search <words>}. It forgives typos and understands things like <white>sharpness 5</white>. {cmd:/shop <item>} with an exact item name goes straight to that item.
+  - question: Where do the prices come from?
+    title: How prices are made
+    text: |
+      Raw materials have a price of their own. Everything crafted from them is worked out from its recipe{if:economy:shop.derive-from-recipes}: ingredients added up, plus {setting:economy:shop.craft-markup|number} of their value for the crafting{else} — on this server only items with a price of their own are priced, so some recipes have no price{/if}.
+
+      Buying costs {setting:economy:shop.buy-markup|number}× an item's value. Staff can override any single price, and the items some owners deem too precious are simply not for sale.
+  - question: Why did a price change?
+    title: Supply and demand
+    when: economy:features.dynamic-prices
+    text: |
+      Prices breathe. Buy an item a lot and it gets dearer; sell a lot of it and it gets cheaper. Each stack you trade leans on the price by {setting:economy:shop.pressure-per-stack|number} and half of any push wears off after {setting:economy:shop.recovery-hours|hours}.
+
+      Limits: sold off, an item is worth {if:economy:shop.lowest-multiplier > 0}at least {setting:economy:shop.lowest-multiplier|number}× its normal price{else}as little as nothing (the shop then stops paying, and gives it away until it is bought back up){/if}; bought up, it costs at most {setting:economy:shop.highest-multiplier|number}× normal. A red ▲ or green ▼ in an item's tooltip shows the current move.
+  - question: Do things made from it follow the price?
+    title: Materials follow
+    when: economy:features.dynamic-prices && economy:shop.follow-materials
+    text: |
+      Yes. Flood the market with cobblestone and furnaces get cheaper too: made things follow what they are made of. A raw material pushes only {setting:economy:shop.raw-pressure-share|number} as hard, so cobblestone does not collapse as fast as furnaces do.
+  - question: Is buying more cheaper?
+    title: Bulk discounts
+    when: economy:features.bulk-discount
+    text: |
+      Buy in bulk and you pay less, in one purchase: up to {setting:economy:shop.bulk-most-percent|percent} off, the steps being {setting:economy:shop.bulk-tiers}. Each step reads "from how many, how many percent" — so a step <white>128 5</white> means five percent off from two stacks. Buttons for the steps appear on each item's page.
+
+      It only applies to items that stack and are on the owner's list; tools, weapons, armour and the like never.
+  - question: Why can I not buy certain items?
+    title: Not for sale
+    text: |
+      Several reasons. Some things are only ever <i>bought</i> by the shop, never sold — ores, maps, trial keys, music discs, loot you should find rather than buy.
+      {if:!economy:shop.sell-rare}Rare things — netherite, nether stars, totems, shulker boxes and anything made from them — are not for sale at all here; the shop still buys them.{/if}
+      Some drawers can be closed by staff (they show greyed with the reason), and a server goal that collects an item stops the shop selling it for a while.
+  - question: Do I get a better price?
+    title: Your price
+    text: |
+      Sometimes. Roles and server events can make things cheaper for you; the tooltip shows the shop's price crossed out next to yours, and says why. Selling back is always capped a coin under the cheapest you could buy the same quantity for — buying and selling in a loop only makes you poorer.
+  - question: Can I use it from another server?
+    title: Network
+    when: economy-client:shop-here
+    text: |
+      Yes: on this server {cmd:/shop} and {cmd:/sell} use the bank's prices and the network's money. Items and spawn eggs are bought and sold here; enchanted books, potions, packs and the rest stay on the bank's own server.

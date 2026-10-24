@@ -1,0 +1,50 @@
+id: taxes
+title: Taxes & fees
+summary: Every way money leaves the economy — payment tax, wealth tax, fees, death costs and the rest.
+intro: |
+  Money that is only ever made would soon be worthless, so some of it must go. Here is where.
+icon: IRON_BARS
+category: Economy & trade
+order: 16
+module: economy
+aliases: [tax, fees, wealth-tax, sink, costs]
+keywords: [fee, destroyed, listing, withdraw, death]
+related: [economy, pay, treasury]
+sections:
+  - question: Is there a tax on payments?
+    title: Payment tax
+    when: economy:features.pay && economy:pay.tax-percent > 0 || economy-supply:pay.tax-by-brackets
+    text: |
+      Yes — see {topic:pay}. It is taken from what arrives and destroyed.
+  - question: What is the wealth tax?
+    title: Wealth tax
+    when: economy:features.wealth-tax
+    text: |
+      A percentage of every bank balance is taken every {setting:economy:wealth-tax.every-hours|hours} and destroyed. {if:economy-supply:wealth-tax.by-brackets && economy-supply:wealth-tax.brackets}It is charged in slices: the more you hold, the higher the rate on the part above the allowance.{else}The rate is {setting:economy:wealth-tax.percent|percent}.{/if}{if:economy:wealth-tax.allowance} Only what is above {setting:economy:wealth-tax.allowance|money} is taxed.{/if} Frozen accounts pay too.
+      {if:economy-supply:wealth-tax.idle-only && economy-supply:wealth-tax.idle-days > 0}
+
+      Money you spent or sent within the last {setting:economy-supply:wealth-tax.idle-days|days} is spared: only idle money is taxed.{/if}
+  - question: Does dying cost money?
+    title: Dying
+    when: economy-supply:death.costs-money && economy-supply:death.lose-percent > 0
+    text: |
+      Yes: {setting:economy-supply:death.lose-percent|percent} of your balance, destroyed{if:economy-supply:death.lose-most}, at most {setting:economy-supply:death.lose-most|money}{/if}.{if:economy-supply:death.worlds} Only in: {setting:economy-supply:death.worlds}.{/if}
+  - question: What does withdrawing cost?
+    title: Withdrawal fee
+    when: economy:features.cash && economy:cash.withdraw-fee-percent > 0
+    text: |
+      {setting:economy:cash.withdraw-fee-percent|percent}, on top of what you take out. Paying cash back in is free.
+  - question: What do auctions and raffles cost?
+    title: Auction & raffle fees
+    when: economy:features.auctions || economy:features.raffles
+    text: |
+      {if:economy:features.auctions}An auction costs {setting:economy:auction.listing-fee|money} to list and the auction house keeps {setting:economy:auction.fee-percent|percent} of the sale price. {/if}{if:economy:features.raffles}Starting a raffle costs {setting:economy:raffle.listing-fee|money} and the house keeps {setting:economy:raffle.fee-percent|percent} of the tickets' money.{/if} All of it leaves the economy.
+  - question: Does gambling cost more than the stake?
+    title: Casino and lottery
+    when: economy:features.gambling
+    text: |
+      The house edge is the price of playing: on average the casino keeps a share of every stake — see {topic:casino}.{if:economy:features.lottery} The lottery destroys {setting:economy:lottery.cut-percent|percent} of each ticket.{/if}
+  - question: What else costs money?
+    title: Other costs
+    text: |
+      {if:economy-supply:features.repair}{cmd:/repair} costs money, scaled by the item's worth and how worn it is. {/if}{if:economy:features.loans}Loan interest and late fees are destroyed when paid. {/if}{if:economy-supply:features.funds}Community fund donations are destroyed. {/if}{if:economy-supply:gamble.insurance}Bet insurance premiums beyond the payback are a sink. {/if}All of these, and everything above, are what keeps your coins worth something.

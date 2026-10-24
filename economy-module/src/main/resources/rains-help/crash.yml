@@ -1,0 +1,31 @@
+id: crash
+title: Crash
+summary: One shared round, a multiplier climbs until it crashes — cash out first.
+intro: |
+  Everybody on the server watches the same number go up. Only one of you will be smug about it.
+icon: FIREWORK_ROCKET
+category: Games
+order: 79
+module: economy
+when: economy:features.gambling && economy:features.crash
+aliases: [multiplier, rocket]
+keywords: [crash, round, auto-cash-out]
+commands: [crash]
+related: [casino, horse-race]
+sections:
+  - question: How does a round work?
+    title: Rounds
+    text: |
+      {run:/crash} opens the round. Bets are open for {setting:economy:crash.betting-seconds|seconds}, then the multiplier climbs from 1× until it crashes at a point drawn at the start that nobody can know. Cash out before the crash and you are paid your stake times the multiplier; if it crashes first, you lose it. One bet per round; rounds follow each other endlessly.
+  - question: Can it cash out for me?
+    title: Auto cash-out
+    text: |
+      Yes: set <white>Cash out by itself at</white> before betting (right-click turns it off). If the round reaches that multiplier you are paid at it, even if it crashes right after.
+  - question: How high can it go?
+    title: Highest round
+    text: |
+      A round goes no higher than {setting:economy:crash.most-multiplier|count}× the stake, about two minutes of climbing at the top setting. Odds stay exact for every target below that.
+  - question: Edge and minimum?
+    title: Edge and minimum
+    text: |
+      The house keeps {if:economy:crash.house-edge-percent}{setting:economy:crash.house-edge-percent|percent}{else}{setting:economy:gamble.house-edge-percent|percent}{/if} on average at any target — a crash at 1.00× happens with exactly that chance. Smallest bet: {if:economy:crash.min-bet}{setting:economy:crash.min-bet|money}{else}{setting:economy:gamble.min-bet|money}{/if}. Open stakes are refunded if the server stops.

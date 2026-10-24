@@ -1,0 +1,42 @@
+id: lottery
+title: Lottery
+summary: Tickets with your own numbers, a pot that grows until somebody wins, and draws on a timer.
+intro: |
+  Pick numbers, buy a ticket, and wait. The balls are called out one at a time for everybody, which is half the fun.
+icon: FILLED_MAP
+category: Games
+order: 83
+module: economy
+when: economy:features.gambling && economy:features.lottery
+aliases: [lotto, ticket, jackpot, pot, draw]
+keywords: [lottery, numbers, pot, balls]
+commands: [lottery]
+related: [casino, scratch-cards, raffles]
+sections:
+  - question: How do I buy a ticket?
+    title: Tickets
+    text: |
+      {run:/lottery} opens the desk: tick {setting:economy:lottery.pick|count} numbers from 1 to {setting:economy:lottery.numbers|count}, or let it pick. A ticket costs {setting:economy:lottery.ticket-price|money}.
+      From chat: {cmd:/lottery buy [tickets]} for quick picks (random numbers), or {cmd:/lottery buy <your numbers>} for one ticket with your numbers, separated by spaces.
+  - question: Is there a limit?
+    title: Ticket limit
+    when: economy:lottery.most-tickets > 0
+    text: |
+      At most {setting:economy:lottery.most-tickets|count} tickets per player in each draw.
+  - question: When is the draw?
+    title: The draw
+    text: |
+      Every {setting:economy:lottery.draw-hours|hours}. {cmd:/lottery info} tells you the pot, the tickets sold, how many are yours and how long to go. The balls are announced one at a time in chat for everybody online.
+  - question: How are prizes shared?
+    title: Prizes
+    text: |
+      By how many numbers each ticket got right: all of them takes sixty percent of the pot, one short a quarter, two short fifteen — each tier's pool split between its tickets. A pool nobody wins stays in the pot, so the jackpot grows until somebody takes it.
+  - question: What are my chances?
+    title: Odds
+    text: |
+      Your ticket has {setting:economy:lottery.pick|count} numbers out of {setting:economy:lottery.numbers|count}, and the same number of balls are drawn. Four numbers from twenty is a jackpot in 4,845; six from forty-nine one in fourteen million. The lottery desk shows the odds for this draw.
+  - question: Where does my ticket money go?
+    title: The cut
+    when: economy:lottery.cut-percent > 0
+    text: |
+      {setting:economy:lottery.cut-percent|percent} of every ticket's price is destroyed; the rest goes into the pot.

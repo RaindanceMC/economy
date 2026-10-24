@@ -1,0 +1,35 @@
+id: eco-world
+title: Staff - dealers, bankers & boards
+summary: Placing casino dealers, insurance agents, bankers and leaderboards, and drawing the lottery.
+intro: |
+  Furnishing the world with people who take your players' money, professionally.
+icon: ARMOR_STAND
+category: Staff
+order: 912
+module: economy
+permission: rainseconomy.admin
+aliases: [dealer-place, banker-place, leaderboard-place, agents]
+keywords: [dealer, banker, agent, leaderboard, draw, mannequin]
+related: [eco-money, casino, economy]
+sections:
+  - question: How do I place a casino dealer?
+    title: Dealers
+    text: |
+      Stand where the dealer should stand, facing the players, and type {cmd:/eco dealer place <game>} — game being coinflip, dice, slots, roulette, blackjack, baccarat, hilo, mines, crash, race, scratch, lottery or casino (the whole screen). {cmd:/eco dealer remove} takes away the nearest one within four blocks. Dealers wear the skin of {setting:economy:casino.dealer-skin} (empty: a black suit).
+  - question: What is dealers-only?
+    title: Dealers only
+    text: |
+      With <white>casino.dealers-only</white> on (it is {setting:economy:casino.dealers-only|onoff} now), nobody can play by command or from the casino screen: every game is played at its own dealer. A warp called <white>casino</white> is offered to refused players.
+  - question: Placing agents and bankers?
+    title: Agents and bankers
+    text: |
+      {cmd:/eco agent place} and {cmd:/eco banker place}, with <white>remove</white> for the nearest. Whether players may use the bank or insurance only at them is a Core setting ({setting:core:bank-in-person-only|onoff} for the bank, {setting:core:insurance-in-person-only|onoff} for insurance).
+  - question: How do I place a leaderboard?
+    title: Leaderboards
+    when: economy:features.leaderboards
+    text: |
+      Stand where it should float and type {run:/eco leaderboard place}; {run:/eco leaderboard remove} takes away the nearest within five blocks. It lists the richest {setting:economy:leaderboard.size|count} players and refreshes by itself.
+  - question: Can I draw the lottery now?
+    title: Lottery draw
+    text: |
+      {run:/eco draw} draws now, settles prizes, and schedules the next draw one full interval ahead.

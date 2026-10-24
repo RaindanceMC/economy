@@ -1,0 +1,28 @@
+id: repair
+title: Repairing items
+summary: Paying to repair the item in your hand, and how the price is worked out.
+intro: |
+  Anvils are for the patient. /repair is for people who would rather spend coins than XP levels.
+icon: ANVIL
+category: Economy & trade
+order: 19
+module: economy
+when: economy-supply:features.repair
+aliases: [repair, fix, mend, anvil]
+keywords: [durability, worn, damage]
+commands: [repair]
+related: [economy, taxes]
+sections:
+  - question: How do I repair something?
+    title: Repairing
+    text: |
+      Hold the worn item and type {cmd:/repair}. You get the price and a <white>[Repair]</white> button; click within half a minute to pay and have it made whole. If the item changed meanwhile, nothing is charged.
+  - question: What does it cost?
+    title: Price
+    text: |
+      A full repair costs {setting:economy-supply:repair.price-percent|percent} of what the item is worth in the shop, scaled by how worn it is — a barely scratched pickaxe is cheap. The least any repair costs is {setting:economy-supply:repair.least|money}. The money leaves the economy.
+  - question: Does it fix the anvil's "too expensive"?
+    title: Anvil cost
+    when: economy-supply:repair.reset-anvil-cost
+    text: |
+      Yes: the penalty an item collects each time it goes through an anvil is cleared as well.

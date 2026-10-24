@@ -1,0 +1,95 @@
+id: economy
+title: Money & the bank
+summary: Your balance, the bank screen, statements, the richest list and what keeps your money safe.
+intro: |
+  Money makes the world go round, and on <white>{server}</white> it also pays for most of the things you will want. Here is how it works, in the order people usually ask.
+icon: GOLD_INGOT
+category: Economy & trade
+order: 10
+module: economy
+aliases: [money, bank, balance, bal, coins, currency, richest, baltop, wallet]
+keywords: [account, statement, balance, rich, sidebar, leaderboard, offline]
+commands: [balance, bank, baltop]
+related: [pay, cash, shop, earning, taxes, treasury]
+sections:
+  - question: What is money here?
+    title: The currency
+    text: |
+      The currency is the <white>{setting:economy:currency.singular}</white> (several: <white>{setting:economy:currency.plural}</white>), written like {money:1500}. There are no decimals anywhere — whole units only, which makes the sums pleasantly short.
+
+      Everybody gets an account the moment they first join, with {setting:economy:accounts.starting-balance|money} in it. Every plugin on the server charges through that same account, so one balance pays for everything.
+  - question: How do I see my balance?
+    title: Balance
+    text: |
+      {run:/balance} tells you what you have and where that ranks you on the server. {cmd:/balance <player>} shows somebody else's. The short names <white>/bal</white> and <white>/money</white> work too.
+
+      {if:economy:accounts.action-bar}Whenever money moves for you, a little <white>+5</white> or <white>-5</white> with your new balance flashes above your hotbar.{else}The server does not flash every change above your hotbar — check {cmd:/balance} when you are curious.{/if}
+  - question: What does the bank screen do?
+    title: The bank screen
+    text: |
+      {run:/bank} opens the doorway to everything money does: paying somebody, your statement, your jobs, the richest list, withdrawing and paying in cash, loans, the shop, selling, the auction house and the casino. Doors for switched-off features are greyed out, with the reason when you click them.
+
+      A button for <white>The server's money</white> leads to the treasury, community funds, repair, bet insurance and season points — see {topic:treasury}.
+      {if:core:bank-in-person-only}
+      <gold>On this server the bank only opens when you talk to a banker standing in the world</gold> — look for one near the spawn and right-click.{/if}
+  - question: Where is my statement?
+    title: Statement
+    text: |
+      Everything that went in or out of your account is written down. Open {run:/bank}, then <white>Statement</white> to read it as a book. Shift-click it instead to print a copy you can keep in your inventory.
+
+      Old lines are tidied away after {setting:economy:accounts.history-days|days}, so print what matters.
+  - question: Who is the richest?
+    title: Richest players
+    when: economy:features.baltop
+    text: |
+      {run:/baltop} (or <white>/richest</white>) lists the richest players, ranked by what is in the bank. Cash somebody carries around is not counted — that is what safes are for.
+      {if:economy:features.leaderboards}
+
+      Floating leaderboards of the richest also stand in the world, wherever staff put them; they show the top {setting:economy:leaderboard.size|count}.{/if}
+  - question: What is that list on my screen?
+    title: The sidebar
+    when: economy:features.sidebar
+    text: |
+      Your balance, your rank and the richest {setting:economy:sidebar.richest|count} players, shown on the right of the screen. It is a bit much for some people: {cmd:/bank sidebar} hides it, and the same command (or the sign button in the bank screen) brings it back. A minigame's own sidebar always wins while the game runs.
+  - question: Is there a limit to what I can hold?
+    title: Account limit
+    text: |
+      Yes: {setting:economy:accounts.most|money}. Anything that would take your balance past it is refused rather than trimmed — you get a message, nothing moves, and nothing is lost.
+
+      Staff can also <white>freeze</white> an account (during an investigation, say). A frozen account can neither send nor receive money until staff release it.
+  - question: What if I was offline when I got paid?
+    title: While you were away
+    text: |
+      Payments, bills, wages, winnings and auction or raffle proceeds that arrived while you were gone are summed up in one line when you next log in: <i>"While you were away, X arrived in your account."</i> Nothing is lost between sessions.
+  - question: Is my money safe?
+    title: Safety
+    text: |
+      Money in your account cannot be stolen, dropped or lost. That is the whole point of keeping it there.
+
+      <white>Cash</white> you withdraw is a different matter: coins and cheques are items that you can carry, trade, drop — and lose. See {topic:cash}.
+      {if:economy-supply:death.costs-money && economy-supply:death.lose-percent > 0}
+
+      Be careful when dying: it costs you {setting:economy-supply:death.lose-percent|percent} of your balance, destroyed.{/if}
+      {if:economy-supply:death.costs-money && economy-supply:death.lose-percent > 0 && economy-supply:death.lose-most}
+      Never more than {setting:economy-supply:death.lose-most|money} at a time.{/if}
+  - question: Why does money sometimes say no?
+    title: When it refuses
+    text: |
+      The usual suspects: you do not have enough, the amount would push somebody past the account limit, the account is frozen, or the bank is briefly unavailable (<i>"The bank is not open right now. Nothing was taken"</i> — try again in a moment).
+      {if:economy-supply:money-supply.capped}
+
+      This server also caps the total amount of money that exists. When the treasury runs dry, payouts such as rewards or shop sales are refused until fees and taxes refill it. See {topic:treasury}.{/if}
+      {if:economy-supply:pay.new-account-lock && economy-supply:pay.new-account-hours > 0}
+
+      And brand new accounts cannot send money away (paying, billing, withdrawing cash) for their first {setting:economy-supply:pay.new-account-hours|hours}.{/if}
+  - question: How do I earn money?
+    title: Earning
+    text: |
+      Sell things to the shop, win a daily reward, collect advancements, earn interest, get hired by another player, run an auction — or gamble, if you are feeling lucky. Start at {topic:earning} and {topic:shop}.
+  - question: What about other servers of the network?
+    title: Network
+    text: |
+      If this server is part of a network, one server keeps everybody's money. On the others, {cmd:/balance}, {cmd:/pay} and {cmd:/baltop} reach the bank through the network, and everything else says <i>"That is on the server that keeps the network's money"</i> — go there to use it.
+      {if:economy-client:shop-here}
+
+      On this server the bank's shop is open too: {cmd:/shop} and {cmd:/sell} work here with the bank's prices. Books, potions, packs and the rest stay on the bank's server.{/if}

@@ -1,0 +1,57 @@
+id: earning
+title: Earning money
+summary: Passive income, the daily reward, advancement pay, back pay, interest and the hourly cap.
+intro: |
+  The honest ways to get rich on this server, besides selling things (see {topic:selling}). None involve a pickaxe, which is rather the point.
+icon: SUNFLOWER
+category: Progress & rewards
+order: 14
+module: economy
+aliases: [daily, income, interest, advancements, backpay, salary, earn, claimadvancements]
+keywords: [reward, streak, passive, afk, cap, hourly]
+commands: [daily, claimadvancements]
+related: [economy, selling, taxes]
+sections:
+  - question: How do I claim the daily reward?
+    title: Daily reward
+    when: economy:features.daily
+    text: |
+      {cmd:/daily} once a day (or the sun button in {run:/bank}) pays {setting:economy:earn.daily|money}. A new day starts at midnight, server time.
+
+      Come back every day and the streak adds {setting:economy:earn.daily-streak-bonus|money} per day, counting up to {setting:economy:earn.daily-streak-most|days}. Miss a day and you start again from one.
+  - question: What is passive income?
+    title: Passive income
+    when: economy:features.income
+    text: |
+      Money for simply being online: {setting:economy:income.amount|money} every {setting:economy:income.minutes|minutes} while you play.
+      {if:economy:income.away-amount}Away from the keyboard you get {setting:economy:income.away-amount|money} instead.{else}Away from the keyboard you get nothing — go and play.{/if}
+      Creative and spectator mode do not count, and you need to be allowed to earn.
+  - question: Do advancements pay?
+    title: Advancements
+    when: economy:features.advancement-rewards
+    text: |
+      Yes, by difficulty: {setting:economy:earn.advancement|money} for an ordinary task, {setting:economy:earn.advancement-goal|money} for a goal, {setting:economy:earn.advancement-challenge|money} for a challenge. Only advancements that announce themselves in chat pay; recipes and hidden ones do not. Not in creative or spectator.
+  - question: I made advancements before they paid.
+    title: Back pay
+    when: economy:features.advancement-rewards && economy:earn.advancement-backpay
+    text: |
+      {cmd:/claimadvancements} pays what you missed — once per player — for advancements made before they paid, or paid less than they pay now. Players with some waiting are told when they join. It reads the ledger, so nothing is ever paid twice.
+  - question: Is there interest on my savings?
+    title: Interest
+    when: economy:features.interest
+    text: |
+      Yes: {setting:economy:interest.percent|percent} of your balance every {setting:economy:interest.minutes|minutes}, at most {setting:economy:interest.cap|money} per payout, and only if you are online when it falls due.
+  - question: Is there a limit to what I earn?
+    title: Hourly cap
+    when: economy:earn.hourly-cap
+    text: |
+      Passive income and advancement pay together are capped at {setting:economy:earn.hourly-cap|money} an hour. Past that, they simply stop until the hour rolls over.
+  - question: Why did a reward come out smaller?
+    title: Smaller payouts
+    when: economy-supply:money-supply.capped || economy-supply:features.stabilizer || economy-supply:earn.per-player-brake
+    text: |
+      The server watches the total amount of money. When the treasury runs low, when prices rise too fast, or when everybody is rich, payouts shrink on purpose — and grow again when things calm down. {cmd:/treasury} shows how the economy is doing.
+  - question: Are mobs and mining paid?
+    title: Mobs and mining
+    text: |
+      No. What you gather, you sell. It keeps the economy honest.

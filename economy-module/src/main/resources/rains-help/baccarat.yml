@@ -1,0 +1,26 @@
+id: baccarat
+title: Baccarat
+summary: Bet on player, banker or a tie; the third-card rules are the real ones.
+intro: |
+  Elegant, fast, and you decide almost nothing. Bet, watch, win or sigh.
+icon: RED_CONCRETE
+category: Games
+order: 76
+module: economy
+when: economy:features.gambling && economy:features.baccarat
+aliases: [punto-banco, banker, player, tie]
+keywords: [baccarat, cards]
+commands: [baccarat]
+related: [casino, blackjack]
+sections:
+  - question: How do I play?
+    title: Playing
+    text: |
+      {run:/baccarat} opens the table. Bet on <white>player</white>, <white>banker</white> or <white>tie</white>. Whichever hand ends closer to 9 wins; tens and faces count 0, a hand is its last digit. The dealer draws third cards by the fixed rules — nothing to decide.
+  - question: What do bets pay?
+    title: Payouts
+    text: |
+      <white>•</white> Player: even money.
+      <white>•</white> Banker: even money, less a {setting:economy:baccarat.banker-commission-percent|percent} commission on the winnings.
+      <white>•</white> Tie: {setting:economy:baccarat.tie-pays|count} to one.
+      On a tie, player and banker bets are returned. Smallest bet: {if:economy:baccarat.min-bet}{setting:economy:baccarat.min-bet|money}{else}{setting:economy:gamble.min-bet|money}{/if}. The shoe holds {setting:economy:casino.decks|count} deck(s).

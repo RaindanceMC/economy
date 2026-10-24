@@ -1,0 +1,50 @@
+id: treasury
+title: The server's money
+summary: The treasury, the money cap, inflation, the price index and why payouts sometimes shrink.
+intro: |
+  Somebody has to keep an eye on the money supply. That somebody is me, with spreadsheets. Here is what it means for you.
+icon: BEACON
+category: Economy & trade
+order: 17
+module: economy
+aliases: [inflation, supply, cap, stabilizer, price-index, treasury-info]
+keywords: [treasury, money, cap, prices, fees, brake]
+commands: [treasury]
+related: [economy, taxes, earning, funds]
+sections:
+  - question: How much money is there?
+    title: /treasury
+    when: economy-supply:features.treasury-info || @perm:rainseconomy.admin
+    text: |
+      {run:/treasury} shows how much money exists, what the treasury holds, how much each active player has on average, how prices and the money have moved this week, and where money was created and destroyed. Fees are easier to accept when you can see where they go.
+  - question: What is the treasury?
+    title: Treasury and cap
+    when: economy-supply:money-supply.capped
+    text: |
+      The server caps the money that can ever exist at {setting:economy-supply:money-supply.cap|money}. Every payout — rewards, interest, the shop buying from you — comes out of the treasury, which is whatever of the cap nobody holds, and every fee, tax and purchase goes back in. When it is empty, payouts are refused until money flows back.
+      {if:economy-supply:money-supply.low-treasury-brake}
+
+      As the treasury runs low, payouts shrink in proportion: below {setting:economy-supply:money-supply.scale-below-percent|percent} of the cap, at half of that they are half.{/if}
+  - question: What is the stabiliser?
+    title: Stabiliser
+    when: economy-supply:features.stabilizer
+    text: |
+      Once a day the server compares last week's inflation (measured by pricing a basket of goods in the shop) with the target of {setting:economy-supply:stabilizer.target-weekly-percent|percent} a week. If prices rise too fast, payouts shrink and fees grow; if they fall, the other way round — by {setting:economy-supply:stabilizer.step-percent|percent} a day, never more than {setting:economy-supply:stabilizer.most-percent|percent} either way.
+  - question: Why do my fees change?
+    title: Fees follow prices
+    when: economy-supply:price-index.fees-follow
+    text: |
+      Fees charged through the server — teleports, upkeep, fines and the like — move with the price index, so a fee set long ago costs about as much in goods today.
+  - question: Why smaller payouts when all are rich?
+    title: Rich-server brake
+    when: economy-supply:earn.per-player-brake && economy-supply:earn.target-per-player
+    text: |
+      When active players (seen within {setting:economy-supply:earn.active-days|days}) hold more on average than {setting:economy-supply:earn.target-per-player|money}, every payout shrinks in proportion: twice as rich as that, half the reward.
+  - question: Do I owe the server money?
+    title: Debts
+    when: economy-supply:debts.collect
+    text: |
+      If you owe the server (an unpaid fine, missed upkeep), {setting:economy-supply:debts.share-of-income-percent|percent} of every reward, wage, interest, sale and plugin payment goes toward it until it is paid.
+      {if:economy-supply:debts.stop-gambling}
+
+      No gambling while you are in debt.{/if}

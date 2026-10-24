@@ -1,0 +1,34 @@
+id: eco-events
+title: Staff - auctions, raffles & funds
+summary: Calling off auctions, running server raffles and giveaways, starting funds and ending seasons.
+intro: |
+  Prizes with the server's money behind them, and the power to say "no, that auction is over".
+icon: BEACON
+category: Staff
+order: 913
+module: economy
+permission: rainseconomy.admin
+aliases: [stop-auction, server-raffle, start-fund, end-season]
+keywords: [auction, raffle, giveaway, fund, season, cancel]
+related: [eco-money, auctions, raffles, funds, seasons]
+sections:
+  - question: How do I stop an auction?
+    title: Auctions
+    text: |
+      {run:/eco auction stop} calls off the running one; {cmd:/eco auction cancel <number or seller>} a particular one; {cmd:/eco auction clear} all of them. Items and every bid go back to their owners.
+  - question: How do I run a raffle with server money?
+    title: Server raffles
+    text: |
+      {cmd:/eco raffle <prize> <ticket price> [length]} puts the server's money up as the prize, for tickets players buy; {cmd:/eco raffle cancel <number>} calls one off and pays every ticket back. Works from the console.
+  - question: And a giveaway?
+    title: Server giveaways
+    text: |
+      {cmd:/eco giveaway <prize> [length]} gives server money away to one lucky player; {cmd:/eco giveaway cancel <number>} stops it.
+  - question: How do I start a community fund?
+    title: Funds
+    text: |
+      {cmd:/eco fund start <name> <target> [effect]}. The effect is either <white>boost <percent> <hours></white> (every payout is raised for that long once full) or <white>command <a> && <b></white> (console commands run once), or nothing at all for a plain goal. {cmd:/eco fund remove <name>} removes one; what was given stays given. Players donate with {cmd:/fund}.
+  - question: How do I end a season?
+    title: Seasons
+    text: |
+      {cmd:/eco season end} shows what it would do; {cmd:/eco season end confirm} turns every balance into season points and restarts everybody at the starting balance. It never happens by itself and cannot be undone. See {topic:seasons}.

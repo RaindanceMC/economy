@@ -1,0 +1,44 @@
+id: raffles
+title: Raffles & giveaways
+summary: Raffling off an item or money, buying tickets, free giveaways and how the draw works.
+intro: |
+  Lotteries run by players. One ticket, one chance, one winner — and nobody has to fight over a diamond block.
+icon: NAME_TAG
+category: Economy & trade
+order: 24
+module: economy
+when: economy:features.raffles || economy:features.giveaways
+aliases: [raffle, giveaway, giveaways, tickets, draw]
+keywords: [raffle, free, prize, host]
+commands: [raffle, giveaway]
+related: [auctions, lottery, economy]
+sections:
+  - question: How do I raffle something off?
+    title: Starting a raffle
+    when: economy:features.raffles
+    text: |
+      Hold the item and type {cmd:/raffle start <ticket price> [length] [most tickets] [per player]}, e.g. <white>/raffle start 100 1h</white>. To raffle money from your account: {cmd:/raffle money <prize> <ticket price> [length]…}. Starting costs {setting:economy:raffle.listing-fee|money}; tickets cost at least {setting:economy:raffle.smallest-ticket|money} each.
+      Lengths run from {setting:economy:raffle.min-minutes|minutes} to {setting:economy:raffle.max-minutes|minutes}, {setting:economy:raffle.default-minutes|minutes} by default. Up to {setting:economy:raffle.most-running|count} raffles run at once, {setting:economy:raffle.per-host|count} per host.
+  - question: How do I buy tickets?
+    title: Tickets
+    when: economy:features.raffles
+    text: |
+      {run:/raffle} lists the running raffles; {cmd:/raffle buy <number> [tickets]}. Each ticket is one equal chance — the tooltip shows your chance. You cannot buy tickets for your own raffle. The host may limit tickets in total or per player.
+  - question: What happens at the draw?
+    title: The draw
+    when: economy:features.raffles
+    text: |
+      A drumroll in chat, then one ticket is picked. The winner gets the prize in their inventory. The host gets the ticket money after the house's {setting:economy:raffle.fee-percent|percent} cut. Nobody bought a ticket? The prize goes back to the host.
+  - question: Can I cancel my raffle?
+    title: Cancelling
+    text: |
+      {cmd:/raffle cancel <number>} — only while no ticket is sold; after that it runs to the draw. If staff call one off, every ticket is paid back.
+  - question: What is a giveaway?
+    title: Giveaways
+    when: economy:features.giveaways
+    text: |
+      A raffle that is free to join, once each. Hold an item and {cmd:/giveaway start [length]}, or give away money from your account: {cmd:/giveaway money <amount> [length]}. Join with {cmd:/giveaway join <number>}; {run:/giveaway} lists what is running. {cmd:/giveaway cancel <number>} works while nobody has joined.
+  - question: Why can I not raffle that?
+    title: Restrictions
+    text: |
+      Cash and insured items are refused, and money must go through the money commands. You are limited in how many you may run, and in how many may run in total.

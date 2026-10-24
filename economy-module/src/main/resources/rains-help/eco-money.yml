@@ -1,0 +1,48 @@
+id: eco-money
+title: Staff - money & accounts
+summary: Giving, taking and setting money, freezing accounts, statements, loans, the wealth tax and the money report.
+intro: |
+  The staff corner. Every change to somebody's money is written to the audit record with your name on it, so do try to have a reason.
+icon: COMMAND_BLOCK
+category: Staff
+order: 910
+module: economy
+permission: rainseconomy.admin
+aliases: [eco, economy-admin, give-money, take-money, freeze]
+keywords: [admin, audit, staff, history, health, menu]
+commands: [eco]
+related: [eco-shop, eco-world, eco-events, economy]
+sections:
+  - question: How do I change somebody's balance?
+    title: Give, take, set, reset
+    text: |
+      {cmd:/eco give <player> <amount> [reason]}, {cmd:/eco take <player> <amount> [reason]}, {cmd:/eco set <player> <amount> [reason]}. {cmd:/eco reset <player>} sets them back to the starting balance of {setting:economy:accounts.starting-balance|money}. The reason is shown in the player's statement. Players who have never joined are refused; refused changes say why.
+  - question: How do I freeze an account?
+    title: Freezing
+    text: |
+      {cmd:/eco freeze <player>} stops that account sending or receiving anything; {cmd:/eco unfreeze <player>} lifts it. Frozen accounts still pay wealth tax.
+  - question: Can I read somebody's statement?
+    title: Statements
+    permission: rainseconomy.history.others
+    text: |
+      {cmd:/eco history <player>} opens their statement as a book, for as long as {setting:economy:accounts.history-days|days} back.
+  - question: How do I open the control screen?
+    title: The control screen
+    text: |
+      {run:/eco menu} (or plain /eco) switches features, closes shop drawers, paints the currency (names, symbols and number colours) and more — the same settings as {run:/settings}, friendlier. Every economy feature has its own switch.
+  - question: How do I see the money supply?
+    title: Health report
+    text: |
+      {run:/eco health} is the full report: money out there, cap and treasury, per-player average, growth, inflation, how the taps are turned and where money was created and destroyed this week. {run:/treasury} shows players the same.
+  - question: How do I look at or forgive a loan?
+    title: Loans
+    text: |
+      {cmd:/eco loan <player>} shows what they owe and when it is due; {cmd:/eco loan <player> forgive} wipes it, which is audited. Loans themselves are explained in {topic:loans}.
+  - question: How do I run the wealth tax by hand?
+    title: Wealth tax
+    text: |
+      {cmd:/eco tax <percent>} shows what a tax of that percentage would take and from how many accounts; add <white>confirm</white> to actually do it: {cmd:/eco tax <percent> confirm}. Destroyed money cannot be given back, so read the preview. The tax that runs on a timer is a setting ({setting:economy:features.wealth-tax|onoff} right now).
+  - question: How do I change the coin?
+    title: The coin
+    text: |
+      Hold the item the coin should be made of and type {run:/eco coin}. Coins already out keep working — they are recognised by their seal, not their look. A resource pack model can be set in settings (<white>cash.coin-model</white>).

@@ -1,0 +1,66 @@
+id: auctions
+title: Auction house
+summary: Selling an item to the highest bidder, bidding, buy-it-now, the queue, fees and picking up what you won.
+intro: |
+  Going once, going twice — one auction at a time for the whole server, announced in chat with a countdown, and the bids on a boss bar. Dramatic, I know.
+icon: BELL
+category: Economy & trade
+order: 23
+module: economy
+when: economy:features.auctions
+aliases: [auction, ah, bid, bidding, sell-to-players, buyout]
+keywords: [queue, sniping, claim, fee, jump, mute]
+commands: [auction]
+related: [raffles, shop, economy, taxes]
+sections:
+  - question: How do I put something up?
+    title: Selling
+    text: |
+      Hold the stack you want to sell and type {cmd:/auction sell <start> [buy it now] [length]} — for example <white>/auction sell 500 2000 5m</white>: starting at 500, buy it now for 2,000, running five minutes. Or open {run:/auction} and use the sell screen. The whole stack goes up, and leaves your inventory.
+
+      Cash and insured items cannot be auctioned. The lowest starting price is {setting:economy:auction.smallest-start|money}.
+  - question: How long does an auction run?
+    title: Length
+    text: |
+      {setting:economy:auction.default-seconds|seconds} unless you say otherwise; you may choose from {setting:economy:auction.min-seconds|seconds} up to {setting:economy:auction.max-seconds|seconds}. One auction runs at a time; the others wait in a queue of at most {setting:economy:auction.queue-size|count} with {setting:economy:auction.gap-seconds|seconds} between them. You may have {setting:economy:auction.per-player|count} running or waiting at once.
+  - question: What does it cost me?
+    title: Fees
+    text: |
+      A listing fee of {setting:economy:auction.listing-fee|money}, paid when the item goes up — sold or not — and the auction house keeps {setting:economy:auction.fee-percent|percent} of the final price. That money leaves the economy.
+  - question: How do I bid?
+    title: Bidding
+    text: |
+      Click <white>[Bid]</white> in chat or on the screen, or {cmd:/auction bid [amount]} — without an amount it bids the smallest accepted. A bid must beat the last by at least {setting:economy:auction.step|money} or {setting:economy:auction.step-percent|percent}, whichever is more. Your money is held while you lead and returned the moment somebody outbids you. You cannot bid on your own auction.
+  - question: What is buy it now?
+    title: Buy it now
+    text: |
+      A seller may set a price at which the item is simply yours. Bid that much (or click the button) and the auction ends at once.
+  - question: Can I snipe in the last second?
+    title: Late bids
+    when: economy:auction.snipe-seconds > 0
+    text: |
+      No. A bid with less than {setting:economy:auction.snipe-seconds|seconds} left pushes the end back to that long again, so everybody gets to answer.
+  - question: I won. Where is my item?
+    title: Claiming
+    text: |
+      It lands in your inventory when the hammer falls. If you have no room, it waits in the auction house: {cmd:/auction claim} delivers it, and you are reminded when you join. The seller gets the money minus the fee, even when offline.
+  - question: Can I take my auction back?
+    title: Cancelling
+    text: |
+      {cmd:/auction cancel} withdraws your newest auction — as long as it has no bids. Once somebody bid, it runs to the end.
+  - question: Can I skip the queue?
+    title: Jumping the queue
+    when: economy-supply:auction.jump-queue && economy-supply:auction.jump-queue-price
+    text: |
+      For {setting:economy-supply:auction.jump-queue-price|money}, {cmd:/auction jump} moves your waiting auction to the front. You are shown the price with a button before anything is paid.
+  - question: Too much auction chatter!
+    title: Muting
+    text: |
+      {cmd:/auction mute} silences auction and raffle announcements for you; run it again to hear them.
+      {if:!economy:auction.announce-bids}
+
+      The server announces only the start, the countdown and the result anyway.{/if}
+  - question: What is running right now?
+    title: Info
+    text: |
+      {run:/auction info} (works from chat too) tells you the running auction, time left and the highest bid, and how many wait behind it.

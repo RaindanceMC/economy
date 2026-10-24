@@ -1,0 +1,68 @@
+id: selling
+title: Selling & Auto Sell
+summary: Selling items and experience to the shop, the Sell Wand, Auto Sell Chests and the Auto Sell enchantment.
+intro: |
+  You dig, you chop, you slay — and your chests fill with things. Here is how to turn them into coins without a bank clerk's sigh.
+icon: CHEST
+category: Economy & trade
+order: 21
+module: economy
+when: economy:features.selling
+aliases: [sell, sell-wand, autosell, auto-sell, sell-all]
+keywords: [wand, chest, hopper, sold, budget, flooded, diminishing, worth]
+commands: [sell]
+related: [shop, shop-extras, economy, taxes]
+sections:
+  - question: How do I sell things?
+    title: Selling
+    text: |
+      {run:/sell} lists everything you carry that the shop buys, with what each lot fetches. Click a lot to sell it, or press <white>Sell everything</white>.
+
+      Quicker: {cmd:/sell hand} sells the stack in your hand, {cmd:/sell all} everything of that kind you carry, and {cmd:/sell enchantments} strips the enchantments off the item in your hand and sells those, keeping the item. Curses stay.
+  - question: What does the shop pay?
+    title: Prices
+    text: |
+      Selling pays {setting:economy:shop.sell-ratio|number}× an item's value — always kept below what buying costs, so nothing can be bought and sold back at a profit.
+      {if:economy:shop.sell-pricing == custom}On this server only items with a custom sell price can be sold, at exactly that price.{/if}
+      {if:economy:features.dynamic-prices}
+
+      Selling lots of one thing pushes its price down for a while; see {topic:shop}.{/if}
+  - question: What will the shop not take?
+    title: Not accepted
+    text: |
+      Anything with lore, hidden plugin data or contents (a loaded shulker box excepted in the wand and chests) is not bought; renamed items are valued as themselves. Money, insured items and plugin items are never sold as their material.
+      {if:economy:shop.take-worthless}
+
+      A flooded item the shop pays nothing for is still taken, for nothing, so you can get rid of it.{/if}
+  - question: Can I sell enchanted or worn items?
+    title: Enchanted & worn
+    when: economy:shop.enchanted-selling
+    text: |
+      Yes. Enchanted books sell at their price; enchanted tools and armour for their plain price plus what each enchantment's book sells for; worn items for less, in proportion to the wear. Curses take away. They are sold one at a time, shown as themselves in {run:/sell}.
+  - question: Is there a daily limit?
+    title: Daily budgets
+    when: economy-supply:shop.sell-budgets
+    text: |
+      The shop only has so much to spend: {if:economy-supply:shop.sell-budget-per-player}at most {setting:economy-supply:shop.sell-budget-per-player|money} a day from you{/if}{if:economy-supply:shop.sell-budget-per-player && economy-supply:shop.sell-budget-server}, and {/if}{if:economy-supply:shop.sell-budget-server}at most {setting:economy-supply:shop.sell-budget-server|money} a day from everybody together{/if}. Once spent, come back tomorrow.
+  - question: Why does selling again pay less?
+    title: Selling again
+    when: economy-supply:earn.diminishing && economy-supply:earn.diminishing-percent > 0
+    text: |
+      Each further stack of the same item you sell within {setting:economy-supply:earn.diminishing-minutes|minutes} pays {setting:economy-supply:earn.diminishing-percent|percent} less than the one before. Sell a variety, or wait — the tooltip says how many stacks are remembered.
+  - question: Can I sell experience?
+    title: Selling experience
+    when: economy:features.xp-trade
+    text: |
+      Yes, in {run:/sell}: click <white>Sell experience</white> for one level, right-click for ten, shift-click for everything. A point is worth {setting:economy:xp.sell-per-point|money}; it never pays more than a point costs to buy, so you cannot get rich by shuffling levels.
+  - question: What is the Sell Wand?
+    title: Sell Wand
+    text: |
+      A blaze rod with a gift for arithmetic. Right-click a chest or barrel with it, read what it all fetches, say yes, and everything the shop buys is sold. What the shop cannot buy stays put. You can craft it (the recipe is in your recipe book) or buy it in the shop's <white>Rain's items</white> drawer; staff can hand one out.
+  - question: What is an Auto Sell Chest?
+    title: Auto Sell Chest
+    text: |
+      A chest that sells for you. Place one, and whatever goes in — dropped in by hand or fed by a hopper — is sold on the spot and the money goes to whoever placed it. What the shop will not buy comes back to you, or stays in the chest. It is always a single chest, and survives explosions. You make one at an anvil with an Auto Sell book, or buy it in <white>Rain's items</white>.
+  - question: What is Auto Sell?
+    title: Auto Sell enchantment
+    text: |
+      Rain's Auto Sell enchantment on the tool in your hand: what you break or what the mobs you kill drop is sold instead of falling, and the money arrives in a lump every couple of seconds. It only sells what the shop buys, within the same budgets and price moves as /sell.

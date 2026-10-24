@@ -1,0 +1,27 @@
+id: horse-race
+title: Horse race
+summary: One race for everybody — bet on a horse while the gate is closed and watch them run.
+intro: |
+  Four horses, long shots and favourites, and a track that runs whether you bet or not.
+icon: SADDLE
+category: Games
+order: 81
+module: economy
+when: economy:features.gambling && economy:features.race
+aliases: [race, horses, horserace]
+keywords: [horse, race, bet, odds]
+commands: [race]
+related: [casino, crash]
+sections:
+  - question: How does it work?
+    title: Betting
+    text: |
+      {run:/race} shows the race. While the gate is closed ({setting:economy:race.betting-seconds|seconds} before each start) bet on any horse — as often as you like, on several if you want. Then watch them run; the winner pays out.
+  - question: Which horse should I back?
+    title: Odds
+    text: |
+      Thunder is the favourite, then Biscuit, Comet and Shadow, the long shot. Each horse has a fixed chance of winning and pays its fair return minus the edge, so the favourite pays little and the long shot a lot.
+  - question: Edge and minimum?
+    title: Edge and minimum
+    text: |
+      The house keeps {if:economy:race.house-edge-percent}{setting:economy:race.house-edge-percent|percent}{else}{setting:economy:gamble.house-edge-percent|percent}{/if} on average. Smallest bet: {if:economy:race.min-bet}{setting:economy:race.min-bet|money}{else}{setting:economy:gamble.min-bet|money}{/if}. Stakes on an open race are refunded if the server stops.

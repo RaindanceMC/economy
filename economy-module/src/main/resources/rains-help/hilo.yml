@@ -1,0 +1,27 @@
+id: hilo
+title: Hi-Lo
+summary: Guess whether the next card is higher or lower, and cash out any time.
+intro: |
+  A streak game. Every right guess grows the pot; every wrong one ends it. Greed is optional, but traditional.
+icon: LIME_CONCRETE
+category: Games
+order: 77
+module: economy
+when: economy:features.gambling && economy:features.hilo
+aliases: [high-low, higher-lower]
+keywords: [hilo, cards, streak, cash-out]
+commands: [hilo]
+related: [casino, mines, blackjack]
+sections:
+  - question: How do I play?
+    title: Playing
+    text: |
+      {run:/hilo} opens the table. A card is showing; guess whether the next is higher or lower. The same rank loses either guess. A right guess multiplies your stake by a fair figure worked out from what is actually left in the shoe ({setting:economy:casino.decks|count} deck(s)).
+  - question: When do I get paid?
+    title: Cashing out
+    text: |
+      Whenever you like, press <white>Cash out</white> and take what the stake has grown to. A wrong guess loses it all. Cashing out before any guess just returns the bet, and closing the window or leaving cashes out for you.
+  - question: Edge and minimum?
+    title: Edge and minimum
+    text: |
+      The house keeps {if:economy:hilo.house-edge-percent}{setting:economy:hilo.house-edge-percent|percent}{else}{setting:economy:gamble.house-edge-percent|percent}{/if} on average, however long you run. Smallest bet: {if:economy:hilo.min-bet}{setting:economy:hilo.min-bet|money}{else}{setting:economy:gamble.min-bet|money}{/if}.

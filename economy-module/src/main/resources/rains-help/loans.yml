@@ -1,0 +1,39 @@
+id: loans
+title: Loans
+summary: Borrowing from the bank, how much you may borrow, interest, due dates and what happens when you are late.
+intro: |
+  The bank will lend you money. Of course it will — the interest is the whole business model.
+icon: GOLD_BLOCK
+category: Economy & trade
+order: 15
+module: economy
+when: economy:features.loans
+aliases: [loan, borrow, debt-bank, credit, repay]
+keywords: [interest, overdue, late, owe, limit]
+commands: [loan]
+related: [economy, taxes, casino]
+sections:
+  - question: How do I borrow?
+    title: Borrowing
+    text: |
+      {cmd:/loan take <amount>}, or {run:/loan} for the screen with the amounts to pick from. The bank lends at least {setting:economy:loans.least|money}{if:economy:loans.most} and at most {setting:economy:loans.most|money}{/if}. One loan at a time — pay it back first.
+  - question: What does it cost?
+    title: Interest
+    text: |
+      The interest is added once, when you borrow: {setting:economy:loans.interest-percent|percent}. Borrowing 1,000 therefore means paying back more than 1,000 — {run:/loan} shows the exact sum before you commit.
+  - question: How much may I borrow?
+    title: Your limit
+    when: economy:loans.personal-limit
+    text: |
+      It is personal. You may borrow up to what you have plus a quarter of what you earned during your last {setting:economy:loans.recent-hours|hours} of play (hours played, not on the clock). That is reduced the more of it you spent or gambled away, increased for every earlier loan paid back on time and cut for every late one. Never past the bank's overall maximum. {run:/loan} shows your number and why.
+  - question: How do I pay it back?
+    title: Repaying
+    text: |
+      {cmd:/loan repay} pays everything you can afford, {cmd:/loan repay <amount>} part of it. Any time before it is due — no penalty for being early. You must pay it back within {setting:economy:loans.days|days}.
+  - question: What if I am late?
+    title: Overdue
+    text: |
+      Once due, the bank collects whatever your balance holds, until the debt is gone. Every further full day adds {setting:economy:loans.late-percent|percent} of what is still owed, and the late fee compounds. You get reminders when you join.
+      {if:economy:loans.overdue-stops-gambling}
+
+      And no gambling while a loan is overdue. Bold of you to ask.{/if}

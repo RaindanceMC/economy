@@ -1,0 +1,31 @@
+id: blackjack
+title: Blackjack
+summary: Beat the dealer to 21 — hit, stand, double down and split, with the real casino rules.
+intro: |
+  Closer to 21 than the dealer, without going over. Count cards if you like; each player has their own shoe, so nobody will mind.
+icon: PAPER
+category: Games
+order: 75
+module: economy
+when: economy:features.gambling && economy:features.blackjack
+aliases: [bj, 21, cards]
+keywords: [blackjack, double, split, dealer]
+commands: [blackjack]
+related: [casino, baccarat, hilo]
+sections:
+  - question: How do I play?
+    title: Playing
+    text: |
+      {run:/blackjack} (or <white>/bj</white>) opens the table. Set a bet and deal. Aces count 1 or 11, faces 10. <white>Hit</white> to take a card, <white>Stand</white> to stop, <white>Double</white> to double your stake for exactly one more card, <white>Split</white> a pair into two hands (split aces take one card each).
+  - question: How does the dealer play?
+    title: The dealer
+    text: |
+      The dealer draws to 16 and stands on 17{if:economy:blackjack.dealer-hits-soft-17}, except that on this table the dealer also hits a soft 17 (a 17 with an ace counted as 11){else}, soft 17 included{/if}. A dealer blackjack beats everything but a blackjack of yours, which is a push.
+  - question: What does a blackjack pay?
+    title: Natural pays
+    text: |
+      A natural (21 on two cards) pays {setting:economy:blackjack.natural-pays}. A win pays even money, a push gives your stake back. The shoe holds {setting:economy:casino.decks|count} deck(s) and is reshuffled when it runs low. The edge is the game's own, a fraction of a percent against good play, not the casino-wide one.
+  - question: Smallest bet? What if I leave?
+    title: Minimum & leaving
+    text: |
+      Smallest bet: {if:economy:blackjack.min-bet}{setting:economy:blackjack.min-bet|money}{else}{setting:economy:gamble.min-bet|money}{/if}. Closing the window or logging out with a hand open makes you stand, and the hand is settled.

@@ -1,0 +1,31 @@
+id: roulette
+title: Roulette
+summary: European roulette — red, black, green, odd, even, halves, dozens or a single number.
+intro: |
+  Thirty-seven pockets, one ball, and a green zero that has ruined better players than you.
+icon: ENDER_PEARL
+category: Games
+order: 74
+module: economy
+when: economy:features.gambling && economy:features.roulette
+aliases: [wheel, red, black, green]
+keywords: [roulette, number, dozen]
+commands: [roulette]
+related: [casino]
+sections:
+  - question: How do I play?
+    title: Playing
+    text: |
+      {cmd:/roulette [bet]} or {run:/roulette} for the wheel. Pick a bet, then spin. The pocket under the pointer when the wheel stops is the winner.
+  - question: Which bets are there?
+    title: Bets
+    text: |
+      <white>•</white> Red, black, odd, even, low (1 to 18), high (19 to 36): about even money.
+      <white>•</white> A dozen (1 to 12, 13 to 24, 25 to 36): about three to one.
+      <white>•</white> A single number: about 36 to one.
+      <white>•</white> Green, the zero: a rare treat.
+      Zero loses every bet except green. Every bet returns the same on average: the house edge below.
+  - question: Edge and minimum?
+    title: Edge and minimum
+    text: |
+      The house keeps {if:economy:roulette.house-edge-percent}{setting:economy:roulette.house-edge-percent|percent}{else}{setting:economy:gamble.house-edge-percent|percent}{/if} on average, on every bet. Smallest bet: {if:economy:roulette.min-bet}{setting:economy:roulette.min-bet|money}{else}{setting:economy:gamble.min-bet|money}{/if}.
