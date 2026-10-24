@@ -2,6 +2,7 @@ package de.raindancer.modules.economy.screen;
 
 import de.raindancer.core.ui.chat.Brand;
 import de.raindancer.core.ui.choose.Category;
+import de.raindancer.core.ui.menu.Backdrop;
 import de.raindancer.core.ui.menu.Icons;
 import de.raindancer.core.ui.menu.Menu;
 import de.raindancer.core.ui.menu.MenuLayout;
@@ -34,6 +35,16 @@ public final class ClientShopMenu extends Menu implements IEconomyScreen {
         this.lines = List.copyOf(lines);
     }
 
+    /** The balance, on the stall's coin purse for somebody who sees the stall. */
+    private org.bukkit.inventory.ItemStack purse(org.bukkit.inventory.ItemStack icon) {
+        return designed() ? de.raindancer.modules.economy.service.EconomyPack.purse(icon) : icon;
+    }
+
+    @Override
+    protected Backdrop backdrop() {
+        return de.raindancer.modules.economy.service.EconomyPack.stall(layout().rows());
+    }
+
     @Override
     protected Component title() {
         return MiniMessage.miniMessage().deserialize("<dark_gray>Shop");
@@ -46,9 +57,9 @@ public final class ClientShopMenu extends Menu implements IEconomyScreen {
 
     @Override
     protected void render() {
-        set(MenuLayout.HEADER_SUBJECT, Icons.of(Material.EMERALD, "<green>Shop",
+        set(MenuLayout.HEADER_SUBJECT, purse(Icons.of(Material.EMERALD, "<green>Shop",
                 "<gray>The network's shop, with your money", "<gray>from " + MiniMessage.miniMessage()
-                        .escapeTags(shop.bankName()) + ".", "<dark_gray>Prices move with supply and demand."));
+                        .escapeTags(shop.bankName()) + ".", "<dark_gray>Prices move with supply and demand.")));
         Category[] categories = Category.values();
         for (int i = 0; i < categories.length; i++) {
             Category category = categories[i];

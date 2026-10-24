@@ -1,6 +1,7 @@
 package de.raindancer.modules.economy.screen;
 
 import de.raindancer.core.social.economy.Money;
+import de.raindancer.core.ui.menu.Backdrop;
 import de.raindancer.core.ui.menu.Icons;
 import de.raindancer.core.ui.menu.Menu;
 import de.raindancer.core.ui.menu.PaginatedMenu;
@@ -46,6 +47,11 @@ public final class PotionMenu extends PaginatedMenu<ShopService.PotionOffer> imp
         super(viewer, services.brand(), parent);
         this.services = services;
         this.offers = services.shop().potionOffers();
+    }
+
+    @Override
+    protected Backdrop backdrop() {
+        return de.raindancer.modules.economy.service.EconomyPack.stall(layout().rows());
     }
 
     @Override

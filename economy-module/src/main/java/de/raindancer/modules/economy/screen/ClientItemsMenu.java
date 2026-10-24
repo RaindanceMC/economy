@@ -2,6 +2,7 @@ package de.raindancer.modules.economy.screen;
 
 import de.raindancer.core.ui.chat.Brand;
 import de.raindancer.core.ui.choose.Catalogue;
+import de.raindancer.core.ui.menu.Backdrop;
 import de.raindancer.core.ui.menu.Icons;
 import de.raindancer.core.ui.menu.Menu;
 import de.raindancer.core.ui.menu.PaginatedMenu;
@@ -37,6 +38,11 @@ public final class ClientItemsMenu extends PaginatedMenu<ShopDesk.Line> implemen
     private static Material material(ShopDesk.Line line) {
         Material material = Material.matchMaterial(line.material());
         return material != null && material.isItem() ? material : null;
+    }
+
+    @Override
+    protected Backdrop backdrop() {
+        return de.raindancer.modules.economy.service.EconomyPack.stall(layout().rows());
     }
 
     @Override

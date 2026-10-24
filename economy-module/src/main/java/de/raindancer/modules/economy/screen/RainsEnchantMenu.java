@@ -1,6 +1,7 @@
 package de.raindancer.modules.economy.screen;
 
 import de.raindancer.core.content.enchant.EnchantShards;
+import de.raindancer.core.ui.menu.Backdrop;
 import de.raindancer.core.ui.menu.Icons;
 import de.raindancer.core.ui.menu.Menu;
 import de.raindancer.core.ui.menu.PaginatedMenu;
@@ -27,6 +28,11 @@ public final class RainsEnchantMenu extends PaginatedMenu<ShopService.RainsOffer
     RainsEnchantMenu(EconomyServices services, Player viewer, Menu parent) {
         super(viewer, services.brand(), parent);
         this.services = services;
+    }
+
+    @Override
+    protected Backdrop backdrop() {
+        return de.raindancer.modules.economy.service.EconomyPack.stall(layout().rows());
     }
 
     @Override

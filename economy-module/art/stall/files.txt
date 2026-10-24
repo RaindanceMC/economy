@@ -1,0 +1,10 @@
+assets/rainseconomy/textures/font/stall/stall_1.png
+assets/rainseconomy/textures/font/stall/stall_2.png
+assets/rainseconomy/textures/font/stall/stall_3.png
+assets/rainseconomy/textures/font/stall/stall_4.png
+assets/rainseconomy/textures/font/stall/stall_5.png
+assets/rainseconomy/textures/font/stall/stall_6.png
+assets/rainseconomy/font/stall.json
+assets/rainseconomy/items/purse.json
+assets/rainseconomy/models/item/purse.json
+assets/rainseconomy/textures/item/purse.png

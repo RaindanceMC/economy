@@ -4,6 +4,7 @@ import de.raindancer.core.data.settings.SettingsMenu;
 import de.raindancer.core.data.settings.SettingsStore;
 import de.raindancer.core.social.economy.Currency;
 import de.raindancer.core.platform.util.Scheduling;
+import de.raindancer.core.ui.menu.Backdrop;
 import de.raindancer.core.ui.menu.Icons;
 import de.raindancer.core.ui.menu.Menu;
 import de.raindancer.core.ui.menu.MenuLayout;
@@ -30,6 +31,11 @@ public final class AdminMenu extends Menu implements IEconomyScreen {
     public AdminMenu(EconomyServices services, Player viewer, Menu parent) {
         super(viewer, services.brand(), parent);
         this.services = services;
+    }
+
+    @Override
+    protected Backdrop backdrop() {
+        return Backdrop.workshop(layout().rows());
     }
 
     @Override

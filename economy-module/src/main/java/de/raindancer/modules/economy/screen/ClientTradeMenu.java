@@ -2,6 +2,7 @@ package de.raindancer.modules.economy.screen;
 
 import de.raindancer.core.ui.chat.Brand;
 import de.raindancer.core.ui.choose.Catalogue;
+import de.raindancer.core.ui.menu.Backdrop;
 import de.raindancer.core.ui.menu.Icons;
 import de.raindancer.core.ui.menu.Menu;
 import de.raindancer.core.ui.menu.MenuLayout;
@@ -56,6 +57,11 @@ public final class ClientTradeMenu extends Menu implements IEconomyScreen {
         }
         shop.quote(viewer, material, buy, sell, quote ->
                 new ClientTradeMenu(shop, brand, viewer, parent, material, quote).open());
+    }
+
+    @Override
+    protected Backdrop backdrop() {
+        return de.raindancer.modules.economy.service.EconomyPack.stall(layout().rows());
     }
 
     @Override

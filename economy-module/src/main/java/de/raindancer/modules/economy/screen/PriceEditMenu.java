@@ -3,6 +3,7 @@ package de.raindancer.modules.economy.screen;
 import de.raindancer.core.social.economy.Currency;
 import de.raindancer.core.social.economy.Money;
 import de.raindancer.core.ui.choose.Catalogue;
+import de.raindancer.core.ui.menu.Backdrop;
 import de.raindancer.core.ui.menu.Icons;
 import de.raindancer.core.ui.menu.Menu;
 import de.raindancer.core.ui.menu.MenuLayout;
@@ -43,6 +44,11 @@ public final class PriceEditMenu extends Menu implements IEconomyScreen {
         this.name = name;
         this.icon = icon;
         this.label = label;
+    }
+
+    @Override
+    protected Backdrop backdrop() {
+        return Backdrop.workshop(layout().rows());
     }
 
     @Override

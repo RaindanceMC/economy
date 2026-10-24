@@ -3,6 +3,7 @@ package de.raindancer.modules.economy.screen;
 import de.raindancer.core.social.economy.Currency;
 import de.raindancer.core.ui.choose.Catalogue;
 import de.raindancer.core.ui.choose.ItemChooser;
+import de.raindancer.core.ui.menu.Backdrop;
 import de.raindancer.core.ui.menu.Icons;
 import de.raindancer.core.ui.menu.Menu;
 import de.raindancer.core.ui.menu.PaginatedMenu;
@@ -34,6 +35,11 @@ public final class ShopEditorMenu extends PaginatedMenu<Material> implements IEc
     ShopEditorMenu(EconomyServices services, Player viewer, Menu parent) {
         super(viewer, services.brand(), parent);
         this.services = services;
+    }
+
+    @Override
+    protected Backdrop backdrop() {
+        return Backdrop.workshop(layout().rows());
     }
 
     @Override
