@@ -30,11 +30,7 @@ public final class PriceSolverRule implements IEconomyRule {
                 if (base.containsKey(recipe.result())) {
                     continue;
                 }
-                Money cost = costOf(recipe, known, switch (recipe.process()) {
-                    case SMELT -> smeltMarkup;
-                    case WORLD -> 0;
-                    default -> craftMarkup;
-                });
+                Money cost = costOf(recipe, known, markupOf(recipe, craftMarkup, smeltMarkup));
                 if (cost == null) {
                     continue;
                 }
@@ -49,6 +45,57 @@ public final class PriceSolverRule implements IEconomyRule {
             }
         }
         return known;
+    }
+
+    /**
+     * What each priced-by-recipe item is made of, as each material's share of the ingredients' value (summing to
+     * 1) — read off the recipe whose cost became the item's price, with the cheapest material in every slot, as
+     * the price itself was worked out. Raw materials are made of nothing.
+     *
+     * @param solved what {@link #solve} answered for the same base, recipes and markups
+     */
+    public Map<String, Map<String, Double>> materials(Map<String, Money> base, List<RecipeShape> recipes,
+                                                      Map<String, Money> solved, double craftMarkup,
+                                                      double smeltMarkup) {
+        Map<String, Map<String, Double>> made = new HashMap<>();
+        for (RecipeShape recipe : recipes) {
+            String result = recipe.result();
+            Money price = solved.get(result);
+            if (base.containsKey(result) || made.containsKey(result) || price == null) {
+                continue;
+            }
+            if (!price.equals(costOf(recipe, solved, markupOf(recipe, craftMarkup, smeltMarkup)))) {
+                continue;
+            }
+            Map<String, Double> shares = new HashMap<>();
+            double total = 0;
+            for (List<String> slot : recipe.slots()) {
+                String cheapest = null;
+                for (String option : slot) {
+                    Money each = solved.get(option);
+                    if (each != null && (cheapest == null || solved.get(cheapest).isMoreThan(each))) {
+                        cheapest = option;
+                    }
+                }
+                long worth = solved.get(cheapest).minor();
+                shares.merge(cheapest, (double) worth, Double::sum);
+                total += worth;
+            }
+            if (total > 0) {
+                double sum = total;
+                shares.replaceAll((material, worth) -> worth / sum);
+                made.put(result, Map.copyOf(shares));
+            }
+        }
+        return made;
+    }
+
+    private static double markupOf(RecipeShape recipe, double craftMarkup, double smeltMarkup) {
+        return switch (recipe.process()) {
+            case SMELT -> smeltMarkup;
+            case WORLD -> 0;
+            default -> craftMarkup;
+        };
     }
 
     /** One of what this recipe makes, or null when an ingredient has no price yet. */

@@ -61,7 +61,8 @@ public final class PriceBook {
                             PricedNames buyPrices, PricedNames sellPrices, Set<String> notSold,
                             Set<String> notBought, List<String> eggs, Map<String, EnchantKind> enchantments,
                             EnchantWorthRule worth, double pointValue, List<String> potionTypes,
-                            Set<String> potionsClosed, Set<String> fallback) {
+                            Set<String> potionsClosed, Set<String> fallback,
+                            Map<String, Map<String, Double>> materials) {
     }
 
     private static final String EGG = "_SPAWN_EGG";
@@ -103,7 +104,7 @@ public final class PriceBook {
         this.stackSize = stackSize;
         this.snapshot = new Snapshot(EconomySettings.DEFAULTS, this.shipped, Set.of(), PricedNames.NONE,
                 PricedNames.NONE, Set.of(), Set.of(), List.of(), Map.of(), new EnchantWorthRule(List.of()), 0, List.of(),
-                Set.of(), Set.of());
+                Set.of(), Set.of(), Map.of());
     }
 
     /** Works every price out again — on start, on a settings change, on {@code /eco reprice}. */
@@ -150,6 +151,9 @@ public final class PriceBook {
         Map<String, Money> values = new HashMap<>(settings.deriveFromRecipes()
                 ? solver.solve(base, recipes, settings.craftMarkupClamped(), settings.smeltMarkupClamped())
                 : base);
+        Map<String, Map<String, Double>> materials = settings.deriveFromRecipes()
+                ? solver.materials(base, recipes, values, settings.craftMarkupClamped(), settings.smeltMarkupClamped())
+                : Map.of();
         // No recipe makes one, so the solver never prices it; it is worth the points it holds, which the shop
         // already sells by the point. Priced after the recipes so an owner's own value (in base) still wins.
         if (!base.containsKey(BOTTLE)) {
@@ -192,7 +196,7 @@ public final class PriceBook {
         snapshot = new Snapshot(settings, Map.copyOf(values), Set.copyOf(customValues.amounts().keySet()),
                 PricedNames.parse(settings.buyPrices(), currency), PricedNames.parse(settings.sellPrices(), currency),
                 names(settings.notSold()), names(settings.notBought()), List.copyOf(openEggs), Map.copyOf(kinds),
-                worth, pointValue, types, names(settings.potionsClosed()), Set.copyOf(fallback));
+                worth, pointValue, types, names(settings.potionsClosed()), Set.copyOf(fallback), Map.copyOf(materials));
     }
 
     /**
@@ -470,16 +474,39 @@ public final class PriceBook {
 
     /**
      * What supply and demand does to an item's price right now: below 1 when it has been sold a lot, above
-     * when bought a lot. Always 1 with supply and demand off, and for an item the owner priced by hand.
+     * when bought a lot. Always 1 with supply and demand off, and for an item the owner priced by hand. With
+     * {@code shop.follow-materials} a made item also moves with its materials, each by its share of the value.
      */
     public double multiplier(String material) {
         String name = EnchantKey.parse(material).map(EnchantKey::name).orElse(material.toUpperCase(Locale.ROOT));
         Snapshot now = snapshot;
-        EconomySettings settings = now.settings();
-        if (!settings.dynamicPrices() || now.buyPrices().of(name).isPresent() || now.sellPrices().of(name).isPresent()) {
+        if (!now.settings().dynamicPrices()) {
             return 1.0;
         }
-        return market.multiplier(pressure.applyAsDouble(name), settings.lowestMultiplier(), settings.highestMultiplier());
+        return moved(name, now, new HashSet<>());
+    }
+
+    /** Far deeper than any real chain; only a guard. */
+    private static final int MOST_MATERIAL_STEPS = 32;
+
+    private double moved(String name, Snapshot now, Set<String> on) {
+        if (now.buyPrices().of(name).isPresent() || now.sellPrices().of(name).isPresent()) {
+            return 1.0;
+        }
+        EconomySettings settings = now.settings();
+        double own = market.multiplier(pressure.applyAsDouble(name), settings.lowestMultiplier(), settings.highestMultiplier());
+        Map<String, Double> madeOf = settings.followMaterials() ? now.materials().get(name) : null;
+        if (madeOf == null || on.size() >= MOST_MATERIAL_STEPS || !on.add(name)) {
+            return own;
+        }
+        double materials = 0;
+        for (Map.Entry<String, Double> share : madeOf.entrySet()) {
+            materials += share.getValue() * (on.contains(share.getKey()) ? 1.0 : moved(share.getKey(), now, on));
+        }
+        on.remove(name);
+        double floor = Math.max(0, Math.min(1, settings.lowestMultiplier()));
+        double ceiling = Math.max(1, Math.min(10, settings.highestMultiplier()));
+        return Math.max(floor, Math.min(ceiling, own * materials));
     }
 
     /** Every item in a category the shop will buy or sell, alphabetically. */

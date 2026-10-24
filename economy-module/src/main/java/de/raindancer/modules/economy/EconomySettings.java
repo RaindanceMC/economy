@@ -266,6 +266,11 @@ public record EconomySettings(
         @Describe("Hours for half of any push to wear off.")
         @Key("shop.recovery-hours") double recoveryHours,
 
+        @In("economy/shop") @Title("Made things follow their materials")
+        @Describe("A crafted or smelted item's price also moves with what it is made of: cobblestone sold off "
+                + "takes furnaces down with it, each material counting as much as it makes up of the value.")
+        @Key("shop.follow-materials") boolean followMaterials,
+
         @In("economy/shop") @Title("Enchanted books for sale")
         @Describe("An Enchantments drawer in the shop: every enchantment at every level up to its normal maximum, "
                 + "each priced like an item — with supply and demand, the buy markup and sell ratio, roles. A book "
@@ -906,7 +911,7 @@ public record EconomySettings(
             true, Material.GOLD_NUGGET, "", true, true, 0.0, 2304,
             // shop
             true, true, 1.0, 0.4, SellPricing.AUTOMATIC, List.of(), List.of(), List.of(), List.of(), List.of(), false,
-            true, 0.1, 0.15, true, 0.0, 3.0, 0.1, 12.0, true, true, List.of(), true, List.of(),
+            true, 0.1, 0.15, true, 0.0, 3.0, 0.1, 12.0, true, true, true, List.of(), true, List.of(),
             true, List.of(), "800",
             true, "2000", List.of("ender_dragon", "wither"),
             true, true, true, true, true, true, true, true, true,
