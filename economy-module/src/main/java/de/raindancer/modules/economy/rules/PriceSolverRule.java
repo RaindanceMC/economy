@@ -20,9 +20,17 @@ public final class PriceSolverRule implements IEconomyRule {
     /** Far more than any real chain is deep (log → planks → stick → torch …). */
     private static final int MOST_PASSES = 64;
 
-    /** @return raw prices and every price that could be worked out, keyed by material name */
-    public Map<String, Money> solve(Map<String, Money> base, List<RecipeShape> recipes, double craftMarkup,
-                                    double smeltMarkup) {
+    /** Smelting burns this; one piece smelts {@link #SMELTS_PER_COAL} items. */
+    public static final String FUEL = "COAL";
+    public static final int SMELTS_PER_COAL = 8;
+
+    /**
+     * Crafting adds the markup to its ingredients; smelting adds no markup, only the coal one item takes — so a
+     * smelted thing is never worth more than its input and its fuel.
+     *
+     * @return raw prices and every price that could be worked out, keyed by material name
+     */
+    public Map<String, Money> solve(Map<String, Money> base, List<RecipeShape> recipes, double craftMarkup) {
         Map<String, Money> known = new HashMap<>(base);
         for (int pass = 0; pass < MOST_PASSES; pass++) {
             boolean changed = false;
@@ -30,7 +38,7 @@ public final class PriceSolverRule implements IEconomyRule {
                 if (base.containsKey(recipe.result())) {
                     continue;
                 }
-                Money cost = costOf(recipe, known, markupOf(recipe, craftMarkup, smeltMarkup));
+                Money cost = costOf(recipe, known, craftMarkup);
                 if (cost == null) {
                     continue;
                 }
@@ -55,8 +63,7 @@ public final class PriceSolverRule implements IEconomyRule {
      * @param solved what {@link #solve} answered for the same base, recipes and markups
      */
     public Map<String, Map<String, Double>> materials(Map<String, Money> base, List<RecipeShape> recipes,
-                                                      Map<String, Money> solved, double craftMarkup,
-                                                      double smeltMarkup) {
+                                                      Map<String, Money> solved, double craftMarkup) {
         Map<String, Map<String, Double>> made = new HashMap<>();
         for (RecipeShape recipe : recipes) {
             String result = recipe.result();
@@ -64,7 +71,7 @@ public final class PriceSolverRule implements IEconomyRule {
             if (base.containsKey(result) || made.containsKey(result) || price == null) {
                 continue;
             }
-            if (!price.equals(costOf(recipe, solved, markupOf(recipe, craftMarkup, smeltMarkup)))) {
+            if (!price.equals(costOf(recipe, solved, craftMarkup))) {
                 continue;
             }
             Map<String, Double> shares = new HashMap<>();
@@ -81,6 +88,11 @@ public final class PriceSolverRule implements IEconomyRule {
                 shares.merge(cheapest, (double) worth, Double::sum);
                 total += worth;
             }
+            double fuel = recipe.process() == RecipeShape.Process.SMELT ? fuelPerItem(solved) * recipe.amount() : 0;
+            if (fuel > 0) {
+                shares.merge(FUEL, fuel, Double::sum);
+                total += fuel;
+            }
             if (total > 0) {
                 double sum = total;
                 shares.replaceAll((material, worth) -> worth / sum);
@@ -90,16 +102,13 @@ public final class PriceSolverRule implements IEconomyRule {
         return made;
     }
 
-    private static double markupOf(RecipeShape recipe, double craftMarkup, double smeltMarkup) {
-        return switch (recipe.process()) {
-            case SMELT -> smeltMarkup;
-            case WORLD -> 0;
-            default -> craftMarkup;
-        };
+    private static double fuelPerItem(Map<String, Money> known) {
+        Money coal = known.get(FUEL);
+        return coal == null ? 0 : Math.max(0, coal.minor()) / (double) SMELTS_PER_COAL;
     }
 
     /** One of what this recipe makes, or null when an ingredient has no price yet. */
-    private static Money costOf(RecipeShape recipe, Map<String, Money> known, double markup) {
+    private static Money costOf(RecipeShape recipe, Map<String, Money> known, double craftMarkup) {
         if (recipe.slots().isEmpty()) {
             return null;
         }
@@ -121,7 +130,11 @@ public final class PriceSolverRule implements IEconomyRule {
                 return null;
             }
         }
-        double each = total * (1.0 + Math.max(0, markup)) / recipe.amount();
+        double each = switch (recipe.process()) {
+            case SMELT -> total / (double) recipe.amount() + fuelPerItem(known);
+            case WORLD -> total / (double) recipe.amount();
+            default -> total * (1.0 + Math.max(0, craftMarkup)) / recipe.amount();
+        };
         if (each >= Long.MAX_VALUE) {
             return null;
         }

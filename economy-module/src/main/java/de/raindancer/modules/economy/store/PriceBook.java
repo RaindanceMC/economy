@@ -149,10 +149,10 @@ public final class PriceBook {
             }
         });
         Map<String, Money> values = new HashMap<>(settings.deriveFromRecipes()
-                ? solver.solve(base, recipes, settings.craftMarkupClamped(), settings.smeltMarkupClamped())
+                ? solver.solve(base, recipes, settings.craftMarkupClamped())
                 : base);
         Map<String, Map<String, Double>> materials = settings.deriveFromRecipes()
-                ? solver.materials(base, recipes, values, settings.craftMarkupClamped(), settings.smeltMarkupClamped())
+                ? solver.materials(base, recipes, values, settings.craftMarkupClamped())
                 : Map.of();
         // No recipe makes one, so the solver never prices it; it is worth the points it holds, which the shop
         // already sells by the point. Priced after the recipes so an owner's own value (in base) still wins.

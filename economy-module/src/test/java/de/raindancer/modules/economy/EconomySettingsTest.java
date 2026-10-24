@@ -87,7 +87,6 @@ public class EconomySettingsTest {
         assertThat(d.notBought()).isEmpty();
         assertThat(d.deriveFromRecipes()).isTrue();
         assertThat(d.craftMarkupClamped()).isEqualTo(0.1);
-        assertThat(d.smeltMarkupClamped()).isEqualTo(0.15);
         assertThat(d.dynamicPrices()).isTrue();
         assertThat(d.lowestMultiplier()).as("a flooded market can make an item worth nothing").isEqualTo(0.0);
         assertThat(d.highestMultiplier()).as("buying can triple it").isEqualTo(3.0);

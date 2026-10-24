@@ -546,7 +546,7 @@ class PriceBookTest {
     @Test
     @DisplayName("a world shape never makes what it is made from cheaper: ore smelts to an ingot, the ingot stays its price")
     void noCheaperLoops() {
-        byte[] raw = "raw_gold: 900\n".getBytes(StandardCharsets.UTF_8);
+        byte[] raw = "raw_gold: 900\ncoal: 30\n".getBytes(StandardCharsets.UTF_8);
         PriceBook book = new PriceBook(currency -> BasePrices.parse(new ByteArrayInputStream(raw), currency),
                 material -> 0.0, material -> 64, List.of());
         List<RecipeShape> gold = new java.util.ArrayList<>(List.of(
@@ -556,7 +556,7 @@ class PriceBookTest {
         gold.addAll(RecipeReader.inWorld(List.of("GOLD_INGOT", "GOLD_NUGGET", "NETHER_GOLD_ORE", "RAW_GOLD")));
         book.recompute(EconomySettings.DEFAULTS, gold);
         Money ingot = book.tag("GOLD_INGOT").value();
-        assertThat(ingot).isGreaterThan(book.tag("RAW_GOLD").value());
+        assertThat(ingot).as("raw gold and the coal for one item").isEqualTo(Money.of(904));
         assertThat(book.tag("NETHER_GOLD_ORE").value()).isGreaterThanOrEqualTo(ingot);
         assertThat(book.tag("GOLD_NUGGET").sellable()).isTrue();
     }

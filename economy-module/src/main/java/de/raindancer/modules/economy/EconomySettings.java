@@ -239,9 +239,6 @@ public record EconomySettings(
         @In("economy/shop") @Title("Crafting adds") @Describe("A fraction of the ingredients' value: 0.1 is ten percent.")
         @Key("shop.craft-markup") double craftMarkup,
 
-        @In("economy/shop") @Title("Smelting adds") @Describe("A fraction, as crafting — the fuel and the wait.")
-        @Key("shop.smelt-markup") double smeltMarkup,
-
         @In("economy/shop") @Title("Supply and demand")
         @Describe("Buying something makes it dearer and selling it cheaper, recovering over time.")
         @Key("features.dynamic-prices") boolean dynamicPrices,
@@ -917,7 +914,7 @@ public record EconomySettings(
             true, Material.GOLD_NUGGET, "", true, true, 0.0, 2304,
             // shop
             true, true, 1.0, 0.4, SellPricing.AUTOMATIC, List.of(), List.of(), List.of(), List.of(), List.of(), false,
-            true, 0.1, 0.15, true, 0.0, 3.0, 0.1, 12.0, true, 0.25, true, true, List.of(), true, List.of(),
+            true, 0.1, true, 0.0, 3.0, 0.1, 12.0, true, 0.25, true, true, List.of(), true, List.of(),
             true, List.of(), "800",
             true, "2000", List.of("ender_dragon", "wither"),
             true, true, true, true, true, true, true, true, true,
@@ -1265,10 +1262,6 @@ public record EconomySettings(
 
     public double craftMarkupClamped() {
         return clamp(craftMarkup, 0, 10, 0.1);
-    }
-
-    public double smeltMarkupClamped() {
-        return clamp(smeltMarkup, 0, 10, 0.15);
     }
 
     public double lowestMultiplier() {

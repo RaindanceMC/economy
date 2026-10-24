@@ -102,7 +102,7 @@ class RulesTest {
         @DisplayName("a crafted item costs its ingredients plus the markup, per item made")
         void simple() {
             Map<String, Money> solved = rule.solve(Map.of("OAK_LOG", m(200)),
-                    List.of(craft("OAK_PLANKS", 4, "OAK_LOG")), 0.10, 0.15);
+                    List.of(craft("OAK_PLANKS", 4, "OAK_LOG")), 0.10);
             assertThat(solved).containsEntry("OAK_PLANKS", m(55));
             assertThat(solved).containsEntry("OAK_LOG", m(200));
         }
@@ -112,7 +112,7 @@ class RulesTest {
         void chains() {
             Map<String, Money> solved = rule.solve(Map.of("OAK_LOG", m(400)), List.of(
                     craft("STICK", 4, "OAK_PLANKS", "OAK_PLANKS"),
-                    craft("OAK_PLANKS", 4, "OAK_LOG")), 0.0, 0.0);
+                    craft("OAK_PLANKS", 4, "OAK_LOG")), 0.0);
             assertThat(solved).containsEntry("OAK_PLANKS", m(100)).containsEntry("STICK", m(50));
         }
 
@@ -120,7 +120,7 @@ class RulesTest {
         @DisplayName("the cheapest of several recipes wins, and a raw price is never overwritten")
         void cheapest() {
             Map<String, Money> solved = rule.solve(Map.of("A", m(100), "B", m(1000), "C", m(5)), List.of(
-                    craft("X", 1, "B"), craft("X", 1, "A"), craft("C", 1, "A")), 0.0, 0.0);
+                    craft("X", 1, "B"), craft("X", 1, "A"), craft("C", 1, "A")), 0.0);
             assertThat(solved).containsEntry("X", m(100)).containsEntry("C", m(5));
         }
 
@@ -129,14 +129,14 @@ class RulesTest {
         void alternatives() {
             RecipeShape chest = new RecipeShape("CHEST", 1, List.of(List.of("OAK_PLANKS", "BIRCH_PLANKS")),
                     RecipeShape.Process.CRAFT);
-            assertThat(rule.solve(Map.of("OAK_PLANKS", m(50), "BIRCH_PLANKS", m(20)), List.of(chest), 0, 0))
+            assertThat(rule.solve(Map.of("OAK_PLANKS", m(50), "BIRCH_PLANKS", m(20)), List.of(chest), 0))
                     .containsEntry("CHEST", m(20));
         }
 
         @Test
         @DisplayName("an ingredient nobody can price leaves the result unpriced rather than cheap")
         void unknown() {
-            assertThat(rule.solve(Map.of("A", m(100)), List.of(craft("X", 1, "A", "MYSTERY")), 0, 0))
+            assertThat(rule.solve(Map.of("A", m(100)), List.of(craft("X", 1, "A", "MYSTERY")), 0))
                     .doesNotContainKey("X");
         }
 
@@ -147,14 +147,45 @@ class RulesTest {
                     new RecipeShape("IRON_INGOT", 1, List.of(List.of("RAW_IRON")), RecipeShape.Process.SMELT),
                     craft("IRON_BLOCK", 1, "IRON_INGOT", "IRON_INGOT", "IRON_INGOT", "IRON_INGOT", "IRON_INGOT",
                             "IRON_INGOT", "IRON_INGOT", "IRON_INGOT", "IRON_INGOT"),
-                    craft("IRON_INGOT", 9, "IRON_BLOCK")), 0.10, 0.25);
-            assertThat(solved).containsEntry("IRON_INGOT", m(1000)).containsEntry("IRON_BLOCK", m(9900));
+                    craft("IRON_INGOT", 9, "IRON_BLOCK")), 0.10);
+            assertThat(solved).containsEntry("IRON_INGOT", m(800)).containsEntry("IRON_BLOCK", m(7920));
         }
 
         @Test
         @DisplayName("nothing is ever priced at zero")
         void neverFree() {
-            assertThat(rule.solve(Map.of("A", m(1)), List.of(craft("B", 64, "A")), 0, 0)).containsEntry("B", m(1));
+            assertThat(rule.solve(Map.of("A", m(1)), List.of(craft("B", 64, "A")), 0)).containsEntry("B", m(1));
+        }
+
+        private RecipeShape smelt(String result, String input) {
+            return new RecipeShape(result, 1, List.of(List.of(input)), RecipeShape.Process.SMELT);
+        }
+
+        @Test
+        @DisplayName("smelting costs the input plus the coal for one item: an eighth of a coal, no markup")
+        void smeltingTakesCoal() {
+            Map<String, Money> solved = rule.solve(Map.of("RAW_IRON", m(800), "COAL", m(80)),
+                    List.of(smelt("IRON_INGOT", "RAW_IRON")), 0.10);
+            assertThat(solved).containsEntry("IRON_INGOT", m(810));
+        }
+
+        @Test
+        @DisplayName("without a price for coal, smelting costs the input alone")
+        void smeltingWithoutCoal() {
+            assertThat(rule.solve(Map.of("RAW_IRON", m(800)), List.of(smelt("IRON_INGOT", "RAW_IRON")), 0.10))
+                    .containsEntry("IRON_INGOT", m(800));
+        }
+
+        @Test
+        @DisplayName("a smelted item is made of its input and its coal, each by its share of the value")
+        void smeltedMaterials() {
+            Map<String, Money> base = Map.of("COBBLESTONE", m(5), "COAL", m(80));
+            List<RecipeShape> recipes = List.of(smelt("STONE", "COBBLESTONE"));
+            Map<String, Money> solved = rule.solve(base, recipes, 0.10);
+            assertThat(solved).containsEntry("STONE", m(15));
+            Map<String, Double> stone = rule.materials(base, recipes, solved, 0.10).get("STONE");
+            assertThat(stone.get("COBBLESTONE")).isCloseTo(5.0 / 15, org.assertj.core.data.Offset.offset(1e-9));
+            assertThat(stone.get("COAL")).isCloseTo(10.0 / 15, org.assertj.core.data.Offset.offset(1e-9));
         }
     }
 

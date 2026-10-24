@@ -36,12 +36,14 @@ class PriceBookMaterialsTest {
             // A cycle: the block from ingots and the ingots back from the block.
             craft("IRON_BLOCK", 1, "IRON_INGOT", "IRON_INGOT", "IRON_INGOT", "IRON_INGOT", "IRON_INGOT",
                     "IRON_INGOT", "IRON_INGOT", "IRON_INGOT", "IRON_INGOT"),
-            craft("IRON_INGOT", 9, "IRON_BLOCK"));
+            craft("IRON_INGOT", 9, "IRON_BLOCK"),
+            new RecipeShape("STONE", 1, List.of(List.of("COBBLESTONE")), RecipeShape.Process.SMELT));
 
     private PriceBook book(EconomySettings settings) {
         byte[] raw = """
                 cobblestone: 5
                 iron_ingot: 10
+                coal: 80
                 """.getBytes(StandardCharsets.UTF_8);
         PriceBook book = new PriceBook(currency -> BasePrices.parse(new ByteArrayInputStream(raw), currency),
                 material -> pressure.getOrDefault(material, 0.0), material -> 64);
@@ -152,5 +154,14 @@ class PriceBookMaterialsTest {
     @DisplayName("without following materials a raw material pushes in full again")
     void rawInFullWithoutFollowing() {
         assertThat(book("shop.follow-materials", "false").pushPerStack("COBBLESTONE")).isCloseTo(0.1, CLOSE);
+    }
+
+    @Test
+    @DisplayName("a smelted item follows its coal too: coal sold off makes smelting cheaper")
+    void smeltedFollowsCoal() {
+        pressure.put("COAL", -1000.0);
+        PriceBook book = book();
+        assertThat(book.tag("STONE").value()).isEqualTo(Money.of(15));
+        assertThat(book.multiplier("STONE")).as("only the cobblestone third is left").isCloseTo(5.0 / 15, CLOSE);
     }
 }
