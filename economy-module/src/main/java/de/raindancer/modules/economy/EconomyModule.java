@@ -151,7 +151,9 @@ public final class EconomyModule implements FlexModule {
                     return found == null ? 64 : found.getMaxStackSize();
                 },
                 de.raindancer.modules.economy.store.SellOnlyList.parse(
-                        EconomyModule.class.getResourceAsStream(de.raindancer.modules.economy.store.SellOnlyList.RESOURCE)));
+                        EconomyModule.class.getResourceAsStream(de.raindancer.modules.economy.store.SellOnlyList.RESOURCE)),
+                de.raindancer.modules.economy.store.SellOnlyList.parse(EconomyModule.class.getResourceAsStream(
+                        de.raindancer.modules.economy.store.SellOnlyList.RARE_RESOURCE)));
 
         EconomySettings now = settings.current();
         RainEconomy economy = new RainEconomy(book, id -> server.getOfflinePlayer(id).getName(), now);

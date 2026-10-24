@@ -62,7 +62,7 @@ public final class PriceBook {
                             Set<String> notBought, List<String> eggs, Map<String, EnchantKind> enchantments,
                             EnchantWorthRule worth, double pointValue, List<String> potionTypes,
                             Set<String> potionsClosed, Set<String> fallback,
-                            Map<String, Map<String, Double>> materials) {
+                            Map<String, Map<String, Double>> materials, Set<String> rare) {
     }
 
     private static final String EGG = "_SPAWN_EGG";
@@ -78,6 +78,7 @@ public final class PriceBook {
     private final de.raindancer.modules.economy.rules.FallbackPriceRule fallbackPrice =
             new de.raindancer.modules.economy.rules.FallbackPriceRule();
     private final de.raindancer.modules.economy.rules.SellOnlyRule sellOnly;
+    private final de.raindancer.modules.economy.rules.SellOnlyRule rareRule;
     private final TradePriceRule trade = new TradePriceRule();
     private final MarketRule market = new MarketRule();
     private final EnchantCostRule enchantCost = new EnchantCostRule();
@@ -97,14 +98,21 @@ public final class PriceBook {
     /** @param sellOnly the shipped {@code sell-only.yml}: what the shop buys and never sells */
     public PriceBook(java.util.function.Function<Currency, Map<String, Money>> shipped, ToDoubleFunction<String> pressure,
                      ToIntFunction<String> stackSize, List<String> sellOnly) {
+        this(shipped, pressure, stackSize, sellOnly, List.of());
+    }
+
+    /** @param rare the shipped {@code rare.yml}: what the shop sells only with {@code shop.sell-rare} */
+    public PriceBook(java.util.function.Function<Currency, Map<String, Money>> shipped, ToDoubleFunction<String> pressure,
+                     ToIntFunction<String> stackSize, List<String> sellOnly, List<String> rare) {
         this.sellOnly = new de.raindancer.modules.economy.rules.SellOnlyRule(sellOnly);
+        this.rareRule = new de.raindancer.modules.economy.rules.SellOnlyRule(rare);
         this.shippedIn = shipped;
         this.shipped = Map.copyOf(shipped.apply(EconomySettings.DEFAULTS.currency()));
         this.pressure = pressure;
         this.stackSize = stackSize;
         this.snapshot = new Snapshot(EconomySettings.DEFAULTS, this.shipped, Set.of(), PricedNames.NONE,
                 PricedNames.NONE, Set.of(), Set.of(), List.of(), Map.of(), new EnchantWorthRule(List.of()), 0, List.of(),
-                Set.of(), Set.of(), Map.of());
+                Set.of(), Set.of(), Map.of(), Set.of());
     }
 
     /** Works every price out again — on start, on a settings change, on {@code /eco reprice}. */
@@ -196,7 +204,41 @@ public final class PriceBook {
         snapshot = new Snapshot(settings, Map.copyOf(values), Set.copyOf(customValues.amounts().keySet()),
                 PricedNames.parse(settings.buyPrices(), currency), PricedNames.parse(settings.sellPrices(), currency),
                 names(settings.notSold()), names(settings.notBought()), List.copyOf(openEggs), Map.copyOf(kinds),
-                worth, pointValue, types, names(settings.potionsClosed()), Set.copyOf(fallback), Map.copyOf(materials));
+                worth, pointValue, types, names(settings.potionsClosed()), Set.copyOf(fallback), Map.copyOf(materials),
+                rare(values.keySet(), materials));
+    }
+
+    /** Rare by the list, or made of something rare at any step. */
+    private Set<String> rare(Set<String> names, Map<String, Map<String, Double>> materials) {
+        Map<String, Boolean> known = new HashMap<>();
+        Set<String> rare = new HashSet<>();
+        for (String name : names) {
+            if (rare(name, materials, known, new HashSet<>())) {
+                rare.add(name);
+            }
+        }
+        return Set.copyOf(rare);
+    }
+
+    private boolean rare(String name, Map<String, Map<String, Double>> materials, Map<String, Boolean> known,
+                         Set<String> on) {
+        Boolean answer = known.get(name);
+        if (answer != null) {
+            return answer;
+        }
+        boolean rare = rareRule.matches(name);
+        Map<String, Double> madeOf = materials.get(name);
+        if (!rare && madeOf != null && on.add(name)) {
+            for (String material : madeOf.keySet()) {
+                if (!on.contains(material) && rare(material, materials, known, on)) {
+                    rare = true;
+                    break;
+                }
+            }
+            on.remove(name);
+        }
+        known.put(name, rare);
+        return rare;
     }
 
     /**
@@ -314,7 +356,8 @@ public final class PriceBook {
         boolean free = raw.buy() != null && !raw.buy().isPositive() && flooded(name, raw);
         boolean buyable = settings.shopEnabled() && open && raw.buy() != null && (raw.buy().isPositive() || free)
                 && !now.notSold().contains(name)
-                && (now.buyPrices().of(name).isPresent() || !fallback && !sellOnly.matches(name));
+                && (now.buyPrices().of(name).isPresent() || !fallback && !sellOnly.matches(name)
+                && (settings.sellRare() || !now.rare().contains(name)));
         boolean sellable = settings.sellingEnabled() && open && raw.sell() != null && raw.sell().isPositive()
                 && !now.notBought().contains(name);
         PriceTag.Source source = raw.custom() ? PriceTag.Source.CUSTOM

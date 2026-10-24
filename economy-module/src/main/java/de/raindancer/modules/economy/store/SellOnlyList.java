@@ -8,10 +8,14 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-/** The shipped {@code sell-only.yml}: one name or pattern a line, {@code - } in front or not, {@code #} for comments. */
+/**
+ * The shipped {@code sell-only.yml} and {@code rare.yml}: one name or pattern a line, {@code - } in front or not,
+ * {@code #} for comments.
+ */
 public final class SellOnlyList {
 
     public static final String RESOURCE = "sell-only.yml";
+    public static final String RARE_RESOURCE = "rare.yml";
 
     private SellOnlyList() {
     }

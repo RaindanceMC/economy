@@ -1,0 +1,34 @@
+# What should stay rare in the game: the shop does not sell it (shop.sell-rare off), though it still buys it.
+# End-game progress, boss drops and one-of-a-kind finds — bought, they would skip what the game is about.
+# Whatever is made from one of these is rare too, without being written here: a beacon has a nether star in it.
+# Whole names, or one star at the start or the end. What sell-only.yml lists is never sold anyway.
+# An owner's own buy price for one (shop.buy-prices) still puts it on sale.
+
+# Netherite: debris, scrap, ingots, blocks, tools, armour — and the template that makes them
+- ancient_debris
+- netherite_*
+- "*_smithing_template"
+
+# Bosses and raids
+- nether_star
+- dragon_head
+- dragon_breath
+- wither_skeleton_skull
+- totem_of_undying
+
+# The deep sea
+- heart_of_the_sea
+- trident
+
+# The End
+- shulker_shell
+- shulker_box
+- "*_shulker_box"
+- end_crystal
+
+# Trial chambers and the deep dark
+- heavy_core
+- mace
+- echo_shard
+
+- enchanted_golden_apple
