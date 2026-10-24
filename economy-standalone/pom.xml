@@ -62,7 +62,7 @@
         <!-- 0.52.2: no book of Rain's enchantments costs more shards than two of the level below (built-in 8, 16, 32, 64, 128; steeper settings capped) — buying low and combining in an anvil was cheaper. -->
         <!-- 0.54.0: shop.take-worthless — /sell and /sell hand take an item the shop pays nothing for (flooded), for nothing; selling everything still leaves it. -->
         <!-- 0.53.0: rains-enchantments.free-once-unlocked — once a guild unlocked an enchantment, its books cost only the money. -->
-        <plugin.version>0.56.0</plugin.version>
+        <plugin.version>0.56.1</plugin.version>
     </properties>
 
     <dependencies>
