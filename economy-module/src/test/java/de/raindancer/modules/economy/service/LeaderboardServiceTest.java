@@ -84,4 +84,24 @@ class LeaderboardServiceTest {
         assertThat(leaderboard.standings(Podium.Board.CASINO).getFirst().amount()).isEqualTo(Money.of(400));
         assertThat(leaderboard.standings(Podium.Board.RICHEST).getFirst().name()).isEqualTo("Rich");
     }
+
+    @Test
+    @DisplayName("the playtime board ranks by minutes played on the network; nobody who never played, no pots")
+    void playtime() {
+        UUID ada = UUID.randomUUID();
+        UUID bo = UUID.randomUUID();
+        UUID fresh = UUID.randomUUID();
+        book.open(ada, "Ada", Money.of(1));
+        book.open(bo, "Bo", Money.of(900_000));
+        book.open(fresh, "Fresh", Money.of(1));
+        book.open(AccountBook.LOTTERY_POT, "Lottery", Money.of(1_000_000));
+        java.util.Map<UUID, Long> minutes = java.util.Map.of(ada, 600L, bo, 90L, AccountBook.LOTTERY_POT, 99_999L);
+
+        LeaderboardService leaderboard = new LeaderboardService(book, clock::get,
+                id -> minutes.getOrDefault(id, 0L));
+
+        assertThat(leaderboard.standings(Podium.Board.PLAYTIME)).extracting(Standing::name)
+                .containsExactly("Ada", "Bo");
+        assertThat(leaderboard.standings(Podium.Board.PLAYTIME).getFirst().minutes()).isEqualTo(600L);
+    }
 }

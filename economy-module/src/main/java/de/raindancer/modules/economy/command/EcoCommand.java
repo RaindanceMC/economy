@@ -107,8 +107,20 @@ public final class EcoCommand extends EconomyCommand {
                 } else if (!live.config().leaderboardsEnabled()) {
                     live.messages().send(player, "economy.admin.leaderboards-off");
                 } else {
-                    live.displays().place(player);
-                    live.messages().send(player, "economy.admin.leaderboard-placed");
+                    // "/eco leaderboard", "/eco leaderboard place [board]" or "/eco leaderboard <board>"
+                    String typed = args.length > 2 ? args[2]
+                            : args.length > 1 && !args[1].equalsIgnoreCase("place") ? args[1] : "richest";
+                    var board = de.raindancer.modules.economy.model.Podium.Board.read(typed);
+                    if (board.isEmpty()) {
+                        live.messages().send(player, "economy.admin.statue-board", "what", typed);
+                        return;
+                    }
+                    live.displays().place(player, board.get());
+                    live.messages().send(player, switch (board.get()) {
+                    case RICHEST -> "economy.admin.leaderboard-placed-richest";
+                    case CASINO -> "economy.admin.leaderboard-placed-casino";
+                    case PLAYTIME -> "economy.admin.leaderboard-placed-playtime";
+                });
                 }
             });
             case "statue" -> player(live, sender).ifPresent(player -> {
@@ -128,8 +140,11 @@ public final class EcoCommand extends EconomyCommand {
                     return;
                 }
                 live.statues().place(player, board.get());
-                live.messages().send(player, board.get() == de.raindancer.modules.economy.model.Podium.Board.CASINO
-                        ? "economy.admin.statue-placed-casino" : "economy.admin.statue-placed-richest");
+                live.messages().send(player, switch (board.get()) {
+                    case RICHEST -> "economy.admin.statue-placed-richest";
+                    case CASINO -> "economy.admin.statue-placed-casino";
+                    case PLAYTIME -> "economy.admin.statue-placed-playtime";
+                });
             });
             case "auction" -> {
                 if (args.length > 2 && args[1].equalsIgnoreCase("cancel")) {
@@ -506,9 +521,14 @@ public final class EcoCommand extends EconomyCommand {
         if (args[0].equalsIgnoreCase("statue")) {
             return args.length == 2 ? starting(args[1], List.of("place", "remove"))
                     : args.length == 3 && args[1].equalsIgnoreCase("place")
-                    ? starting(args[2], List.of("casino", "richest")) : List.of();
+                    ? starting(args[2], List.of("casino", "richest", "playtime")) : List.of();
         }
-        if (args.length == 2 && (args[0].equalsIgnoreCase("leaderboard") || args[0].equalsIgnoreCase("agent")
+        if (args[0].equalsIgnoreCase("leaderboard")) {
+            return args.length == 2 ? starting(args[1], List.of("place", "remove"))
+                    : args.length == 3 && args[1].equalsIgnoreCase("place")
+                    ? starting(args[2], List.of("richest", "casino", "playtime")) : List.of();
+        }
+        if (args.length == 2 && (args[0].equalsIgnoreCase("agent")
                 || args[0].equalsIgnoreCase("banker"))) {
             return starting(args[1], List.of("place", "remove"));
         }

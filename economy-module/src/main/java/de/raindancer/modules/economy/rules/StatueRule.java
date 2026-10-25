@@ -49,12 +49,17 @@ public final class StatueRule implements IEconomyRule {
         return switch (board) {
             case CASINO -> "<gold><bold>Biggest casino winners</bold></gold>";
             case RICHEST -> "<gold><bold>Richest players</bold></gold>";
+            case PLAYTIME -> "<gold><bold>Most time played</bold></gold>";
         };
     }
 
     /** What goes before the amount under a name. */
     public String caption(Podium.Board board) {
-        return board == Podium.Board.CASINO ? "<gray>won " : "<gray>";
+        return switch (board) {
+            case CASINO -> "<gray>won ";
+            case RICHEST -> "<gray>";
+            case PLAYTIME -> "<gray>played ";
+        };
     }
 
     @Override

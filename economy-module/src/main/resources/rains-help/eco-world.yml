@@ -28,12 +28,12 @@ sections:
     title: Leaderboards
     when: economy:features.leaderboards
     text: |
-      Stand where it should float and type {run:/eco leaderboard place}; {run:/eco leaderboard remove} takes away the nearest within five blocks. It lists the richest {setting:economy:leaderboard.size|count} players and refreshes by itself.
+      Stand where it should float and type {run:/eco leaderboard place}; {run:/eco leaderboard remove} takes away the nearest within five blocks. It lists the richest {setting:economy:leaderboard.size|count} players and refreshes by itself; {cmd:/eco leaderboard place casino} lists the biggest casino winners and {cmd:/eco leaderboard place playtime} who played longest on the network.
   - question: How do I put up top three statues?
     title: Top three podiums
     when: economy:features.statues
     text: |
-      Stand where the winner should stand, look toward where the crowd will be, and type {run:/eco statue place} — a podium of the three biggest casino winners (net, the lottery included). {cmd:/eco statue place richest} ranks balances instead. Each statue wears its player's skin and changes hands by itself; {run:/eco statue remove} takes away the nearest podium within five blocks.
+      Stand where the winner should stand, look toward where the crowd will be, and type {run:/eco statue place} — a podium of the three biggest casino winners (net, the lottery included). {cmd:/eco statue place richest} ranks balances instead, {cmd:/eco statue place playtime} time played on the network. Each statue wears its player's skin and changes hands by itself; {run:/eco statue remove} takes away the nearest podium within five blocks.
   - question: Can I draw the lottery now?
     title: Lottery draw
     text: |

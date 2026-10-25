@@ -1,13 +1,11 @@
 package de.raindancer.modules.economy.rules;
 
-import de.raindancer.modules.economy.model.Account;
-
 import java.util.List;
 
-/** How the richest players are listed — in the sidebar and on a leaderboard alike. */
+/** How the top players of a board are listed — in the sidebar and on a leaderboard alike. */
 public final class LeaderboardRule implements IEconomyRule {
 
-    public List<Account> top(List<Account> ranking, int size) {
+    public <T> List<T> top(List<T> ranking, int size) {
         return ranking.subList(0, Math.max(0, Math.min(size, ranking.size())));
     }
 
@@ -27,6 +25,6 @@ public final class LeaderboardRule implements IEconomyRule {
 
     @Override
     public String describe() {
-        return "how the richest players are listed";
+        return "how the top players of a board are listed";
     }
 }

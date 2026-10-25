@@ -120,7 +120,8 @@ public final class StatueService implements IEconomyService {
     private void dress(Mannequin statue, int place, Standing holder, Podium podium, EconomySettings live) {
         statue.customName(MINI.deserialize(rule.title(place, holder == null ? null : holder.name())));
         statue.setDescription(holder == null ? Component.empty()
-                : MINI.deserialize(rule.caption(podium.board())).append(live.currency().render(holder.amount())));
+                : MINI.deserialize(rule.caption(podium.board()))
+                        .append(LeaderboardDisplayService.worth(holder, podium.board(), live.currency())));
         String wearing = statue.getPersistentDataContainer().get(HOLDER, PersistentDataType.STRING);
         String now = holder == null ? NOBODY : holder.id().toString();
         if (!now.equals(wearing)) {

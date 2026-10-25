@@ -14,7 +14,9 @@ public record Podium(String world, double x, double y, double z, float yaw, Boar
         /** Net winnings at the games of chance and the lottery, over the account's whole life. */
         CASINO,
         /** Balance, like /baltop. */
-        RICHEST;
+        RICHEST,
+        /** Time played on the whole network, away time included, as Core counts it. */
+        PLAYTIME;
 
         public static Optional<Board> read(String typed) {
             if (typed == null) {

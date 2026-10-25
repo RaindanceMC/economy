@@ -3,10 +3,13 @@ package de.raindancer.modules.economy.service;
 import de.raindancer.core.data.settings.SettingsStore;
 import de.raindancer.core.platform.util.Scheduling;
 import de.raindancer.core.social.economy.Currency;
+import de.raindancer.core.world.time.Times;
 import de.raindancer.modules.economy.EconomySettings;
-import de.raindancer.modules.economy.model.Account;
+import de.raindancer.modules.economy.model.Podium;
 import de.raindancer.modules.economy.model.Spot;
+import de.raindancer.modules.economy.model.Standing;
 import de.raindancer.modules.economy.rules.LeaderboardRule;
+import de.raindancer.modules.economy.rules.StatueRule;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Location;
@@ -20,13 +23,16 @@ import org.bukkit.entity.TextDisplay;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
 
+import java.time.Duration;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
 /**
- * Floating lists of the richest players, put down in the world. Each is a text display tagged as this
+ * Floating lists of a board's top players — the richest, casino winners, time played — put down in the world. Each is a text display tagged as this
  * module's; the places live in the settings, so a lost display is simply put back on the next refresh.
  * Everything touching the world happens on the region that owns it.
  */
@@ -40,6 +46,7 @@ public final class LeaderboardDisplayService implements IEconomyService {
     private final LeaderboardService leaderboard;
     private final SettingsStore<EconomySettings> store;
     private final LeaderboardRule rule = new LeaderboardRule();
+    private final StatueRule headings = new StatueRule();
     private volatile EconomySettings settings;
 
     public LeaderboardDisplayService(Plugin plugin, Server server, LeaderboardService leaderboard,
@@ -68,8 +75,9 @@ public final class LeaderboardDisplayService implements IEconomyService {
         if (!live.leaderboardsEnabled()) {
             return;
         }
-        Component text = text(live);
+        Map<Podium.Board, Component> texts = new EnumMap<>(Podium.Board.class);
         for (Spot spot : spots()) {
+            Component text = texts.computeIfAbsent(spot.board(), board -> text(live, board));
             World world = server.getWorld(spot.world());
             if (world == null) {
                 continue;
@@ -85,10 +93,10 @@ public final class LeaderboardDisplayService implements IEconomyService {
         }
     }
 
-    private Component text(EconomySettings live) {
+    private Component text(EconomySettings live, Podium.Board board) {
         Currency currency = live.currency();
-        var built = Component.text().append(MINI.deserialize("<gold><bold>Richest players</bold></gold>"));
-        List<Account> top = rule.top(leaderboard.ranking(), live.leaderboardSize());
+        var built = Component.text().append(MINI.deserialize(headings.heading(board)));
+        List<Standing> top = rule.top(leaderboard.standings(board), live.leaderboardSize());
         if (top.isEmpty()) {
             built.append(Component.newline()).append(MINI.deserialize("<gray>Nobody yet"));
         }
@@ -96,9 +104,16 @@ public final class LeaderboardDisplayService implements IEconomyService {
             built.append(Component.newline())
                     .append(MINI.deserialize(rule.colourOf(i + 1) + (i + 1) + ". <white>"
                             + MINI.escapeTags(top.get(i).name()) + "<gray> — "))
-                    .append(currency.render(top.get(i).balance()));
+                    .append(worth(top.get(i), board, currency));
         }
         return built.build();
+    }
+
+    /** What a place on a board is worth: money, or time played. */
+    static Component worth(Standing standing, Podium.Board board, Currency currency) {
+        return board == Podium.Board.PLAYTIME
+                ? Component.text(Times.describe(Duration.ofMinutes(standing.minutes())))
+                : currency.render(standing.amount());
     }
 
     private static Optional<TextDisplay> find(Location at) {
@@ -120,10 +135,10 @@ public final class LeaderboardDisplayService implements IEconomyService {
         });
     }
 
-    /** A new leaderboard just above the player's head. */
-    public Spot place(Player player) {
+    /** A new leaderboard of {@code board} just above the player's head. */
+    public Spot place(Player player, Podium.Board board) {
         Location eye = player.getEyeLocation();
-        Spot spot = new Spot(eye.getWorld().getName(), eye.getX(), eye.getY() + 0.75, eye.getZ());
+        Spot spot = new Spot(eye.getWorld().getName(), eye.getX(), eye.getY() + 0.75, eye.getZ(), board);
         write(lines -> lines.add(spot.written()));
         return spot;
     }

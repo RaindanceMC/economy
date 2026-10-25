@@ -51,5 +51,7 @@ class StatueRuleTest {
         assertThat(rule.heading(Podium.Board.RICHEST)).contains("Richest");
         assertThat(rule.caption(Podium.Board.CASINO)).isEqualTo("<gray>won ");
         assertThat(rule.caption(Podium.Board.RICHEST)).isEqualTo("<gray>");
+        assertThat(rule.heading(Podium.Board.PLAYTIME)).contains("time played");
+        assertThat(rule.caption(Podium.Board.PLAYTIME)).isEqualTo("<gray>played ");
     }
 }

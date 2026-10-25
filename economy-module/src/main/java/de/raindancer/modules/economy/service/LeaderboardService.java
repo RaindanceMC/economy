@@ -13,8 +13,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.LongSupplier;
+import java.util.function.ToLongFunction;
 
-/** The richest accounts, sorted at most every few seconds however often /baltop is typed. */
+/** The boards — richest, casino winners, time played — each sorted at most every few seconds however often asked. */
 public final class LeaderboardService {
 
     private static final long FRESH_FOR_MILLIS = 4_000;
@@ -27,10 +28,19 @@ public final class LeaderboardService {
     private volatile long sortedAt = Long.MIN_VALUE / 2;
     private volatile List<Standing> winners = List.of();
     private volatile long winnersAt = Long.MIN_VALUE / 2;
+    private final ToLongFunction<UUID> minutesPlayed;
+    private volatile List<Standing> players = List.of();
+    private volatile long playersAt = Long.MIN_VALUE / 2;
 
     public LeaderboardService(AccountBook book, LongSupplier clock) {
+        this(book, clock, id -> 0);
+    }
+
+    /** @param minutesPlayed how long a player has played on the network, in minutes */
+    public LeaderboardService(AccountBook book, LongSupplier clock, ToLongFunction<UUID> minutesPlayed) {
         this.book = book;
         this.clock = clock;
+        this.minutesPlayed = minutesPlayed;
     }
 
     public List<Account> ranking() {
@@ -49,7 +59,22 @@ public final class LeaderboardService {
         return switch (board) {
             case RICHEST -> ranking().stream().map(each -> new Standing(each.id(), each.name(), each.balance())).toList();
             case CASINO -> casinoWinners();
+            case PLAYTIME -> longestPlayed();
         };
+    }
+
+    private List<Standing> longestPlayed() {
+        long now = clock.getAsLong();
+        if (now - playersAt > FRESH_FOR_MILLIS) {
+            players = book.all().stream()
+                    .filter(account -> !AccountBook.isSystem(account.id()))
+                    .map(account -> Standing.played(account.id(), account.name(), minutesPlayed.applyAsLong(account.id())))
+                    .filter(standing -> standing.minutes() > 0)
+                    .sorted(Comparator.comparingLong(Standing::minutes).reversed().thenComparing(Standing::name))
+                    .toList();
+            playersAt = now;
+        }
+        return players;
     }
 
     private List<Standing> casinoWinners() {

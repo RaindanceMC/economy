@@ -33,6 +33,7 @@ class PodiumTest {
     void boards() {
         assertThat(Podium.Board.read("Richest")).contains(Podium.Board.RICHEST);
         assertThat(Podium.Board.read("CASINO")).contains(Podium.Board.CASINO);
+        assertThat(Podium.Board.read("playtime")).contains(Podium.Board.PLAYTIME);
         assertThat(Podium.Board.read("jackpot")).isEmpty();
         assertThat(Podium.Board.read(null)).isEmpty();
     }
