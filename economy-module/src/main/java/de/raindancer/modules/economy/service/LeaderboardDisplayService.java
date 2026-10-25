@@ -124,10 +124,7 @@ public final class LeaderboardDisplayService implements IEconomyService {
     public Spot place(Player player) {
         Location eye = player.getEyeLocation();
         Spot spot = new Spot(eye.getWorld().getName(), eye.getX(), eye.getY() + 0.75, eye.getZ());
-        List<String> lines = new ArrayList<>(settings.leaderboardSpots());
-        lines.add(spot.written());
-        write(lines);
-        Scheduling.entityLater(plugin, player, 2L, this::refresh);
+        write(lines -> lines.add(spot.written()));
         return spot;
     }
 
@@ -147,20 +144,25 @@ public final class LeaderboardDisplayService implements IEconomyService {
             return false;
         }
         Spot gone = nearest;
-        List<String> lines = new ArrayList<>();
-        for (String line : settings.leaderboardSpots()) {
-            if (!Spot.parse(line).map(gone::equals).orElse(false)) {
-                lines.add(line);
-            }
-        }
-        write(lines);
+        write(lines -> lines.removeIf(line -> Spot.parse(line).map(gone::equals).orElse(false)));
         Location there = new Location(at.getWorld(), gone.x(), gone.y(), gone.z());
         Scheduling.region(plugin, there, () -> find(there).ifPresent(Entity::remove));
         return true;
     }
 
-    private void write(List<String> lines) {
-        store.set("leaderboard.spots", String.join(", ", lines));
-        store.trySave();
+    /**
+     * Changes the list of places and saves it, off the server's threads (the settings live in a database), then
+     * redraws. One at a time, so two placed at once both stay.
+     */
+    private void write(java.util.function.Consumer<List<String>> change) {
+        Scheduling.async(plugin, () -> {
+            synchronized (this) {
+                List<String> lines = new ArrayList<>(store.current().leaderboardSpots());
+                change.accept(lines);
+                store.set("leaderboard.spots", String.join(", ", lines));
+                store.trySave();
+            }
+            refresh();
+        });
     }
 }

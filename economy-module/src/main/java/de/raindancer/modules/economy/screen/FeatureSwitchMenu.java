@@ -50,6 +50,7 @@ public final class FeatureSwitchMenu extends PaginatedMenu<FeatureSwitchMenu.Swi
             new Switch("features.baltop", "Richest players", Material.GOLDEN_HELMET),
             new Switch("features.sidebar", "Sidebar", Material.OAK_SIGN),
             new Switch("features.leaderboards", "World leaderboards", Material.ITEM_FRAME),
+            new Switch("features.statues", "Top three podiums", Material.ARMOR_STAND),
             new Switch("accounts.action-bar", "Changes above hotbar", Material.OAK_SIGN),
             new Switch("features.gambling", "Gambling", Material.GOLD_BLOCK),
             new Switch("features.coinflip", "Coin flips", Material.SUNFLOWER),

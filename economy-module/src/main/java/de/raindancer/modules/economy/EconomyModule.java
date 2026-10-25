@@ -87,7 +87,7 @@ import java.util.UUID;
  */
 public final class EconomyModule implements FlexModule {
 
-    private static final ModuleInfo INFO = ModuleInfo.of("economy", "Economy", "0.57.0")
+    private static final ModuleInfo INFO = ModuleInfo.of("economy", "Economy", "0.58.0")
             .describedAs("A bank, paying and hiring, coins you can carry, a creative-style shop priced from recipes, "
                     + "passive income, live auctions and raffles, and a casino with sounds and animations — every part switchable.")
             .by("Raindancer118");
@@ -217,6 +217,8 @@ public final class EconomyModule implements FlexModule {
                 context.core().scoreboards(), now);
         var displays = new de.raindancer.modules.economy.service.LeaderboardDisplayService(context.plugin(), server,
                 leaderboard, settings, now);
+        var statues = new de.raindancer.modules.economy.service.StatueService(context.plugin(), server, leaderboard,
+                settings, now);
         GamblingService gambling = new GamblingService(context.plugin(), server, economy, messages, effects, buttons,
                 Clock.systemDefaultZone(), sounds, now);
         gambling.offersWarp(name -> context.core().places().ofKind("warp").stream()
@@ -291,7 +293,7 @@ public final class EconomyModule implements FlexModule {
 
         for (var service : List.of(economy, notifier, payments, bills, cash, shop, rewards, income, hire, statements,
                 interest, daily, gambling, lottery, sidebar, displays, tables, scratch, crash, race, dealers, auctions,
-                raffles, tax, experience, loans, packs, supply, funds, repair, death, seasons, backpay)) {
+                raffles, tax, experience, loans, packs, supply, funds, repair, death, seasons, backpay, statues)) {
             settings.onChange(service::settings);
         }
 
@@ -302,7 +304,7 @@ public final class EconomyModule implements FlexModule {
                 settings::current, settings, economy, market, payments, bills, cash, shop, rewards, income, hire,
                 statements, interest, daily, leaderboard, sidebar, displays, gambling, lottery, tables, scratch, crash,
                 race, dealers, auctions, raffles, tax, experience, loans, packs, new LiveScreens(), supply, supplyStore,
-                funds, repair, death, seasons, backpay, sellWands);
+                funds, repair, death, seasons, backpay, sellWands, statues);
         sidebar.pot(lottery::pot);
         this.tables = tables;
         this.crash = crash;
@@ -397,7 +399,10 @@ public final class EconomyModule implements FlexModule {
         if (sidebars != null) {
             context.closeWith(sidebars::cancel);
         }
-        var boards = Scheduling.globalTimer(context.plugin(), 100L, 600L, task -> displays.refresh());
+        var boards = Scheduling.globalTimer(context.plugin(), 100L, 100L, task -> {
+            displays.refresh();
+            statues.refresh();
+        });
         if (boards != null) {
             context.closeWith(boards::cancel);
         }

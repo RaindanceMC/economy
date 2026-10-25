@@ -1314,6 +1314,33 @@ public final class AccountBook {
         }
     }
 
+    /**
+     * Every account's lifetime net — taken in less paid out — over {@code kinds}, lines not yet written included.
+     * Accounts that never moved money of those kinds are missing.
+     */
+    public Map<UUID, Money> netOf(Set<TransactionKind> kinds) {
+        synchronized (lock) {
+            Map<UUID, Money> net = new HashMap<>();
+            credit.forEach((id, history) -> {
+                Money sum = Money.ZERO;
+                for (TransactionKind kind : kinds) {
+                    sum = sum.plus(history.in(kind)).minus(history.out(kind));
+                }
+                if (!history.in().isEmpty() || !history.out().isEmpty()) {
+                    net.merge(id, sum, Money::plus);
+                }
+            });
+            for (List<Transaction> lines : List.of(flushingLines, journal)) {
+                for (Transaction line : lines) {
+                    if (kinds.contains(line.kind())) {
+                        net.merge(line.account(), line.delta(), Money::plus);
+                    }
+                }
+            }
+            return net;
+        }
+    }
+
     public Optional<Loan> loanOf(UUID player) {
         synchronized (lock) {
             return Optional.ofNullable(loans.get(player));

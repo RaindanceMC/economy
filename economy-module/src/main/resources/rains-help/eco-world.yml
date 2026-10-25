@@ -8,8 +8,8 @@ category: Staff
 order: 912
 module: economy
 permission: rainseconomy.admin
-aliases: [dealer-place, banker-place, leaderboard-place, agents]
-keywords: [dealer, banker, agent, leaderboard, draw, mannequin]
+aliases: [dealer-place, banker-place, leaderboard-place, statue-place, agents]
+keywords: [dealer, banker, agent, leaderboard, statue, podium, draw, mannequin]
 related: [eco-money, casino, economy]
 sections:
   - question: How do I place a casino dealer?
@@ -29,6 +29,11 @@ sections:
     when: economy:features.leaderboards
     text: |
       Stand where it should float and type {run:/eco leaderboard place}; {run:/eco leaderboard remove} takes away the nearest within five blocks. It lists the richest {setting:economy:leaderboard.size|count} players and refreshes by itself.
+  - question: How do I put up top three statues?
+    title: Top three podiums
+    when: economy:features.statues
+    text: |
+      Stand where the winner should stand, look toward where the crowd will be, and type {run:/eco statue place} — a podium of the three biggest casino winners (net, the lottery included). {cmd:/eco statue place richest} ranks balances instead. Each statue wears its player's skin and changes hands by itself; {run:/eco statue remove} takes away the nearest podium within five blocks.
   - question: Can I draw the lottery now?
     title: Lottery draw
     text: |

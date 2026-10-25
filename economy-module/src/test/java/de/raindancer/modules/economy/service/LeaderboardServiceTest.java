@@ -4,6 +4,8 @@ import de.raindancer.core.data.sql.Database;
 import de.raindancer.core.testkit.TestDatabases;
 import de.raindancer.core.social.economy.Money;
 import de.raindancer.modules.economy.model.Account;
+import de.raindancer.modules.economy.model.Podium;
+import de.raindancer.modules.economy.model.Standing;
 import de.raindancer.modules.economy.rules.BalanceRule;
 import de.raindancer.modules.economy.store.AccountBook;
 import de.raindancer.modules.economy.store.EconomyDatabase;
@@ -55,5 +57,31 @@ class LeaderboardServiceTest {
 
         assertThat(leaderboard.ranking()).extracting(Account::id).containsExactly(bedrock, java);
         assertThat(leaderboard.placeOf(bedrock)).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("the casino board ranks what each player won at the tables, net; losers and pots are not on it")
+    void casinoWinners() {
+        UUID ada = UUID.randomUUID();
+        UUID bo = UUID.randomUUID();
+        UUID loser = UUID.randomUUID();
+        UUID rich = UUID.randomUUID();
+        book.open(ada, "Ada", Money.of(1_000));
+        book.open(bo, "Bo", Money.of(1_000));
+        book.open(loser, "Lu", Money.of(1_000));
+        book.open(rich, "Rich", Money.of(900_000));
+        Money most = Money.of(1_000_000_000L);
+        book.play(ada, Money.of(100), Money.of(600), "Slots — won", most);
+        book.play(ada, Money.of(100), Money.ZERO, "Slots", most);
+        book.play(bo, Money.of(100), Money.of(300), "Dice — won", most);
+        book.play(loser, Money.of(500), Money.ZERO, "Roulette", most);
+        book.open(AccountBook.LOTTERY_POT, "Lottery", Money.of(1_000_000));
+
+        LeaderboardService leaderboard = new LeaderboardService(book, clock::get);
+
+        assertThat(leaderboard.standings(Podium.Board.CASINO)).extracting(Standing::name)
+                .containsExactly("Ada", "Bo");
+        assertThat(leaderboard.standings(Podium.Board.CASINO).getFirst().amount()).isEqualTo(Money.of(400));
+        assertThat(leaderboard.standings(Podium.Board.RICHEST).getFirst().name()).isEqualTo("Rich");
     }
 }

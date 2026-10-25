@@ -27,7 +27,7 @@ import java.util.function.Supplier;
 public final class EcoCommand extends EconomyCommand {
 
     private static final List<String> SUBCOMMANDS = List.of("give", "take", "set", "reset", "freeze", "unfreeze",
-            "history", "menu", "price", "unpriced", "wand", "reprice", "draw", "calm", "coin", "leaderboard", "dealer", "agent", "banker", "auction", "raffle", "giveaway", "tax", "loan", "packs", "health", "fund", "season");
+            "history", "menu", "price", "unpriced", "wand", "reprice", "draw", "calm", "coin", "leaderboard", "statue", "dealer", "agent", "banker", "auction", "raffle", "giveaway", "tax", "loan", "packs", "health", "fund", "season");
 
     public EcoCommand(Supplier<EconomyServices> services) {
         super(services);
@@ -110,6 +110,26 @@ public final class EcoCommand extends EconomyCommand {
                     live.displays().place(player);
                     live.messages().send(player, "economy.admin.leaderboard-placed");
                 }
+            });
+            case "statue" -> player(live, sender).ifPresent(player -> {
+                if (args.length > 1 && args[1].equalsIgnoreCase("remove")) {
+                    live.messages().send(player, live.statues().remove(player)
+                            ? "economy.admin.statue-removed" : "economy.admin.statue-none");
+                    return;
+                }
+                if (!live.config().statuesEnabled()) {
+                    live.messages().send(player, "economy.admin.statues-off");
+                    return;
+                }
+                String typed = args.length > 2 ? args[2] : "casino";
+                var board = de.raindancer.modules.economy.model.Podium.Board.read(typed);
+                if (board.isEmpty()) {
+                    live.messages().send(player, "economy.admin.statue-board", "what", typed);
+                    return;
+                }
+                live.statues().place(player, board.get());
+                live.messages().send(player, board.get() == de.raindancer.modules.economy.model.Podium.Board.CASINO
+                        ? "economy.admin.statue-placed-casino" : "economy.admin.statue-placed-richest");
             });
             case "auction" -> {
                 if (args.length > 2 && args[1].equalsIgnoreCase("cancel")) {
@@ -482,6 +502,11 @@ public final class EcoCommand extends EconomyCommand {
         }
         if (args.length == 3 && args[0].equalsIgnoreCase("loan")) {
             return starting(args[2], List.of("forgive"));
+        }
+        if (args[0].equalsIgnoreCase("statue")) {
+            return args.length == 2 ? starting(args[1], List.of("place", "remove"))
+                    : args.length == 3 && args[1].equalsIgnoreCase("place")
+                    ? starting(args[2], List.of("casino", "richest")) : List.of();
         }
         if (args.length == 2 && (args[0].equalsIgnoreCase("leaderboard") || args[0].equalsIgnoreCase("agent")
                 || args[0].equalsIgnoreCase("banker"))) {

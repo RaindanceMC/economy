@@ -852,6 +852,15 @@ public record EconomySettings(
         @Describe("'<world> <x> <y> <z>', comma separated. Written by /eco leaderboard place and remove.")
         @Key("leaderboard.spots") List<String> leaderboardSpots,
 
+        @In("economy/display") @Title("Podiums of the top three")
+        @Describe("Statues of the three biggest casino winners (or richest players) on a podium, wearing their "
+                + "skins, put down with /eco statue place.")
+        @Key("features.statues") boolean statuesEnabled,
+
+        @In("economy/display") @Title("Podium places")
+        @Describe("'<world> <x> <y> <z> <yaw> <casino|richest>', comma separated. Written by /eco statue place and remove.")
+        @Key("statue.podiums") List<String> statuePodiums,
+
         // ------------------------------------------------------------------ general
         @In("economy") @Title("Richest players list") @Describe("/baltop.")
         @Key("features.baltop") boolean baltopEnabled,
@@ -963,7 +972,7 @@ public record EconomySettings(
             // wealth tax
             false, 1.0, 24, "0",
             // display
-            true, 3, true, 10, List.of(),
+            true, 3, true, 10, List.of(), true, List.of(),
             // general
             true,
             // packs
