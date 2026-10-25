@@ -93,6 +93,11 @@ public final class LeaderboardDisplayService implements IEconomyService {
         }
     }
 
+    /** A board's text as a floating leaderboard shows it — for a screen too. */
+    public Component board(Podium.Board board) {
+        return text(settings, board);
+    }
+
     private Component text(EconomySettings live, Podium.Board board) {
         Currency currency = live.currency();
         var built = Component.text().append(MINI.deserialize(headings.heading(board)));

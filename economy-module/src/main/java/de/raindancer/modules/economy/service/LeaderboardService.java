@@ -27,6 +27,7 @@ public final class LeaderboardService {
     private volatile List<Account> sorted = List.of();
     private volatile long sortedAt = Long.MIN_VALUE / 2;
     private volatile List<Standing> winners = List.of();
+    private volatile Map<UUID, Money> casinoNet = Map.of();
     private volatile long winnersAt = Long.MIN_VALUE / 2;
     private final ToLongFunction<UUID> minutesPlayed;
     private volatile List<Standing> players = List.of();
@@ -81,6 +82,7 @@ public final class LeaderboardService {
         long now = clock.getAsLong();
         if (now - winnersAt > FRESH_FOR_MILLIS) {
             Map<UUID, Money> net = book.netOf(CASINO);
+            casinoNet = net;
             winners = book.all().stream()
                     .filter(account -> !AccountBook.isSystem(account.id()))
                     .map(account -> new Standing(account.id(), account.name(), net.getOrDefault(account.id(), Money.ZERO)))
@@ -90,6 +92,12 @@ public final class LeaderboardService {
             winnersAt = now;
         }
         return winners;
+    }
+
+    /** What a player won (or lost, negative) at the games and the lottery, over the account's whole life. */
+    public Money casinoNet(UUID id) {
+        casinoWinners();
+        return casinoNet.getOrDefault(id, Money.ZERO);
     }
 
     /** 1-based place, or 0 for no account. */

@@ -87,7 +87,7 @@ import java.util.UUID;
  */
 public final class EconomyModule implements FlexModule {
 
-    private static final ModuleInfo INFO = ModuleInfo.of("economy", "Economy", "0.59.0")
+    private static final ModuleInfo INFO = ModuleInfo.of("economy", "Economy", "0.60.0")
             .describedAs("A bank, paying and hiring, coins you can carry, a creative-style shop priced from recipes, "
                     + "passive income, live auctions and raffles, and a casino with sounds and animations — every part switchable.")
             .by("Raindancer118");
@@ -307,6 +307,18 @@ public final class EconomyModule implements FlexModule {
                 race, dealers, auctions, raffles, tax, experience, loans, packs, new LiveScreens(), supply, supplyStore,
                 funds, repair, death, seasons, backpay, sellWands, statues);
         sidebar.pot(lottery::pot);
+        // Screens for /screen — Core 2.10.0; on an older Core there are simply none.
+        try {
+            var screens = context.core().screens();
+            if (screens != null) {
+                new de.raindancer.modules.economy.service.EconomyScreens(book, leaderboard, displays, lottery, auctions,
+                        daily, settings::current, System::currentTimeMillis).register(screens, context.plugin());
+                context.closeWith(() -> de.raindancer.modules.economy.service.EconomyScreens.KINDS
+                        .forEach(screens::unregister));
+            }
+        } catch (LinkageError olderCore) {
+            context.log().info("RainsCore is older than 2.10.0: no economy screens until it is updated.");
+        }
         this.tables = tables;
         this.crash = crash;
         this.race = race;
