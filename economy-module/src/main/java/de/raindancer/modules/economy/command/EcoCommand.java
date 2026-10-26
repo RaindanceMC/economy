@@ -123,29 +123,7 @@ public final class EcoCommand extends EconomyCommand {
                 });
                 }
             });
-            case "statue" -> player(live, sender).ifPresent(player -> {
-                if (args.length > 1 && args[1].equalsIgnoreCase("remove")) {
-                    live.messages().send(player, live.statues().remove(player)
-                            ? "economy.admin.statue-removed" : "economy.admin.statue-none");
-                    return;
-                }
-                if (!live.config().statuesEnabled()) {
-                    live.messages().send(player, "economy.admin.statues-off");
-                    return;
-                }
-                String typed = args.length > 2 ? args[2] : "casino";
-                var board = de.raindancer.modules.economy.model.Podium.Board.read(typed);
-                if (board.isEmpty()) {
-                    live.messages().send(player, "economy.admin.statue-board", "what", typed);
-                    return;
-                }
-                live.statues().place(player, board.get());
-                live.messages().send(player, switch (board.get()) {
-                    case RICHEST -> "economy.admin.statue-placed-richest";
-                    case CASINO -> "economy.admin.statue-placed-casino";
-                    case PLAYTIME -> "economy.admin.statue-placed-playtime";
-                });
-            });
+            case "statue" -> player(live, sender).ifPresent(player -> statue(live, player, args));
             case "auction" -> {
                 if (args.length > 2 && args[1].equalsIgnoreCase("cancel")) {
                     var picked = live.auctions().pick(args[2]);
@@ -519,9 +497,17 @@ public final class EcoCommand extends EconomyCommand {
             return starting(args[2], List.of("forgive"));
         }
         if (args[0].equalsIgnoreCase("statue")) {
-            return args.length == 2 ? starting(args[1], List.of("place", "remove"))
-                    : args.length == 3 && args[1].equalsIgnoreCase("place")
-                    ? starting(args[2], List.of("casino", "richest", "playtime")) : List.of();
+            boolean placing = args[1].equalsIgnoreCase("place") || args[1].equalsIgnoreCase("move");
+            if (args.length == 2) {
+                return starting(args[1], List.of("place", "move", "remove"));
+            }
+            if (args.length == 3) {
+                return placing ? starting(args[2], List.of("casino", "richest", "playtime"))
+                        : args[1].equalsIgnoreCase("remove") ? starting(args[2], List.of("podium")) : List.of();
+            }
+            return args.length == 4 && placing
+                    && de.raindancer.modules.economy.model.Podium.Board.read(args[2]).isPresent()
+                    ? starting(args[3], List.of("1", "2", "3")) : List.of();
         }
         if (args[0].equalsIgnoreCase("leaderboard")) {
             return args.length == 2 ? starting(args[1], List.of("place", "remove"))
@@ -538,6 +524,63 @@ public final class EcoCommand extends EconomyCommand {
     @Override
     public String describe() {
         return "staff: giving, taking, setting and freezing money, and the owner's tools";
+    }
+
+    /**
+     * {@code /eco statue place [board] [1|2|3]} puts up a whole podium, or one statue where the player stands;
+     * {@code move <board> <1|2|3>} brings the nearest such statue here; {@code remove [podium]} takes away the
+     * nearest statue, or the whole podium it stands on.
+     */
+    private static void statue(EconomyServices live, Player player, String[] args) {
+        String action = args.length > 1 ? args[1].toLowerCase(Locale.ROOT) : "place";
+        var statues = live.statues();
+        if (action.equals("remove")) {
+            boolean whole = args.length > 2 && args[2].equalsIgnoreCase("podium");
+            live.messages().send(player, statues.remove(player, whole)
+                    ? whole ? "economy.admin.statue-podium-removed" : "economy.admin.statue-removed"
+                    : "economy.admin.statue-none");
+            return;
+        }
+        if (!live.config().statuesEnabled()) {
+            live.messages().send(player, "economy.admin.statues-off");
+            return;
+        }
+        boolean moving = action.equals("move");
+        if (!moving && !action.equals("place")) {
+            live.messages().send(player, "economy.admin.statue-usage");
+            return;
+        }
+        String typed = args.length > 2 ? args[2] : moving ? "" : "casino";
+        var board = de.raindancer.modules.economy.model.Podium.Board.read(typed);
+        if (board.isEmpty()) {
+            live.messages().send(player, moving && typed.isEmpty() ? "economy.admin.statue-usage"
+                    : "economy.admin.statue-board", "what", typed);
+            return;
+        }
+        if (args.length <= 3 && !moving) {
+            statues.place(player, board.get());
+            live.messages().send(player, switch (board.get()) {
+                case RICHEST -> "economy.admin.statue-placed-richest";
+                case CASINO -> "economy.admin.statue-placed-casino";
+                case PLAYTIME -> "economy.admin.statue-placed-playtime";
+            });
+            return;
+        }
+        var place = de.raindancer.modules.economy.model.StatueSpot.readPlace(args.length > 3 ? args[3] : null);
+        if (place.isEmpty()) {
+            live.messages().send(player, "economy.admin.statue-place", "what", args.length > 3 ? args[3] : "");
+            return;
+        }
+        String ranks = new de.raindancer.modules.economy.rules.StatueRule().ranks(board.get());
+        if (moving) {
+            live.messages().send(player, statues.move(player, board.get(), place.get())
+                    ? "economy.admin.statue-moved" : "economy.admin.statue-not-found",
+                    "place", String.valueOf(place.get()), "board", ranks);
+            return;
+        }
+        statues.placeOne(player, board.get(), place.get());
+        live.messages().send(player, "economy.admin.statue-placed-one", "place", String.valueOf(place.get()),
+                "board", ranks);
     }
 
     /** {@code /eco packs} reads packs.yml again; {@code /eco packs give <player> <pack>} hands one out free. */

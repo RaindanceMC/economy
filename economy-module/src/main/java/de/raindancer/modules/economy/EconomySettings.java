@@ -853,12 +853,13 @@ public record EconomySettings(
         @Key("leaderboard.spots") List<String> leaderboardSpots,
 
         @In("economy/display") @Title("Podiums of the top three")
-        @Describe("Statues of the three biggest casino winners (or richest players) on a podium, wearing their "
-                + "skins, put down with /eco statue place.")
+        @Describe("Statues of the three biggest casino winners (or richest players, or who played longest), "
+                + "wearing their skins: a whole podium or each one where you like, put down with /eco statue place.")
         @Key("features.statues") boolean statuesEnabled,
 
-        @In("economy/display") @Title("Podium places")
-        @Describe("'<world> <x> <y> <z> <yaw> <casino|richest>', comma separated. Written by /eco statue place and remove.")
+        @In("economy/display") @Title("Statue places")
+        @Describe("'<world> <x> <y> <z> <yaw> <casino|richest|playtime> <1|2|3> <podium or ->', comma separated. "
+                + "Written by /eco statue place, move and remove; podiums from before 0.61 are read as three statues.")
         @Key("statue.podiums") List<String> statuePodiums,
 
         // ------------------------------------------------------------------ general

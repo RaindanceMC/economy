@@ -6,6 +6,7 @@ import de.raindancer.core.platform.util.Scheduling;
 import de.raindancer.core.world.npc.Attendants;
 import de.raindancer.modules.economy.EconomySettings;
 import de.raindancer.modules.economy.model.Podium;
+import de.raindancer.modules.economy.model.StatueSpot;
 import de.raindancer.modules.economy.model.Standing;
 import de.raindancer.modules.economy.rules.StatueRule;
 import io.papermc.paper.datacomponent.item.ResolvableProfile;
@@ -29,24 +30,34 @@ import org.joml.AxisAngle4f;
 import org.joml.Vector3f;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 /**
- * Podiums of the top three: on each a pedestal per place, a statue wearing the skin of whoever holds it, and a
- * heading over them. The podiums live in the settings; everything standing on one is tagged with it, so a lost
- * piece is simply put back on the next refresh. Everything touching the world happens on the region that owns it.
+ * Statues of the top three: each on its own spot with a pedestal, wearing the skin of whoever holds its place,
+ * and labelled with what it ranks — placed one by one wherever staff like, or three at once as a podium (whose
+ * highest statue carries the label). The spots live in the settings; everything standing on one is tagged with
+ * it, so a lost piece is simply put back on the next refresh and a piece nobody owns any more is taken away.
+ * Everything touching the world happens on the region that owns it.
  */
 public final class StatueService implements IEconomyService {
 
-    /** On every piece of a podium: the podium's key, then {@code #place} — or {@code #heading} for the heading. */
+    /** On every piece of a statue: its spot's key, then {@code #statue}, {@code #pedestal} or {@code #label}. */
     public static final NamespacedKey PIECE = Objects.requireNonNull(NamespacedKey.fromString("rainseconomy:statue"));
     /** On a statue: whose skin it wears, so a refresh changes it only when the place changes hands. */
     private static final NamespacedKey HOLDER = Objects.requireNonNull(NamespacedKey.fromString("rainseconomy:statue_holder"));
     private static final Material[] PEDESTALS = {Material.GOLD_BLOCK, Material.IRON_BLOCK, Material.WAXED_COPPER_BLOCK};
     private static final String NOBODY = "-";
+    private static final double REACH_SQUARED = 25;
+    private static final double LABEL_ABOVE = 2.4;
     private static final MiniMessage MINI = MiniMessage.miniMessage();
 
     private final Plugin plugin;
@@ -54,6 +65,7 @@ public final class StatueService implements IEconomyService {
     private final LeaderboardService leaderboard;
     private final SettingsStore<EconomySettings> store;
     private final StatueRule rule = new StatueRule();
+    private final AtomicBoolean migrating = new AtomicBoolean();
     private volatile EconomySettings settings;
 
     public StatueService(Plugin plugin, Server server, LeaderboardService leaderboard,
@@ -70,58 +82,78 @@ public final class StatueService implements IEconomyService {
         this.settings = updated == null ? EconomySettings.DEFAULTS : updated;
     }
 
-    public List<Podium> podiums() {
-        List<Podium> read = new ArrayList<>();
-        settings.statuePodiums().forEach(line -> Podium.parse(line).ifPresent(read::add));
-        return read;
+    /** Every statue, podiums from before statues stood on their own read as their three. */
+    public List<StatueSpot> spots() {
+        return rule.read(settings.statuePodiums());
     }
 
-    /** Puts every podium whose ground is loaded up to date. */
+    /** Puts every statue whose ground is loaded up to date; writes old podiums back as statues once. */
     public void refresh() {
         EconomySettings live = settings;
         if (!live.statuesEnabled()) {
             return;
         }
-        for (Podium podium : podiums()) {
-            World world = server.getWorld(podium.world());
+        if (rule.hasLegacy(live.statuePodiums()) && migrating.compareAndSet(false, true)) {
+            write(lines -> { });
+        }
+        List<StatueSpot> all = rule.read(live.statuePodiums());
+        Set<String> known = new HashSet<>();
+        all.forEach(spot -> known.add(spot.key()));
+        Map<Podium.Board, List<Standing>> tops = new EnumMap<>(Podium.Board.class);
+        for (StatueSpot spot : all) {
+            World world = server.getWorld(spot.world());
             if (world == null) {
                 continue;
             }
-            List<Standing> top = leaderboard.standings(podium.board());
-            List<Standing> three = top.subList(0, Math.min(StatueRule.PLACES, top.size()));
-            Location centre = new Location(world, podium.x(), podium.y(), podium.z());
-            Scheduling.region(plugin, centre, () -> {
-                if (!world.isChunkLoaded(centre.getBlockX() >> 4, centre.getBlockZ() >> 4)) {
+            List<Standing> top = tops.computeIfAbsent(spot.board(), leaderboard::standings);
+            Standing holder = spot.place() <= top.size() ? top.get(spot.place() - 1) : null;
+            boolean labelled = rule.labelled(spot, all);
+            Location ground = new Location(world, spot.x(), spot.y(), spot.z());
+            Scheduling.region(plugin, ground, () -> {
+                if (!world.isChunkLoaded(ground.getBlockX() >> 4, ground.getBlockZ() >> 4)) {
                     return;
                 }
-                build(podium, centre, three, live);
+                build(spot, ground, holder, labelled, known, live);
             });
         }
     }
 
-    private void build(Podium podium, Location centre, List<Standing> three, EconomySettings live) {
-        List<Entity> pieces = piecesOf(podium, centre);
-        TextDisplay heading = find(pieces, TextDisplay.class, podium.key() + "#heading")
-                .orElseGet(() -> spawnHeading(podium, centre));
-        heading.text(MINI.deserialize(rule.heading(podium.board())));
-        for (int place = 1; place <= StatueRule.PLACES; place++) {
-            String tag = podium.key() + "#" + place;
-            Location at = spot(podium, centre, place);
-            int index = place - 1;
-            if (find(pieces, BlockDisplay.class, tag).isEmpty()) {
-                spawnPedestal(at, tag, place);
+    private void build(StatueSpot spot, Location ground, Standing holder, boolean labelled, Set<String> known,
+                       EconomySettings live) {
+        List<Entity> pieces = new ArrayList<>();
+        for (Entity nearby : ground.getWorld().getNearbyEntities(ground, 3, 4, 3)) {
+            String tag = nearby.getPersistentDataContainer().get(PIECE, PersistentDataType.STRING);
+            if (tag == null) {
+                continue;
             }
-            Mannequin statue = find(pieces, Mannequin.class, tag).orElseGet(() -> spawnStatue(at, podium.yaw(), tag));
-            Standing holder = index < three.size() ? three.get(index) : null;
-            dress(statue, place, holder, podium, live);
+            int cut = tag.lastIndexOf('#');
+            if (cut < 0 || !known.contains(tag.substring(0, cut))) {
+                // Left by a statue that was moved or removed while nobody was near, or by an old podium.
+                nearby.remove();
+            } else if (tag.startsWith(spot.key() + "#")) {
+                pieces.add(nearby);
+            }
         }
+        String own = spot.key() + "#";
+        Optional<TextDisplay> label = find(pieces, TextDisplay.class, own + "label");
+        if (labelled) {
+            label.orElseGet(() -> spawnLabel(spot, ground)).text(MINI.deserialize(rule.heading(spot.board())));
+        } else {
+            label.ifPresent(Entity::remove);
+        }
+        if (find(pieces, BlockDisplay.class, own + "pedestal").isEmpty()) {
+            spawnPedestal(ground, own + "pedestal", spot.place());
+        }
+        Mannequin statue = find(pieces, Mannequin.class, own + "statue")
+                .orElseGet(() -> spawnStatue(standing(spot, ground), spot.yaw(), own + "statue"));
+        dress(statue, spot, holder, live);
     }
 
-    private void dress(Mannequin statue, int place, Standing holder, Podium podium, EconomySettings live) {
-        statue.customName(MINI.deserialize(rule.title(place, holder == null ? null : holder.name())));
+    private void dress(Mannequin statue, StatueSpot spot, Standing holder, EconomySettings live) {
+        statue.customName(MINI.deserialize(rule.title(spot.place(), holder == null ? null : holder.name())));
         statue.setDescription(holder == null ? Component.empty()
-                : MINI.deserialize(rule.caption(podium.board()))
-                        .append(LeaderboardDisplayService.worth(holder, podium.board(), live.currency())));
+                : MINI.deserialize(rule.caption(spot.board()))
+                        .append(LeaderboardDisplayService.worth(holder, spot.board(), live.currency())));
         String wearing = statue.getPersistentDataContainer().get(HOLDER, PersistentDataType.STRING);
         String now = holder == null ? NOBODY : holder.id().toString();
         if (!now.equals(wearing)) {
@@ -142,19 +174,18 @@ public final class StatueService implements IEconomyService {
         return ResolvableProfile.resolvableProfile().uuid(id).build();
     }
 
-    private Location spot(Podium podium, Location centre, int place) {
-        double[] offset = rule.offset(place, podium.yaw());
-        Location at = centre.clone().add(offset[0], offset[1], offset[2]);
-        at.setYaw(podium.yaw());
+    private Location standing(StatueSpot spot, Location ground) {
+        Location at = ground.clone().add(0, rule.height(spot.place()), 0);
+        at.setYaw(spot.yaw());
         at.setPitch(0);
         return at;
     }
 
-    private static List<Entity> piecesOf(Podium podium, Location centre) {
+    private static List<Entity> piecesOf(StatueSpot spot, Location ground) {
         List<Entity> found = new ArrayList<>();
-        for (Entity nearby : centre.getWorld().getNearbyEntities(centre, 3, 4, 3)) {
+        for (Entity nearby : ground.getWorld().getNearbyEntities(ground, 3, 4, 3)) {
             String tag = nearby.getPersistentDataContainer().get(PIECE, PersistentDataType.STRING);
-            if (tag != null && tag.startsWith(podium.key() + "#")) {
+            if (tag != null && tag.startsWith(spot.key() + "#")) {
                 found.add(nearby);
             }
         }
@@ -170,23 +201,23 @@ public final class StatueService implements IEconomyService {
         return Optional.empty();
     }
 
-    private TextDisplay spawnHeading(Podium podium, Location centre) {
-        Location above = centre.clone().add(0, rule.height(1) + 2.4, 0);
-        return centre.getWorld().spawn(above, TextDisplay.class, display -> {
+    private TextDisplay spawnLabel(StatueSpot spot, Location ground) {
+        Location above = ground.clone().add(0, rule.height(spot.place()) + LABEL_ABOVE, 0);
+        return ground.getWorld().spawn(above, TextDisplay.class, display -> {
             display.setBillboard(Display.Billboard.CENTER);
             display.setPersistent(true);
             display.setShadowed(true);
-            display.getPersistentDataContainer().set(PIECE, PersistentDataType.STRING, podium.key() + "#heading");
+            display.getPersistentDataContainer().set(PIECE, PersistentDataType.STRING, spot.key() + "#label");
         });
     }
 
-    private void spawnPedestal(Location statueAt, String tag, int place) {
+    private void spawnPedestal(Location ground, String tag, int place) {
         float height = (float) rule.height(place);
         // A display's model grows from its corner, so the block is set down half a block off the statue's centre.
-        Location corner = statueAt.clone().add(-0.5, -height, -0.5);
+        Location corner = ground.clone().add(-0.5, 0, -0.5);
         corner.setYaw(0);
         corner.setPitch(0);
-        statueAt.getWorld().spawn(corner, BlockDisplay.class, display -> {
+        ground.getWorld().spawn(corner, BlockDisplay.class, display -> {
             display.setBlock(PEDESTALS[place - 1].createBlockData());
             display.setTransformation(new Transformation(new Vector3f(), new AxisAngle4f(),
                     new Vector3f(1, height, 1), new AxisAngle4f()));
@@ -206,52 +237,93 @@ public final class StatueService implements IEconomyService {
     }
 
     /**
-     * A new podium centred on the block the player stands on, the statues facing the way the player looks, turned
+     * A whole podium centred on the block the player stands on, the statues facing the way the player looks, turned
      * to the nearest quarter so the pedestals line up with the blocks around them.
      */
-    public Podium place(Player player, Podium.Board board) {
+    public List<StatueSpot> place(Player player, Podium.Board board) {
         Location feet = player.getLocation();
-        float yaw = Math.round(feet.getYaw() / 90f) * 90f;
-        yaw = ((yaw % 360) + 360) % 360;
-        Podium podium = new Podium(feet.getWorld().getName(), feet.getBlockX() + 0.5, feet.getBlockY(),
-                feet.getBlockZ() + 0.5, yaw, board);
-        write(lines -> lines.add(podium.written()));
-        return podium;
+        String group = UUID.randomUUID().toString().substring(0, 8);
+        List<StatueSpot> three = rule.podium(feet.getWorld().getName(), feet.getBlockX() + 0.5, feet.getBlockY(),
+                feet.getBlockZ() + 0.5, rule.facing(feet.getYaw(), 90f), board, group);
+        write(lines -> three.forEach(spot -> lines.add(spot.written())));
+        return three;
     }
 
-    /** Takes away the nearest podium within a few blocks, everything on it with it; whether there was one. */
-    public boolean remove(Player player) {
-        Location at = player.getLocation();
-        Podium nearest = null;
-        double best = 25;
-        for (Podium podium : podiums()) {
-            double distance = podium.distanceSquared(at.getWorld().getName(), at.getX(), at.getY(), at.getZ());
-            if (distance < best) {
-                best = distance;
-                nearest = podium;
-            }
-        }
-        if (nearest == null) {
-            return false;
-        }
-        Podium gone = nearest;
-        write(lines -> lines.removeIf(line -> Podium.parse(line).map(gone::equals).orElse(false)));
-        Location there = new Location(at.getWorld(), gone.x(), gone.y(), gone.z());
-        Scheduling.region(plugin, there, () -> piecesOf(gone, there).forEach(Entity::remove));
-        return true;
+    /** One statue for {@code place} on the block the player stands on, facing the nearest eighth of their look. */
+    public StatueSpot placeOne(Player player, Podium.Board board, int place) {
+        StatueSpot spot = here(player, new StatueSpot("-", 0, 0, 0, 0, board, place, StatueSpot.ALONE));
+        write(lines -> lines.add(spot.written()));
+        return spot;
     }
 
     /**
-     * Changes the list of podiums and saves it, off the server's threads (the settings live in a database), then
-     * builds what changed. One at a time, so two placed at once both stay.
+     * Brings the nearest statue of {@code board} and {@code place} in the player's world to where they stand; it
+     * leaves its podium, if it had one. Whether there was one.
      */
-    private void write(java.util.function.Consumer<List<String>> change) {
+    public boolean move(Player player, Podium.Board board, int place) {
+        Location at = player.getLocation();
+        Optional<StatueSpot> nearest = rule.nearest(spots(), at.getWorld().getName(), at.getX(), at.getY(),
+                at.getZ(), Double.MAX_VALUE, spot -> spot.board() == board && spot.place() == place);
+        if (nearest.isEmpty()) {
+            return false;
+        }
+        StatueSpot old = nearest.get();
+        StatueSpot moved = here(player, old);
+        write(lines -> lines.replaceAll(line -> StatueSpot.parse(line).map(old::equals).orElse(false)
+                ? moved.written() : line));
+        clear(old);
+        return true;
+    }
+
+    private StatueSpot here(Player player, StatueSpot spot) {
+        Location feet = player.getLocation();
+        StatueSpot there = spot.at(feet.getWorld().getName(), feet.getBlockX() + 0.5, feet.getBlockY(),
+                feet.getBlockZ() + 0.5, rule.facing(feet.getYaw(), 45f));
+        return StatueSpot.parse(there.written()).orElseThrow();
+    }
+
+    /**
+     * Takes away the nearest statue within five blocks — with {@code wholePodium}, every statue of the podium it
+     * stands on. Whether there was one.
+     */
+    public boolean remove(Player player, boolean wholePodium) {
+        Location at = player.getLocation();
+        List<StatueSpot> all = spots();
+        Optional<StatueSpot> nearest = rule.nearest(all, at.getWorld().getName(), at.getX(), at.getY(), at.getZ(),
+                REACH_SQUARED, spot -> true);
+        if (nearest.isEmpty()) {
+            return false;
+        }
+        StatueSpot hit = nearest.get();
+        List<StatueSpot> gone = wholePodium && !hit.standalone()
+                ? all.stream().filter(spot -> spot.group().equals(hit.group())).toList() : List.of(hit);
+        write(lines -> lines.removeIf(line -> StatueSpot.parse(line).map(gone::contains).orElse(false)));
+        gone.forEach(this::clear);
+        return true;
+    }
+
+    private void clear(StatueSpot spot) {
+        World world = server.getWorld(spot.world());
+        if (world == null) {
+            return;
+        }
+        Location there = new Location(world, spot.x(), spot.y(), spot.z());
+        Scheduling.region(plugin, there, () -> piecesOf(spot, there).forEach(Entity::remove));
+    }
+
+    /**
+     * Changes the list of statues and saves it, off the server's threads (the settings live in a database), then
+     * builds what changed. One at a time, so two placed at once both stay. Old podiums are written as their
+     * statues first, so a change always finds the lines it means.
+     */
+    private void write(Consumer<List<String>> change) {
         Scheduling.async(plugin, () -> {
             synchronized (this) {
-                List<String> lines = new ArrayList<>(store.current().statuePodiums());
+                List<String> lines = new ArrayList<>(rule.migrate(store.current().statuePodiums()));
                 change.accept(lines);
                 store.set("statue.podiums", String.join(", ", lines));
                 store.trySave();
+                migrating.set(false);
             }
             refresh();
         });
