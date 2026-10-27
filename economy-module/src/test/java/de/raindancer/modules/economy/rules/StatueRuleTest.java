@@ -115,6 +115,28 @@ class StatueRuleTest {
     }
 
     @Test
+    @DisplayName("statues of one board put up side by side share one label, over the highest place among them")
+    void labelsSideBySide() {
+        StatueSpot first = StatueSpot.parse("w 4229.5 72 -1493.5 135 richest 1 -").orElseThrow();
+        StatueSpot third = StatueSpot.parse("w 4231.5 72 -1494.5 90 richest 3 -").orElseThrow();
+        StatueSpot second = StatueSpot.parse("w 4227.5 72 -1492.5 180 richest 2 -").orElseThrow();
+        StatueSpot casino = StatueSpot.parse("w 4233.5 72 -1494.5 90 casino 2 -").orElseThrow();
+        StatueSpot farAway = StatueSpot.parse("w 4300.5 72 -1494.5 90 richest 2 -").orElseThrow();
+        List<StatueSpot> all = new java.util.ArrayList<>(List.of(first, third, second, casino, farAway));
+        assertThat(rule.labelled(first, all)).isTrue();
+        assertThat(rule.labelled(second, all)).isFalse();
+        assertThat(rule.labelled(third, all)).isFalse();
+        assertThat(rule.labelled(casino, all)).as("another board keeps its own label").isTrue();
+        assertThat(rule.labelled(farAway, all)).as("far from the others it stands alone").isTrue();
+        all.remove(first);
+        assertThat(rule.labelled(second, all)).isTrue();
+        assertThat(rule.labelled(third, all)).isFalse();
+        StatueSpot otherWorld = StatueSpot.parse("v 4229.5 72 -1493.5 135 richest 3 -").orElseThrow();
+        all.add(otherWorld);
+        assertThat(rule.labelled(otherWorld, all)).isTrue();
+    }
+
+    @Test
     @DisplayName("statues face the nearest step of the way the placer looks, a podium the nearest quarter")
     void facing() {
         assertThat(rule.facing(100f, 90f)).isEqualTo(90f);

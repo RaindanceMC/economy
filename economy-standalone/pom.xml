@@ -65,7 +65,8 @@
         <!-- 0.57.0: /help guide — the whole economy explained in the guide, quoting this server's live settings (RainsCore 2.4.0). -->
         <!-- 0.58.0: podiums of the top three casino winners (or richest players) as statues in their skins, /eco statue; leaderboards refresh every five seconds. -->
         <!-- 0.61.0: each statue placed on its own, anywhere — /eco statue place <board> <1|2|3>, move, remove [podium]; old podiums become three statues by themselves. -->
-        <plugin.version>0.61.0</plugin.version>
+        <!-- 0.61.1: statues of one board side by side share one label, over the highest place, instead of each stacking the same heading. -->
+        <plugin.version>0.61.1</plugin.version>
     </properties>
 
     <dependencies>

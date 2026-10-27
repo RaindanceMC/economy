@@ -18,6 +18,7 @@ public final class StatueRule implements IEconomyRule {
 
     public static final int PLACES = 3;
     private static final double SPACING = 1.0;
+    public static final double SHARED_LABEL_REACH = 6.0;
 
     private final LeaderboardRule leaderboard = new LeaderboardRule();
 
@@ -124,12 +125,18 @@ public final class StatueRule implements IEconomyRule {
         return podium(old.world(), old.x(), old.y(), old.z(), old.yaw(), old.board(), group);
     }
 
-    /** Whether a statue carries the label of what it ranks: on its own always, of a podium the highest left. */
+    /**
+     * Whether a statue carries the label of what it ranks: of a podium the highest left; one on its own unless a
+     * higher place of the same board stands within {@link #SHARED_LABEL_REACH} blocks — statues put up side by side
+     * share one label instead of stacking the same heading.
+     */
     public boolean labelled(StatueSpot spot, List<StatueSpot> all) {
-        if (spot.standalone()) {
-            return true;
+        if (!spot.standalone()) {
+            return all.stream().noneMatch(other -> other.group().equals(spot.group()) && other.place() < spot.place());
         }
-        return all.stream().noneMatch(other -> other.group().equals(spot.group()) && other.place() < spot.place());
+        double reach = SHARED_LABEL_REACH * SHARED_LABEL_REACH;
+        return all.stream().noneMatch(other -> other.board() == spot.board() && other.place() < spot.place()
+                && other.distanceSquared(spot.world(), spot.x(), spot.y(), spot.z()) <= reach);
     }
 
     /** {@code yaw} turned to the nearest multiple of {@code step}, between 0 and 360. */
