@@ -115,6 +115,16 @@ class StatueRuleTest {
     }
 
     @Test
+    @DisplayName("the label floats clear above the statue's own name tag, not on top of it")
+    void labelClearsTheName() {
+        // A mannequin is 1.8 tall; its name line is drawn about half a block over its head, a line of text ~0.3 tall.
+        double nameTop = 1.8 + 0.5 + 0.3;
+        for (int place = 1; place <= StatueRule.PLACES; place++) {
+            assertThat(rule.labelHeight(place) - rule.height(place)).as("place " + place).isGreaterThan(nameTop);
+        }
+    }
+
+    @Test
     @DisplayName("statues of one board put up side by side share one label, over the highest place among them")
     void labelsSideBySide() {
         StatueSpot first = StatueSpot.parse("w 4229.5 72 -1493.5 135 richest 1 -").orElseThrow();

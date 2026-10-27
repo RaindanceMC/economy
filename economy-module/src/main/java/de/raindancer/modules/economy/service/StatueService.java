@@ -57,7 +57,6 @@ public final class StatueService implements IEconomyService {
     private static final Material[] PEDESTALS = {Material.GOLD_BLOCK, Material.IRON_BLOCK, Material.WAXED_COPPER_BLOCK};
     private static final String NOBODY = "-";
     private static final double REACH_SQUARED = 25;
-    private static final double LABEL_ABOVE = 2.4;
     private static final MiniMessage MINI = MiniMessage.miniMessage();
 
     private final Plugin plugin;
@@ -137,7 +136,13 @@ public final class StatueService implements IEconomyService {
         String own = spot.key() + "#";
         Optional<TextDisplay> label = find(pieces, TextDisplay.class, own + "label");
         if (labelled) {
-            label.orElseGet(() -> spawnLabel(spot, ground)).text(MINI.deserialize(rule.heading(spot.board())));
+            Location above = labelAt(spot, ground);
+            TextDisplay shown = label.orElseGet(() -> spawnLabel(spot, above));
+            shown.text(MINI.deserialize(rule.heading(spot.board())));
+            if (shown.getLocation().distanceSquared(above) > 0.01) {
+                // Labels from before 0.61.2 floated on the statue's own name.
+                shown.teleportAsync(above);
+            }
         } else {
             label.ifPresent(Entity::remove);
         }
@@ -201,9 +206,12 @@ public final class StatueService implements IEconomyService {
         return Optional.empty();
     }
 
-    private TextDisplay spawnLabel(StatueSpot spot, Location ground) {
-        Location above = ground.clone().add(0, rule.height(spot.place()) + LABEL_ABOVE, 0);
-        return ground.getWorld().spawn(above, TextDisplay.class, display -> {
+    private Location labelAt(StatueSpot spot, Location ground) {
+        return ground.clone().add(0, rule.labelHeight(spot.place()), 0);
+    }
+
+    private TextDisplay spawnLabel(StatueSpot spot, Location above) {
+        return above.getWorld().spawn(above, TextDisplay.class, display -> {
             display.setBillboard(Display.Billboard.CENTER);
             display.setPersistent(true);
             display.setShadowed(true);

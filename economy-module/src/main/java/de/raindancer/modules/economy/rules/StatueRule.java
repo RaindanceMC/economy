@@ -31,6 +31,11 @@ public final class StatueRule implements IEconomyRule {
         };
     }
 
+    /** How high over the ground a statue's label floats: above its name tag, which the mannequin draws over its head. */
+    public double labelHeight(int place) {
+        return height(place) + 2.9;
+    }
+
     /**
      * Where a place stands from the podium's centre, {x, y, z}, for statues facing {@code yaw}. Second goes on the
      * statues' right hand, so the crowd in front reads 2 · 1 · 3.
