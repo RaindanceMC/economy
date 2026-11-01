@@ -1092,6 +1092,16 @@ public final class ShopService implements IEconomyService, ShopDesk {
             return trade.total(each, stack.getAmount()).map(total -> new SaleLot(stack.getType(), slot,
                     stack.getAmount(), total, rainsName(shard.get()) + " Shard"));
         }
+        Optional<Money> priced = de.raindancer.core.social.economy.ItemPrices.sellPrice(stack);
+        if (priced.isPresent()) {
+            // A plugin's own item (a fish, a dish) at the price its plugin gives it, never as its material.
+            if (!settings.sellingEnabled() || CashTags.isCash(stack)
+                    || de.raindancer.core.content.items.InsuredItems.isInsured(stack)) {
+                return Optional.empty();
+            }
+            return trade.total(priced.get(), stack.getAmount()).map(total -> new SaleLot(stack.getType(), slot,
+                    stack.getAmount(), total, shownName(stack)));
+        }
         if (stack == null || stack.getType().isAir() || CashTags.isCash(stack)
                 || de.raindancer.core.content.items.NonIngredients.isMarked(stack)
                 || de.raindancer.core.content.items.InsuredItems.isInsured(stack)) {
@@ -1157,6 +1167,15 @@ public final class ShopService implements IEconomyService, ShopDesk {
         }
         return trade.total(each, stack.getAmount()).map(total -> new SaleLot(material, slot, stack.getAmount(), total,
                 label));
+    }
+
+    /** An item's name as a player sees it, for a sale line. */
+    private static String shownName(ItemStack stack) {
+        org.bukkit.inventory.meta.ItemMeta meta = stack.getItemMeta();
+        net.kyori.adventure.text.Component name = meta != null && meta.hasDisplayName() ? meta.displayName()
+                : meta != null && meta.hasItemName() ? meta.itemName() : null;
+        return name == null ? Catalogue.readable(stack.getType().name())
+                : net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer.plainText().serialize(name);
     }
 
     /**
