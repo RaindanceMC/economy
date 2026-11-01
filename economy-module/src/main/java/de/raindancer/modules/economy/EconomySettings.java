@@ -935,7 +935,7 @@ public record EconomySettings(
             true, "1", 0.0, "10000", 2, true, true, 5,
             true, 10, 10, 3,
             // cash
-            true, Material.GOLD_NUGGET, "", true, true, 0.0, 2304,
+            true, Material.GOLD_NUGGET, "rainseconomy:coin", true, true, 0.0, 2304,
             // shop
             true, true, 1.0, 0.4, SellPricing.AUTOMATIC, List.of(), List.of(), List.of(), List.of(), List.of(), false,
             true, 0.1, true, 0.0, 3.0, 0.1, 12.0, true, 0.25, false, false, "30000000", true, true, List.of(), true, List.of(),

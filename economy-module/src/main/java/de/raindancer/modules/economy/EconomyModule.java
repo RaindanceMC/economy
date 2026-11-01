@@ -87,7 +87,7 @@ import java.util.UUID;
  */
 public final class EconomyModule implements FlexModule {
 
-    private static final ModuleInfo INFO = ModuleInfo.of("economy", "Economy", "0.61.2")
+    private static final ModuleInfo INFO = ModuleInfo.of("economy", "Economy", "0.62.0")
             .describedAs("A bank, paying and hiring, coins you can carry, a creative-style shop priced from recipes, "
                     + "passive income, live auctions and raffles, and a casino with sounds and animations — every part switchable.")
             .by("Raindancer118");
@@ -388,6 +388,10 @@ public final class EconomyModule implements FlexModule {
         var buyer = new de.raindancer.modules.economy.service.ShopBuyer(shop);
         de.raindancer.core.social.economy.ItemSales.provide(context.plugin(), buyer);
         context.closeWith(() -> de.raindancer.core.social.economy.ItemSales.retract(buyer));
+        de.raindancer.core.social.economy.CashDesk desk = (player, amount, mostCoins, issuer) ->
+                java.util.concurrent.CompletableFuture.completedFuture(cash.takeOut(player, amount, mostCoins, issuer));
+        de.raindancer.core.social.economy.Cash.provide(context.plugin(), desk);
+        context.closeWith(() -> de.raindancer.core.social.economy.Cash.retract(desk));
 
         var flushing = Scheduling.asyncTimer(context.plugin(), FLUSH_SECONDS, FLUSH_SECONDS, task -> {
             book.flush();

@@ -14,6 +14,7 @@ import de.raindancer.modules.economy.model.CashPiece;
 import de.raindancer.modules.economy.model.Form;
 import de.raindancer.modules.economy.model.TransactionKind;
 import de.raindancer.modules.economy.rules.CashCheckRule;
+import de.raindancer.modules.economy.rules.CashSplitRule;
 import de.raindancer.modules.economy.model.CashCheck;
 import de.raindancer.modules.economy.store.AccountBook;
 import de.raindancer.modules.economy.store.CashSeal;
@@ -34,6 +35,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Money as things you can hold: withdrawing coins and cheques, and paying them back in.
@@ -250,6 +252,45 @@ public final class CashService implements IEconomyService {
         if (fee.isPositive()) {
             messages.send(player, "economy.cash.fee", "fee", currency.render(fee));
         }
+    }
+
+    /**
+     * Money another plugin hands out as items — a sea chest's coins: off the balance with no fee, as coins up to
+     * {@code mostCoins} and one cheque in {@code issuer}'s name for the rest. Nothing when cash is off or the ledger
+     * refuses; the money then simply stays on the balance. Safe from any thread.
+     */
+    public List<ItemStack> takeOut(UUID id, Money amount, int mostCoins, String issuer) {
+        EconomySettings live = settings;
+        if (!live.cashEnabled()) {
+            return List.of();
+        }
+        CashSplitRule.Split split = new CashSplitRule().split(amount, mostCoins, live.chequesEnabled());
+        if (!split.taken().isPositive()) {
+            return List.of();
+        }
+        Map<String, Money> numbered = new LinkedHashMap<>();
+        List<ItemStack> items = new ArrayList<>();
+        if (split.coins() > 0) {
+            ItemStack coin = coin();
+            int stack = Math.max(1, coin.getMaxStackSize());
+            for (long left = split.coins(); left > 0; left -= stack) {
+                ItemStack part = coin.clone();
+                part.setAmount((int) Math.min(stack, left));
+                items.add(part);
+            }
+        }
+        if (split.cheque().isPositive()) {
+            String serial = serial();
+            numbered.put(serial, split.cheque());
+            items.add(cheque(split.cheque(), serial, issuer));
+        }
+        Map<Money, Integer> coins = split.coins() > 0 ? Map.of(COIN, (int) split.coins()) : Map.of();
+        EconomyResult result = book.issueCash(id, numbered, coins, split.taken(), Money.ZERO, economy.most());
+        if (!result.succeeded()) {
+            return List.of();
+        }
+        economy.tell(id, split.taken().negate(), result.balance(), TransactionKind.WITHDRAW);
+        return items;
     }
 
     /** Whether all of these would go into the inventory, merging into partial stacks as the game does. */

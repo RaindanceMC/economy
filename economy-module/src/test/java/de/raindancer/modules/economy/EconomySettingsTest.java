@@ -69,7 +69,7 @@ public class EconomySettingsTest {
 
         assertThat(d.cashEnabled()).isTrue();
         assertThat(d.coinItem()).isEqualTo(Material.GOLD_NUGGET);
-        assertThat(d.coinModel()).isEmpty();
+        assertThat(d.coinModel()).as("coins wear the pack's own coin model").isEqualTo("rainseconomy:coin");
         assertThat(d.chequesEnabled()).isTrue();
         assertThat(d.depositOnRightClick()).isTrue();
         assertThat(d.withdrawFee()).isZero();
