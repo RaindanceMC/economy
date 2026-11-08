@@ -64,4 +64,21 @@ class LeaderboardRuleTest {
         assertThat(EconomySettings.DEFAULTS.sidebarRichest()).isEqualTo(3);
         assertThat(EconomySettings.DEFAULTS.leaderboardSize()).isEqualTo(10);
     }
+
+    @Test
+    void ordinalsAndMedals() {
+        LeaderboardRule rule = new LeaderboardRule();
+        org.assertj.core.api.Assertions.assertThat(rule.ordinal(1)).isEqualTo("1st");
+        org.assertj.core.api.Assertions.assertThat(rule.ordinal(2)).isEqualTo("2nd");
+        org.assertj.core.api.Assertions.assertThat(rule.ordinal(3)).isEqualTo("3rd");
+        org.assertj.core.api.Assertions.assertThat(rule.ordinal(4)).isEqualTo("4th");
+        org.assertj.core.api.Assertions.assertThat(rule.ordinal(11)).isEqualTo("11th");
+        org.assertj.core.api.Assertions.assertThat(rule.ordinal(12)).isEqualTo("12th");
+        org.assertj.core.api.Assertions.assertThat(rule.ordinal(13)).isEqualTo("13th");
+        org.assertj.core.api.Assertions.assertThat(rule.ordinal(21)).isEqualTo("21st");
+        org.assertj.core.api.Assertions.assertThat(rule.ordinal(112)).isEqualTo("112th");
+        org.assertj.core.api.Assertions.assertThat(rule.medal(1)).isEqualTo("①");
+        org.assertj.core.api.Assertions.assertThat(rule.medal(3)).isEqualTo("③");
+        org.assertj.core.api.Assertions.assertThat(rule.medal(4)).isEqualTo("4.");
+    }
 }
