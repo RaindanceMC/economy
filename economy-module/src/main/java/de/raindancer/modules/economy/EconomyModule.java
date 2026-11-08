@@ -87,7 +87,7 @@ import java.util.UUID;
  */
 public final class EconomyModule implements FlexModule {
 
-    private static final ModuleInfo INFO = ModuleInfo.of("economy", "Economy", "0.69.0")
+    private static final ModuleInfo INFO = ModuleInfo.of("economy", "Economy", "0.70.0")
             .describedAs("A bank, paying and hiring, coins you can carry, a creative-style shop priced from recipes, "
                     + "passive income, live auctions and raffles, and a casino with sounds and animations — every part switchable.")
             .by("Raindancer118");
@@ -170,6 +170,7 @@ public final class EconomyModule implements FlexModule {
         var buttons = context.core().buttons();
 
         PaymentService payments = new PaymentService(context.plugin(), economy, messages, effects, buttons, now);
+        payments.confirmWith(context.chat().brand());
         // A /pay made on another server (the arena): run here, under every rule a /pay here has.
         java.util.function.Function<java.util.Map<String, String>,
                 java.util.concurrent.CompletableFuture<java.util.Map<String, String>>> payLater = data -> {

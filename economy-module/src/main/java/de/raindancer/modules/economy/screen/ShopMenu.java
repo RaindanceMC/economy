@@ -56,6 +56,17 @@ public final class ShopMenu extends Menu implements IEconomyScreen {
     protected void render() {
         EconomySettings live = services.config();
         boolean admin = viewer.hasPermission(PermissionNodes.ADMIN);
+        // The two instant looks beside the purse: what they bought and sold last, one click from doing it again.
+        de.raindancer.modules.economy.service.RecentTrades.lastBought(viewer.getUniqueId()).ifPresent(material ->
+                set(MenuLayout.HEADER_LEFT, Icons.of(material, "<white>Buy again",
+                        "<gray>" + readable(material),
+                        "", "<yellow>Click<gray> to trade it"),
+                        click -> new TradeMenu(services, viewer, this, material).open()));
+        de.raindancer.modules.economy.service.RecentTrades.lastSold(viewer.getUniqueId()).ifPresent(material ->
+                set(MenuLayout.HEADER_RIGHT, Icons.of(material, "<white>Sell again",
+                        "<gray>" + readable(material),
+                        "", "<yellow>Click<gray> to trade it"),
+                        click -> new TradeMenu(services, viewer, this, material).open()));
         set(MenuLayout.HEADER_SUBJECT, purse(Icons.of(Material.EMERALD, "<green>Shop",
                 "<gray>Your balance: " + Mini.of(services.currency().render(services.economy().balance(viewer.getUniqueId()))),
                 "<dark_gray>Prices move with supply and demand.")));
@@ -149,6 +160,11 @@ public final class ShopMenu extends Menu implements IEconomyScreen {
         } else {
             cell(MenuLayout.RULES, column, Icons.locked(icon, BankMenu.OFF), click -> { });
         }
+    }
+
+    private static String readable(Material material) {
+        String plain = material.name().toLowerCase(java.util.Locale.ROOT).replace('_', ' ');
+        return Character.toUpperCase(plain.charAt(0)) + plain.substring(1);
     }
 
     @Override

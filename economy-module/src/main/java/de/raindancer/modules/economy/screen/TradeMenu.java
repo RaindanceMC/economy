@@ -76,6 +76,7 @@ public final class TradeMenu extends Menu implements IEconomyScreen {
                             "<gray>For " + PriceLines.amount(currency, tag.buy().times(count),
                                     yours.buyFor(count).orElse(Money.ZERO))),
                     "The shop does not sell this.", click -> {
+                        de.raindancer.modules.economy.service.RecentTrades.bought(viewer.getUniqueId(), material);
                         services.shop().buy(viewer, material, count);
                         refresh();
                     });
@@ -84,6 +85,7 @@ public final class TradeMenu extends Menu implements IEconomyScreen {
                             "<gray>For " + PriceLines.amount(currency, tag.sell().times(count),
                                     yours.sellFor(count).orElse(Money.ZERO))),
                     tag.sellable() ? "You do not carry that many." : "The shop does not buy this.", click -> {
+                        de.raindancer.modules.economy.service.RecentTrades.sold(viewer.getUniqueId(), material);
                         services.shop().sell(viewer, material, count);
                         refresh();
                     });
@@ -95,6 +97,7 @@ public final class TradeMenu extends Menu implements IEconomyScreen {
                                 tag.sell().times(Math.max(0, carrying)),
                                 yours.sellFor(Math.max(0, carrying)).orElse(Money.ZERO))),
                 tag.sellable() ? "You carry none." : "The shop does not buy this.", click -> {
+                    de.raindancer.modules.economy.service.RecentTrades.sold(viewer.getUniqueId(), material);
                     services.shop().sell(viewer, material, carrying);
                     refresh();
                 });
@@ -114,6 +117,7 @@ public final class TradeMenu extends Menu implements IEconomyScreen {
                             "<gold>Bulk: " + percent + "% off",
                             "<dark_gray>Needs room for all of it."),
                     "The shop does not sell this.", click -> {
+                        de.raindancer.modules.economy.service.RecentTrades.bought(viewer.getUniqueId(), material);
                         services.shop().buy(viewer, material, count);
                         refresh();
                     });
@@ -122,7 +126,8 @@ public final class TradeMenu extends Menu implements IEconomyScreen {
                 yours.bulk().applies() ? "<gray>Bulk discounts count here too." : ""), click ->
                 de.raindancer.core.ui.prompt.AnvilInput.open(viewer, "Buy how many?", "",
                         de.raindancer.core.ui.prompt.Parsers.wholeNumber(1, MOST_AT_ONCE), count -> {
-                            services.shop().buy(viewer, material, count);
+                            de.raindancer.modules.economy.service.RecentTrades.bought(viewer.getUniqueId(), material);
+                        services.shop().buy(viewer, material, count);
                             open();
                         }, this::open));
         if (viewer.hasPermission(PermissionNodes.ADMIN)) {

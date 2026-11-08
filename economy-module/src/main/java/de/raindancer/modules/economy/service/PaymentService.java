@@ -57,6 +57,13 @@ public final class PaymentService implements IEconomyService {
         return SupplyService.settingsOf(supply);
     }
 
+    private volatile de.raindancer.core.ui.chat.Brand brand;
+
+    /** With a brand, a large payment is confirmed in the game's own dialog rather than by a chat button. */
+    public void confirmWith(de.raindancer.core.ui.chat.Brand brand) {
+        this.brand = brand;
+    }
+
     public PaymentService(Plugin plugin, RainEconomy economy, Messages messages, Effects effects, ChatButtons buttons,
                           EconomySettings settings) {
         this.plugin = plugin;
@@ -102,6 +109,15 @@ public final class PaymentService implements IEconomyService {
 
             @Override
             public void askToConfirm(Money amount, String name, Runnable pay) {
+                de.raindancer.core.ui.chat.Brand asking = brand;
+                if (asking != null) {
+                    // The game's own question, with the amount and the name in it — a mistyped zero is caught here.
+                    new de.raindancer.core.ui.menu.ConfirmMenu(payer, asking, null,
+                            "<yellow>Pay " + de.raindancer.core.social.economy.Fees.format(amount) + " to " + de.raindancer.core.ui.text.Text.literal(name) + "?",
+                            java.util.List.of("<gray>It leaves your account at once.", "<gray>Only they can give it back."),
+                            "<dark_gray>A large sum, so it asks first.", () -> Scheduling.entity(plugin, payer, pay)).open();
+                    return;
+                }
                 messages.send(payer, "economy.pay.confirm", "amount", settings.currency().render(amount), "player", name,
                         "button", buttons.label("<green>[Pay]</green>").tooltip("<gray>Send it")
                                 .forOnly(payer.getUniqueId()).expiringIn(Duration.ofSeconds(30))
