@@ -51,7 +51,8 @@ public final class SidebarService implements IEconomyService {
     /** Redraws everybody's. Core's sidebar is safe from any thread and skips what has not changed. */
     public void refresh(Collection<? extends Player> online) {
         EconomySettings live = settings;
-        List<Account> top = rule.top(leaderboard.ranking(), live.sidebarRichest());
+        List<Account> top = rule.top(leaderboard.ranking(), MOST_RICHEST);
+        richest = top;
         for (Player player : online) {
             if (!live.sidebarEnabled() || !SHOWN.isOn(player)) {
                 scoreboards.clear(player.getUniqueId(), OWNER);
@@ -63,6 +64,8 @@ public final class SidebarService implements IEconomyService {
     }
 
     private volatile List<Account> richest = List.of();
+    /** The most a player can ask the sidebar to list. */
+    static final int MOST_RICHEST = 10;
     private volatile java.util.function.Predicate<UUID> dailyReady = id -> false;
 
     /** Who has a daily reward waiting — said under the balance, so nobody forgets to collect it. */
@@ -74,7 +77,9 @@ public final class SidebarService implements IEconomyService {
     public void registerSections() {
         de.raindancer.core.ui.scoreboard.SidebarSections.register("economy-balance", "Balance", 0, this::balanceLines);
         de.raindancer.core.ui.scoreboard.SidebarSections.register("economy-lottery", "Lottery pot", 60, this::lotteryLines);
-        de.raindancer.core.ui.scoreboard.SidebarSections.register("economy-richest", "Richest", 90, this::richestLines);
+        de.raindancer.core.ui.scoreboard.SidebarSections.registerSized("economy-richest", "Richest", 90,
+                new de.raindancer.core.ui.scoreboard.SidebarSections.Size(1, MOST_RICHEST,
+                        Math.max(1, settings.sidebarRichest()), "players"), this::richestLines);
     }
 
     public void unregisterSections() {
@@ -107,11 +112,18 @@ public final class SidebarService implements IEconomyService {
         return List.of(heading("Lottery pot"), value(live.currency().render(jackpot)));
     }
 
-    private List<Component> richestLines(UUID player) {
-        List<Account> top = richest;
-        if (top.isEmpty()) {
+    /** For a test: the richest as a refresh would have found them. */
+    void showTop(List<Account> top) {
+        richest = List.copyOf(top);
+    }
+
+    /** The richest, as many as the player chose — the section is theirs to size (Core 2.67.0). */
+    List<Component> richestLines(UUID player, int count) {
+        List<Account> all = richest;
+        if (all.isEmpty() || count <= 0) {
             return List.of();
         }
+        List<Account> top = all.subList(0, Math.min(count, all.size()));
         Currency currency = settings.currency();
         List<Component> lines = new ArrayList<>();
         lines.add(heading("Richest"));
@@ -130,7 +142,6 @@ public final class SidebarService implements IEconomyService {
      */
     private Sidebar sidebarFor(UUID player, List<Account> top, EconomySettings live) {
         Currency currency = live.currency();
-        richest = top;
         List<Component> lines = de.raindancer.core.ui.scoreboard.SidebarSections.compose(player,
                 de.raindancer.core.ui.scoreboard.Sidebar.MAX_LINES);
         return Sidebar.of(MINI.deserialize("<bold><gradient:" + de.raindancer.core.ui.chat.Style.brandFrom() + ":"
