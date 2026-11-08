@@ -32,8 +32,15 @@ public final class BankCommand extends EconomyCommand {
                         return;
                     }
                     if (args.length > 0 && args[0].equalsIgnoreCase("sidebar")) {
-                        live.messages().send(player, live.sidebar().toggle(player)
-                                ? "economy.sidebar.on" : "economy.sidebar.off");
+                        // The page to arrange it, with the switch on it — not a blind toggle any more.
+                        new de.raindancer.core.ui.scoreboard.SidebarMenu(player, live.brand(), null,
+                                () -> de.raindancer.modules.economy.service.SidebarService.SHOWN.isOn(player),
+                                () -> {
+                                    live.messages().send(player, live.sidebar().toggle(player)
+                                            ? "economy.sidebar.on" : "economy.sidebar.off");
+                                    live.sidebar().refresh(java.util.List.of(player));
+                                },
+                                () -> live.sidebar().refresh(java.util.List.of(player))).open();
                         return;
                     }
                     if (!ServiceDesks.refuseRemote(player, ServiceDesk.BANK)) {

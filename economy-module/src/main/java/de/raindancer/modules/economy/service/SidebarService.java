@@ -62,11 +62,23 @@ public final class SidebarService implements IEconomyService {
         }
     }
 
-    private Sidebar sidebarFor(UUID player, List<Account> top, EconomySettings live) {
-        Currency currency = live.currency();
-        // One shape for every section: a bullet and a grey heading, the value indented under it in white, a blank
-        // line before the next. The old board was headings and values in the same grey at the same indent, so the
-        // eye had to read every line to find the number.
+    private volatile List<Account> richest = List.of();
+
+    /** The sections the economy puts on the sidebar: the balance first, the lottery and the richest at the end. */
+    public void registerSections() {
+        de.raindancer.core.ui.scoreboard.SidebarSections.register("economy-balance", "Balance", 0, this::balanceLines);
+        de.raindancer.core.ui.scoreboard.SidebarSections.register("economy-lottery", "Lottery pot", 60, this::lotteryLines);
+        de.raindancer.core.ui.scoreboard.SidebarSections.register("economy-richest", "Richest", 90, this::richestLines);
+    }
+
+    public void unregisterSections() {
+        for (String owner : List.of("economy-balance", "economy-lottery", "economy-richest")) {
+            de.raindancer.core.ui.scoreboard.SidebarSections.unregister(owner);
+        }
+    }
+
+    private List<Component> balanceLines(UUID player) {
+        Currency currency = settings.currency();
         List<Component> lines = new ArrayList<>();
         lines.add(heading("Balance"));
         lines.add(value(currency.render(economy.balance(player))));
@@ -74,30 +86,44 @@ public final class SidebarService implements IEconomyService {
         if (place > 0) {
             lines.add(MINI.deserialize("   <dark_gray>" + rule.ordinal(place) + " richest"));
         }
-        // Other plugins' lines (a guild's level and bank) come right under the balance; the richest fill what is left.
-        List<Component> others = de.raindancer.core.ui.scoreboard.SidebarSections.linesFor(player,
-                de.raindancer.core.ui.scoreboard.Sidebar.MAX_LINES - lines.size() - 1);
-        if (!others.isEmpty()) {
-            lines.add(Component.empty());
-            lines.addAll(others);
-        }
+        return lines;
+    }
+
+    private List<Component> lotteryLines(UUID player) {
+        EconomySettings live = settings;
         var jackpot = live.gameOpen(live.lotteryEnabled()) ? pot.get() : null;
-        if (jackpot != null && lines.size() + 3 <= de.raindancer.core.ui.scoreboard.Sidebar.MAX_LINES) {
-            lines.add(Component.empty());
-            lines.add(heading("Lottery pot"));
-            lines.add(value(currency.render(jackpot)));
+        if (jackpot == null) {
+            return List.of();
         }
-        int room = de.raindancer.core.ui.scoreboard.Sidebar.MAX_LINES - lines.size() - 2;
-        if (!top.isEmpty() && room > 0) {
-            lines.add(Component.empty());
-            lines.add(heading("Richest"));
-            for (int i = 0; i < Math.min(room, top.size()); i++) {
-                Account account = top.get(i);
-                lines.add(MINI.deserialize("   " + rule.colourOf(i + 1) + rule.medal(i + 1) + " <white>"
-                                + MINI.escapeTags(rule.shortName(account.name(), 11)) + " <gray>")
-                        .append(currency.renderCompact(account.balance())));
-            }
+        return List.of(heading("Lottery pot"), value(live.currency().render(jackpot)));
+    }
+
+    private List<Component> richestLines(UUID player) {
+        List<Account> top = richest;
+        if (top.isEmpty()) {
+            return List.of();
         }
+        Currency currency = settings.currency();
+        List<Component> lines = new ArrayList<>();
+        lines.add(heading("Richest"));
+        for (int i = 0; i < top.size(); i++) {
+            Account account = top.get(i);
+            lines.add(MINI.deserialize("   " + rule.colourOf(i + 1) + rule.medal(i + 1) + " <white>"
+                            + MINI.escapeTags(rule.shortName(account.name(), 11)) + " <gray>")
+                    .append(currency.renderCompact(account.balance())));
+        }
+        return lines;
+    }
+
+    /**
+     * The whole sidebar is sections now — the economy's own and other plugins' — composed in the player's order
+     * with the ones they hid left out (Core 2.58.0, {@code /bank sidebar}). The title is the server's.
+     */
+    private Sidebar sidebarFor(UUID player, List<Account> top, EconomySettings live) {
+        Currency currency = live.currency();
+        richest = top;
+        List<Component> lines = de.raindancer.core.ui.scoreboard.SidebarSections.compose(player,
+                de.raindancer.core.ui.scoreboard.Sidebar.MAX_LINES);
         return Sidebar.of(MINI.deserialize("<bold><gradient:" + de.raindancer.core.ui.chat.Style.brandFrom() + ":"
                 + de.raindancer.core.ui.chat.Style.brandTo() + ">").append(currency.renderSymbol())
                 .append(Component.text(" ")).append(currency.renderName(true)), lines);

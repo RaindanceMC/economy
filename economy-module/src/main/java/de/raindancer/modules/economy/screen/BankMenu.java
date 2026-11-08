@@ -145,12 +145,8 @@ public final class BankMenu extends Menu implements IEconomyScreen {
         boolean shown = de.raindancer.modules.economy.service.SidebarService.SHOWN.isOn(viewer);
         toolbar(2, live.sidebarEnabled(), Icons.of(shown ? Material.OAK_SIGN : Material.BIRCH_SIGN,
                 shown ? "<white>Sidebar: <green>shown" : "<white>Sidebar: <gray>hidden",
-                "<gray>Your balance and the richest players", "<gray>on the right of the screen.",
-                "<yellow>Click<gray> to " + (shown ? "hide" : "show") + " it"), OFF, click -> {
-            services.sidebar().toggle(viewer);
-            services.sidebar().refresh(java.util.List.of(viewer));
-            refresh();
-        });
+                "<gray>What is on the right of your screen:", "<gray>hide sections, put them in your order.",
+                "<yellow>Click<gray> to arrange it"), OFF, click -> sidebarMenu(this).open());
         toolbar(6, Icons.of(Material.BEACON, "<aqua>The server's money",
                 "<gray>The treasury, community funds, repair,", "<gray>bet insurance, season points, debts.",
                 "<yellow>Click<gray> to open"), click -> new SupplyMenu(services, viewer, this).open());
@@ -159,6 +155,19 @@ public final class BankMenu extends Menu implements IEconomyScreen {
                     "<gray>Switch features, close shop categories,", "<gray>paint the currency."),
                     click -> services.screens().admin(viewer));
         }
+    }
+
+    /** Core's page for the player's own sidebar, told how the economy switches and redraws it. */
+    static de.raindancer.core.ui.scoreboard.SidebarMenu sidebarMenu(BankMenu bank) {
+        EconomyServices services = bank.services;
+        Player viewer = bank.viewer;
+        return new de.raindancer.core.ui.scoreboard.SidebarMenu(viewer, services.brand(), bank,
+                () -> de.raindancer.modules.economy.service.SidebarService.SHOWN.isOn(viewer),
+                () -> {
+                    services.sidebar().toggle(viewer);
+                    services.sidebar().refresh(java.util.List.of(viewer));
+                },
+                () -> services.sidebar().refresh(java.util.List.of(viewer)));
     }
 
     private void pickPayee() {
