@@ -397,6 +397,9 @@ economy:
   sidebar:
     on: "<green>Your balance is in the sidebar again. <gray>/bank sidebar hides it."
     off: "<gray>The sidebar is hidden. /bank sidebar brings it back."
+  watch:
+    # Admins only: one player gained more within ten minutes than anybody earns.
+    velocity: "<gold>⚠ <white><player></white> <gray>gained <white><amount></white> within ten minutes <dark_gray>(last: <kind>; balance <balance>)</dark_gray> <gray>— a dupe, a mispriced shop or a broken reward shows up like this."
 
   statement:
     printed: "<green>Your statement is being printed — it lands in your inventory in a moment."
