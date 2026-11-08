@@ -60,21 +60,26 @@ public final class ShopMenu extends Menu implements IEconomyScreen {
                 "<gray>Your balance: " + Mini.of(services.currency().render(services.economy().balance(viewer.getUniqueId()))),
                 "<dark_gray>Prices move with supply and demand.")));
 
+        // Three rows, each one kind of thing: the creative inventory's drawers as one full-width row, the
+        // server's own wares as the row below, and the two things that are not drawers — search and sell — on
+        // their own with a pane between them. Eighteen buttons spread over three mixed bands read as a wall.
+
+        // ── the creative inventory's drawers ───────────────────────────────────────────────────────────
         Category[] categories = Category.values();
         for (int i = 0; i < categories.length; i++) {
             Category category = categories[i];
-            int band = i < 5 ? MenuLayout.WHO : MenuLayout.RULES;
-            int column = i < 5 ? 1 + i * 3 / 2 : 2 + (i - 5) * 3 / 2;
+            int column = i;
             boolean open = live.categoryOpen(category);
             int items = open ? services.shop().prices().tradableIn(category).size() : 0;
             Material icon = Material.matchMaterial(category.icon());
             List<String> lore = new java.util.ArrayList<>();
             lore.add(open ? "<gray>" + items + " item(s) for sale" : "<red>Closed on this server");
+            lore.add("");
+            lore.add(open ? "<yellow>Click<gray> to open the drawer" : "<dark_gray>Nothing to open");
             if (admin) {
-                lore.add("");
                 lore.add("<yellow>Right click<gray> to " + (open ? "close" : "open") + " it");
             }
-            band(band, column, Icons.of(icon == null ? Material.CHEST : icon,
+            cell(MenuLayout.WHO, column, Icons.of(icon == null ? Material.CHEST : icon,
                     (open ? "<green>" : "<gray>") + category.title(), lore), click -> {
                 if (admin && click.isRightClick()) {
                     services.store().set(EconomySettings.categoryKey(category), String.valueOf(!open));
@@ -88,49 +93,72 @@ public final class ShopMenu extends Menu implements IEconomyScreen {
             });
         }
 
-        // The free column in the middle of the second row of drawers.
+        // ── the server's own wares ─────────────────────────────────────────────────────────────────────
         int eggs = live.spawnEggs() ? services.shop().prices().tradableEggs().size() : 0;
-        band(MenuLayout.RULES, 4, live.spawnEggs(), Icons.of(Material.PIG_SPAWN_EGG, "<green>Spawn eggs",
-                "<gray>" + eggs + " mob(s) to hatch."), BankMenu.OFF,
+        drawer(1, live.spawnEggs(), Icons.of(Material.PIG_SPAWN_EGG, "<green>Spawn eggs",
+                "<gray>" + eggs + " mob(s) to hatch.", "", "<yellow>Click<gray> to open the drawer"),
                 click -> ShopItemsMenu.eggs(services, viewer, this).open());
-        band(MenuLayout.RULES, 7, Icons.of(Material.BLAZE_ROD, "<gold>Rain's items",
-                "<gray>The Sell Wand and the Auto Sell Chest,", "<gray>for what their ingredients cost."),
+        int books = live.enchantBooks() ? services.shop().prices().tradableEnchants().size() : 0;
+        drawer(2, live.enchantBooks(), Icons.of(Material.ENCHANTED_BOOK, "<light_purple>Enchantments",
+                "<gray>Any enchantment as a book, for an anvil.",
+                "<gray>" + books + " book(s), prices move with", "<gray>supply and demand.", "",
+                "<yellow>Click<gray> to open the drawer"),
+                click -> new EnchantMenu(services, viewer, this).open());
+        int bottles = live.potions() ? services.shop().prices().tradablePotions().size() : 0;
+        drawer(3, live.potions(), Icons.of(Material.POTION, "<aqua>Potions",
+                "<gray>Potions, splash and lingering ones,",
+                "<gray>and ominous bottles.",
+                "<gray>" + bottles + " bottle(s), prices move with", "<gray>supply and demand.", "",
+                "<yellow>Click<gray> to open the drawer"),
+                click -> new PotionMenu(services, viewer, this).open());
+        drawer(4, live.rainsEnchantments(), Icons.of(Material.ECHO_SHARD, "<light_purple>Rain's enchantments",
+                "<gray>Books of the server's own enchantments,",
+                "<gray>for their shards and a little money,",
+                "<gray>once your guild has unlocked them.", "", "<yellow>Click<gray> to open the drawer"),
+                click -> new RainsEnchantMenu(services, viewer, this).open());
+        drawer(5, true, Icons.of(Material.BLAZE_ROD, "<gold>Rain's items",
+                "<gray>The Sell Wand and the Auto Sell Chest,", "<gray>for what their ingredients cost.", "",
+                "<yellow>Click<gray> to open the drawer"),
                 click -> new RainsItemsMenu(services, viewer, this).open());
-        band(MenuLayout.LAND, 3, Icons.of(Material.SPYGLASS, "<white>Search", "<gray>Find an item by name."),
+        drawer(6, services.packs().enabled(), Icons.of(Material.BUNDLE, "<gold>Packs",
+                "<gray>Ready-made bundles, cheaper than",
+                "<gray>buying it all one by one.",
+                "<gray>" + services.packs().packs().size() + " pack(s).", "", "<yellow>Click<gray> to open the drawer"),
+                click -> new PacksMenu(services, viewer, this).open());
+        drawer(7, live.xpTradeEnabled(), Icons.of(Material.EXPERIENCE_BOTTLE, "<green>Experience",
+                "<gray>Buy levels, priced by the point.",
+                "<gray>A point: " + Mini.of(services.currency().render(live.xpBuyMoney())), "",
+                "<yellow>Click<gray> to open the drawer"),
+                click -> new ExperienceMenu(services, viewer, this).open());
+
+        // ── not drawers: finding a thing, and selling ──────────────────────────────────────────────────
+        band(MenuLayout.LAND, 3, Icons.of(Material.SPYGLASS, "<white>Search", "<gray>Find an item by name,",
+                        "<gray>whichever drawer it is in.", "", "<yellow>Click<gray> to type a name"),
                 click -> AnvilInput.open(viewer, "Search the shop", "", Parsers.text(32),
                         text -> services.screens().shopSearch(viewer, text), this::open));
         band(MenuLayout.LAND, 5, live.sellingEnabled(), Icons.of(Material.CHEST, "<white>Sell",
-                "<gray>What you carry that the shop buys."), BankMenu.OFF, click -> services.screens().sell(viewer));
-        int books = live.enchantBooks() ? services.shop().prices().tradableEnchants().size() : 0;
-        band(MenuLayout.LAND, 1, live.enchantBooks(), Icons.of(Material.ENCHANTED_BOOK, "<light_purple>Enchantments",
-                "<gray>Any enchantment as a book, for an anvil.",
-                "<gray>" + books + " book(s), prices move with", "<gray>supply and demand."), BankMenu.OFF,
-                click -> new EnchantMenu(services, viewer, this).open());
-        int bottles = live.potions() ? services.shop().prices().tradablePotions().size() : 0;
-        band(MenuLayout.LAND, 2, live.potions(), Icons.of(Material.POTION, "<aqua>Potions",
-                "<gray>Potions, splash and lingering ones,",
-                "<gray>and ominous bottles.",
-                "<gray>" + bottles + " bottle(s), prices move with", "<gray>supply and demand."), BankMenu.OFF,
-                click -> new PotionMenu(services, viewer, this).open());
-        band(MenuLayout.LAND, 4, services.packs().enabled(), Icons.of(Material.BUNDLE, "<gold>Packs",
-                "<gray>Ready-made bundles, cheaper than",
-                "<gray>buying it all one by one.",
-                "<gray>" + services.packs().packs().size() + " pack(s)."), BankMenu.OFF,
-                click -> new PacksMenu(services, viewer, this).open());
-        band(MenuLayout.LAND, 6, live.rainsEnchantments(), Icons.of(Material.ECHO_SHARD, "<light_purple>Rain's enchantments",
-                "<gray>Books of the server's own enchantments,",
-                "<gray>for their shards and a little money,",
-                "<gray>once your guild has unlocked them."), BankMenu.OFF,
-                click -> new RainsEnchantMenu(services, viewer, this).open());
-        band(MenuLayout.LAND, 7, live.xpTradeEnabled(), Icons.of(Material.EXPERIENCE_BOTTLE, "<green>Experience",
-                "<gray>Buy levels, priced by the point.",
-                "<gray>A point: " + Mini.of(services.currency().render(live.xpBuyMoney()))), BankMenu.OFF,
-                click -> new ExperienceMenu(services, viewer, this).open());
+                "<gray>What you carry that the shop buys.", "", "<yellow>Click<gray> to see what it pays"), BankMenu.OFF,
+                click -> services.screens().sell(viewer));
+    }
+
+    /** One of the server's own drawers, in the row under the creative inventory's; greyed with the reason when shut. */
+    private void drawer(int column, boolean open, org.bukkit.inventory.ItemStack icon,
+                        java.util.function.Consumer<org.bukkit.event.inventory.InventoryClickEvent> onClick) {
+        if (open) {
+            cell(MenuLayout.RULES, column, icon, onClick);
+        } else {
+            cell(MenuLayout.RULES, column, Icons.locked(icon, BankMenu.OFF), click -> { });
+        }
     }
 
     @Override
     protected List<String> helpLines() {
-        return List.of("Sorted the way the creative inventory is.", "Click a drawer, then an item to buy or sell it.");
+        return List.of("Top row: drawers sorted the way the creative inventory is.",
+                "Second row: the server's own wares — eggs, books,",
+                "potions, Rain's enchantments and items, packs, levels.",
+                "Below: search by name, or sell what you carry.",
+                "",
+                "Click a drawer, then an item to buy or sell it.");
     }
 
     @Override
