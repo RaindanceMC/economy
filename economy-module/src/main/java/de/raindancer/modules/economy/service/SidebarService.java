@@ -63,6 +63,12 @@ public final class SidebarService implements IEconomyService {
     }
 
     private volatile List<Account> richest = List.of();
+    private volatile java.util.function.Predicate<UUID> dailyReady = id -> false;
+
+    /** Who has a daily reward waiting — said under the balance, so nobody forgets to collect it. */
+    public void dailyReady(java.util.function.Predicate<UUID> ready) {
+        this.dailyReady = ready == null ? id -> false : ready;
+    }
 
     /** The sections the economy puts on the sidebar: the balance first, the lottery and the richest at the end. */
     public void registerSections() {
@@ -85,6 +91,9 @@ public final class SidebarService implements IEconomyService {
         int place = leaderboard.placeOf(player);
         if (place > 0) {
             lines.add(MINI.deserialize("   <dark_gray>" + rule.ordinal(place) + " richest"));
+        }
+        if (settings.dailyEnabled() && dailyReady.test(player)) {
+            lines.add(MINI.deserialize("   <yellow>Daily reward ready <dark_gray>/daily"));
         }
         return lines;
     }

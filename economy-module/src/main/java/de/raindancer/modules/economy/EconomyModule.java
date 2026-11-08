@@ -87,7 +87,7 @@ import java.util.UUID;
  */
 public final class EconomyModule implements FlexModule {
 
-    private static final ModuleInfo INFO = ModuleInfo.of("economy", "Economy", "0.67.0")
+    private static final ModuleInfo INFO = ModuleInfo.of("economy", "Economy", "0.68.0")
             .describedAs("A bank, paying and hiring, coins you can carry, a creative-style shop priced from recipes, "
                     + "passive income, live auctions and raffles, and a casino with sounds and animations — every part switchable.")
             .by("Raindancer118");
@@ -217,6 +217,10 @@ public final class EconomyModule implements FlexModule {
         var sidebar = new de.raindancer.modules.economy.service.SidebarService(economy, leaderboard,
                 context.core().scoreboards(), now);
         sidebar.registerSections();
+        sidebar.dailyReady(id -> {
+            org.bukkit.entity.Player online = server.getPlayer(id);
+            return online != null && daily.ready(online);
+        });
         context.closeWith(sidebar::unregisterSections);
         var displays = new de.raindancer.modules.economy.service.LeaderboardDisplayService(context.plugin(), server,
                 leaderboard, settings, now);
