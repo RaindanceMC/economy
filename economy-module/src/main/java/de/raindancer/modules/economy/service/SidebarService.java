@@ -91,7 +91,7 @@ public final class SidebarService implements IEconomyService {
     private List<Component> balanceLines(UUID player) {
         Currency currency = settings.currency();
         List<Component> lines = new ArrayList<>();
-        lines.add(heading("Balance"));
+        lines.add(heading(balanceHeading(settings.sidebarBalanceHeading())));
         lines.add(value(currency.render(economy.balance(player))));
         int place = leaderboard.placeOf(player);
         if (place > 0) {
@@ -144,9 +144,23 @@ public final class SidebarService implements IEconomyService {
         Currency currency = live.currency();
         List<Component> lines = de.raindancer.core.ui.scoreboard.SidebarSections.compose(player,
                 de.raindancer.core.ui.scoreboard.Sidebar.MAX_LINES);
-        return Sidebar.of(MINI.deserialize("<bold><gradient:" + de.raindancer.core.ui.chat.Style.brandFrom() + ":"
-                + de.raindancer.core.ui.chat.Style.brandTo() + ">").append(currency.renderSymbol())
-                .append(Component.text(" ")).append(currency.renderName(true)), lines);
+        return Sidebar.of(title(live.sidebarTitle(), currency), lines);
+    }
+
+    /** The configured title, or the currency's symbol and name when none is set. */
+    static Component title(String configured, Currency currency) {
+        String brand = "<bold><gradient:" + de.raindancer.core.ui.chat.Style.brandFrom() + ":"
+                + de.raindancer.core.ui.chat.Style.brandTo() + ">";
+        if (configured != null && !configured.isBlank()) {
+            // In the brand's gradient like the currency title, so it is part of the text, not appended after it.
+            return MINI.deserialize(brand + MINI.escapeTags(configured.strip()));
+        }
+        return MINI.deserialize(brand).append(currency.renderSymbol()).append(Component.text(" "))
+                .append(currency.renderName(true));
+    }
+
+    static String balanceHeading(String configured) {
+        return configured == null || configured.isBlank() ? "Balance" : configured.strip();
     }
 
     private static Component heading(String text) {

@@ -840,6 +840,14 @@ public record EconomySettings(
         @In("economy/display") @Title("Richest players in the sidebar") @Range(min = 0, max = 10)
         @Key("sidebar.richest") int sidebarRichest,
 
+        @In("economy/display") @Title("Sidebar title")
+        @Describe("The line on top of the sidebar, e.g. the server's address. Empty: the currency's symbol and name.")
+        @Key("sidebar.title") String sidebarTitle,
+
+        @In("economy/display") @Title("Balance heading")
+        @Describe("What the balance is called in the sidebar, e.g. the currency's name.")
+        @Key("sidebar.balance-heading") String sidebarBalanceHeading,
+
         @In("economy/display") @Title("Leaderboards in the world")
         @Describe("Floating lists of the richest players, put down with /eco leaderboard place.")
         @Key("features.leaderboards") boolean leaderboardsEnabled,
@@ -973,7 +981,7 @@ public record EconomySettings(
             // wealth tax
             false, 1.0, 24, "0",
             // display
-            true, 3, true, 10, List.of(), true, List.of(),
+            true, 3, "", "Balance", true, 10, List.of(), true, List.of(),
             // general
             true,
             // packs
