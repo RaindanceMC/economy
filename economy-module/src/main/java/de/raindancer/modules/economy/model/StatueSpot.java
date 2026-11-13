@@ -22,13 +22,33 @@ public record StatueSpot(String world, double x, double y, double z, float yaw, 
             return Optional.empty();
         }
         Optional<Podium.Board> board = Podium.Board.read(words[5]);
-        Optional<Integer> place = readPlace(words[6]);
+        Optional<Integer> place = board.isEmpty() ? Optional.empty() : readPlace(board.get(), words[6]);
         if (board.isEmpty() || place.isEmpty()) {
             return Optional.empty();
         }
         try {
             return Optional.of(new StatueSpot(words[0], Double.parseDouble(words[1]), Double.parseDouble(words[2]),
                     Double.parseDouble(words[3]), Float.parseFloat(words[4]), board.get(), place.get(), words[7]));
+        } catch (NumberFormatException notANumber) {
+            return Optional.empty();
+        }
+    }
+
+    /** Most Prime statues one server puts up. */
+    public static final int MOST_PRIME = 64;
+
+    /** A place as typed for a board: 1 to 3, or for Prime's statues 1 to {@link #MOST_PRIME}. */
+    public static Optional<Integer> readPlace(Podium.Board board, String typed) {
+        if (board != Podium.Board.PRIME) {
+            return readPlace(typed);
+        }
+        if (typed == null) {
+            return Optional.empty();
+        }
+        String digits = typed.strip().replaceFirst("^#", "");
+        try {
+            int place = Integer.parseInt(digits);
+            return place >= 1 && place <= MOST_PRIME ? Optional.of(place) : Optional.empty();
         } catch (NumberFormatException notANumber) {
             return Optional.empty();
         }

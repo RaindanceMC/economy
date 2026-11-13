@@ -120,6 +120,7 @@ public final class EcoCommand extends EconomyCommand {
                     case RICHEST -> "economy.admin.leaderboard-placed-richest";
                     case CASINO -> "economy.admin.leaderboard-placed-casino";
                     case PLAYTIME -> "economy.admin.leaderboard-placed-playtime";
+                    case PRIME -> "economy.admin.leaderboard-placed-prime";
                 });
                 }
             });
@@ -563,10 +564,11 @@ public final class EcoCommand extends EconomyCommand {
                 case RICHEST -> "economy.admin.statue-placed-richest";
                 case CASINO -> "economy.admin.statue-placed-casino";
                 case PLAYTIME -> "economy.admin.statue-placed-playtime";
+                case PRIME -> "economy.admin.statue-placed-prime";
             });
             return;
         }
-        var place = de.raindancer.modules.economy.model.StatueSpot.readPlace(args.length > 3 ? args[3] : null);
+        var place = de.raindancer.modules.economy.model.StatueSpot.readPlace(board.get(), args.length > 3 ? args[3] : null);
         if (place.isEmpty()) {
             live.messages().send(player, "economy.admin.statue-place", "what", args.length > 3 ? args[3] : "");
             return;

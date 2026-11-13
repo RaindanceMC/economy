@@ -17,6 +17,8 @@ import java.util.function.Predicate;
 public final class StatueRule implements IEconomyRule {
 
     public static final int PLACES = 3;
+    /** Prime's badge colours, the default of Ranks' prime rank. */
+    private static final String PRIME_MARK = "<gradient:#ff3d9a:#ff9ad5><bold>PRIME</bold></gradient>";
     private static final double SPACING = 1.0;
     public static final double SHARED_LABEL_REACH = 6.0;
 
@@ -51,6 +53,32 @@ public final class StatueRule implements IEconomyRule {
         return new double[]{-Math.cos(radians) * side, height(place), -Math.sin(radians) * side};
     }
 
+    /** The name over a statue of a board; Prime's are a thank-you, so they carry no place. */
+    public String title(int place, String name, Podium.Board board) {
+        if (board != Podium.Board.PRIME) {
+            return title(place, name);
+        }
+        if (name == null) {
+            return PRIME_MARK + " <dark_gray>— this spot is waiting";
+        }
+        return PRIME_MARK + " <white>" + MiniMessage.miniMessage().escapeTags(name);
+    }
+
+    /**
+     * Who a statue of {@code spots} shows: with no more people than statues each keeps one; with more, they take turns,
+     * {@code turn} counting up — every turn the whole row moves on by {@code spots}, so over the turns everybody stands.
+     */
+    public <T> Optional<T> standing(List<T> people, int place, int spots, long turn) {
+        if (place < 1 || people.isEmpty()) {
+            return Optional.empty();
+        }
+        if (people.size() <= spots) {
+            return place <= people.size() ? Optional.of(people.get(place - 1)) : Optional.empty();
+        }
+        long at = (place - 1 + Math.floorMod(turn, (long) people.size()) * spots) % people.size();
+        return Optional.of(people.get((int) at));
+    }
+
     /** The name over a statue; {@code name} null for a place nobody holds yet. */
     public String title(int place, String name) {
         if (name == null) {
@@ -66,6 +94,7 @@ public final class StatueRule implements IEconomyRule {
             case CASINO -> "<gold><bold>Biggest casino winners</bold></gold>";
             case RICHEST -> "<gold><bold>Richest players</bold></gold>";
             case PLAYTIME -> "<gold><bold>Most time played</bold></gold>";
+            case PRIME -> "<gradient:#ff3d9a:#ffd27a><bold>Our Prime supporters</bold></gradient>";
         };
     }
 
@@ -75,6 +104,7 @@ public final class StatueRule implements IEconomyRule {
             case CASINO -> "<gray>won ";
             case RICHEST -> "<gray>";
             case PLAYTIME -> "<gray>played ";
+            case PRIME -> "<gray>Thank you for supporting the server";
         };
     }
 
@@ -171,6 +201,7 @@ public final class StatueRule implements IEconomyRule {
             case CASINO -> "biggest casino winners";
             case RICHEST -> "richest players";
             case PLAYTIME -> "players who played longest";
+            case PRIME -> "Prime supporters";
         };
     }
 

@@ -167,4 +167,53 @@ class StatueRuleTest {
         assertThat(rule.nearest(all, "w", 0, 64, 0, 4, spot -> spot.place() == 2)).isEmpty();
         assertThat(rule.nearest(all, "end", 0, 64, 0, Double.MAX_VALUE, spot -> true)).isEmpty();
     }
+
+    @org.junit.jupiter.api.Nested
+    @org.junit.jupiter.api.DisplayName("Prime statues")
+    class Prime {
+
+        private final StatueRule rule = new StatueRule();
+
+        @org.junit.jupiter.api.Test
+        @org.junit.jupiter.api.DisplayName("a Prime statue may be any place from 1 to 64; the other boards stay a top three")
+        void places() {
+            assertThat(de.raindancer.modules.economy.model.StatueSpot.parse("spawn 1.00 64.00 2.00 90.0 prime 17 -"))
+                    .map(de.raindancer.modules.economy.model.StatueSpot::place).contains(17);
+            assertThat(de.raindancer.modules.economy.model.StatueSpot.parse("spawn 1.00 64.00 2.00 90.0 richest 17 -"))
+                    .isEmpty();
+            assertThat(de.raindancer.modules.economy.model.StatueSpot.readPlace(Podium.Board.PRIME, "64")).contains(64);
+            assertThat(de.raindancer.modules.economy.model.StatueSpot.readPlace(Podium.Board.PRIME, "65")).isEmpty();
+            assertThat(de.raindancer.modules.economy.model.StatueSpot.readPlace(Podium.Board.CASINO, "4")).isEmpty();
+        }
+
+        @org.junit.jupiter.api.Test
+        @org.junit.jupiter.api.DisplayName("with no more Prime members than statues each has one for good; with more, they take turns")
+        void rotation() {
+            java.util.List<String> five = java.util.List.of("a", "b", "c", "d", "e");
+            assertThat(rule.standing(five.subList(0, 2), 1, 3, 0)).contains("a");
+            assertThat(rule.standing(five.subList(0, 2), 3, 3, 0)).isEmpty();
+            assertThat(rule.standing(five.subList(0, 2), 2, 3, 99)).contains("b");
+
+            java.util.Set<String> shownNow = new java.util.HashSet<>();
+            for (int place = 1; place <= 3; place++) {
+                shownNow.add(rule.standing(five, place, 3, 0).orElseThrow());
+            }
+            assertThat(shownNow).hasSize(3);
+            java.util.Set<String> overTime = new java.util.HashSet<>();
+            for (long turn = 0; turn < 5; turn++) {
+                for (int place = 1; place <= 3; place++) {
+                    overTime.add(rule.standing(five, place, 3, turn).orElseThrow());
+                }
+            }
+            assertThat(overTime).as("everybody gets a turn").containsExactlyInAnyOrderElementsOf(five);
+        }
+
+        @org.junit.jupiter.api.Test
+        @org.junit.jupiter.api.DisplayName("a Prime statue is labelled as one and thanks rather than counts")
+        void words() {
+            assertThat(rule.heading(Podium.Board.PRIME)).contains("Prime");
+            assertThat(rule.title(9, "Ada", Podium.Board.PRIME)).contains("PRIME").contains("Ada").doesNotContain("#9");
+            assertThat(rule.title(9, null, Podium.Board.PRIME)).contains("PRIME").contains("waiting");
+        }
+    }
 }

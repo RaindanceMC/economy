@@ -16,7 +16,9 @@ public record Podium(String world, double x, double y, double z, float yaw, Boar
         /** Balance, like /baltop. */
         RICHEST,
         /** Time played on the whole network, away time included, as Core counts it. */
-        PLAYTIME;
+        PLAYTIME,
+        /** Who holds Prime right now, longest-running first — a thank-you, not a ranking; as many statues as staff place. */
+        PRIME;
 
         public static Optional<Board> read(String typed) {
             if (typed == null) {

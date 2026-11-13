@@ -61,7 +61,23 @@ public final class LeaderboardService {
             case RICHEST -> ranking().stream().map(each -> new Standing(each.id(), each.name(), each.balance())).toList();
             case CASINO -> casinoWinners();
             case PLAYTIME -> longestPlayed();
+            case PRIME -> primeMembers();
         };
+    }
+
+    private volatile java.util.function.Supplier<List<UUID>> prime = List::of;
+
+    /** Who is Prime right now, longest-running first (Core's PrimeMembers). */
+    public void primeFrom(java.util.function.Supplier<List<UUID>> current) {
+        this.prime = current == null ? List::of : current;
+    }
+
+    /** Prime members with an account here — somebody who paid before ever joining has no statue yet. */
+    private List<Standing> primeMembers() {
+        java.util.Map<UUID, String> names = new java.util.HashMap<>();
+        book.all().forEach(account -> names.put(account.id(), account.name()));
+        return prime.get().stream().filter(names::containsKey)
+                .map(id -> new Standing(id, names.get(id), Money.ZERO)).toList();
     }
 
     private List<Standing> longestPlayed() {

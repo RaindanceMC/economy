@@ -87,7 +87,7 @@ import java.util.UUID;
  */
 public final class EconomyModule implements FlexModule {
 
-    private static final ModuleInfo INFO = ModuleInfo.of("economy", "Economy", "0.72.0")
+    private static final ModuleInfo INFO = ModuleInfo.of("economy", "Economy", "0.73.0")
             .describedAs("A bank, paying and hiring, coins you can carry, a creative-style shop priced from recipes, "
                     + "passive income, live auctions and raffles, and a casino with sounds and animations — every part switchable.")
             .by("Raindancer118");
@@ -219,6 +219,9 @@ public final class EconomyModule implements FlexModule {
         DailyService daily = new DailyService(economy, messages, effects, Clock.systemDefaultZone(), now);
         LeaderboardService leaderboard = new LeaderboardService(book, System::currentTimeMillis,
                 playtime::minutes);
+        leaderboard.primeFrom(() -> context.core().prime() == null ? java.util.List.of()
+                : context.core().prime().current(java.time.Instant.now()).stream()
+                        .map(de.raindancer.core.social.support.PrimeMembers.Member::player).toList());
         serveTheNetwork(context, bankClient, leaderboard, payments, settings, shop);
         var sidebar = new de.raindancer.modules.economy.service.SidebarService(economy, leaderboard,
                 context.core().scoreboards(), now);

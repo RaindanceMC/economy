@@ -56,6 +56,7 @@ public final class StatueService implements IEconomyService {
     private static final NamespacedKey HOLDER = Objects.requireNonNull(NamespacedKey.fromString("rainseconomy:statue_holder"));
     private static final Material[] PEDESTALS = {Material.GOLD_BLOCK, Material.IRON_BLOCK, Material.WAXED_COPPER_BLOCK};
     private static final String NOBODY = "-";
+    private static final java.time.Duration PRIME_TURN = java.time.Duration.ofMinutes(10);
     private static final double REACH_SQUARED = 25;
     private static final MiniMessage MINI = MiniMessage.miniMessage();
 
@@ -105,7 +106,15 @@ public final class StatueService implements IEconomyService {
                 continue;
             }
             List<Standing> top = tops.computeIfAbsent(spot.board(), leaderboard::standings);
-            Standing holder = spot.place() <= top.size() ? top.get(spot.place() - 1) : null;
+            Standing holder;
+            if (spot.board() == Podium.Board.PRIME) {
+                int spots = (int) all.stream().filter(other -> other.board() == Podium.Board.PRIME).count();
+                // More Prime members than statues: they take turns, a new row every PRIME_TURN.
+                holder = rule.standing(top, spot.place(), spots, System.currentTimeMillis() / PRIME_TURN.toMillis())
+                        .orElse(null);
+            } else {
+                holder = spot.place() <= top.size() ? top.get(spot.place() - 1) : null;
+            }
             boolean labelled = rule.labelled(spot, all);
             Location ground = new Location(world, spot.x(), spot.y(), spot.z());
             Scheduling.region(plugin, ground, () -> {
@@ -147,7 +156,7 @@ public final class StatueService implements IEconomyService {
             label.ifPresent(Entity::remove);
         }
         if (find(pieces, BlockDisplay.class, own + "pedestal").isEmpty()) {
-            spawnPedestal(ground, own + "pedestal", spot.place());
+            spawnPedestal(ground, own + "pedestal", spot.board() == Podium.Board.PRIME ? 1 : spot.place());
         }
         Mannequin statue = find(pieces, Mannequin.class, own + "statue")
                 .orElseGet(() -> spawnStatue(standing(spot, ground), spot.yaw(), own + "statue"));
@@ -155,8 +164,9 @@ public final class StatueService implements IEconomyService {
     }
 
     private void dress(Mannequin statue, StatueSpot spot, Standing holder, EconomySettings live) {
-        statue.customName(MINI.deserialize(rule.title(spot.place(), holder == null ? null : holder.name())));
+        statue.customName(MINI.deserialize(rule.title(spot.place(), holder == null ? null : holder.name(), spot.board())));
         statue.setDescription(holder == null ? Component.empty()
+                : spot.board() == Podium.Board.PRIME ? MINI.deserialize(rule.caption(spot.board()))
                 : MINI.deserialize(rule.caption(spot.board()))
                         .append(LeaderboardDisplayService.worth(holder, spot.board(), live.currency())));
         String wearing = statue.getPersistentDataContainer().get(HOLDER, PersistentDataType.STRING);
