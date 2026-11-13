@@ -216,4 +216,31 @@ class StatueRuleTest {
             assertThat(rule.title(9, null, Podium.Board.PRIME)).contains("PRIME").contains("waiting");
         }
     }
+
+    @Test
+    @DisplayName("a Prime statue stands like a mannequin statue: on the ground, no pedestal, no label over it")
+    void primeStandsFree() {
+        StatueSpot prime = StatueSpot.parse("w 0 64 0 0 prime 1 -").orElseThrow();
+        StatueSpot casino = StatueSpot.parse("w 9 64 0 0 casino 1 -").orElseThrow();
+        assertThat(rule.pedestal(prime.board())).isFalse();
+        assertThat(rule.pedestal(casino.board())).isTrue();
+        assertThat(rule.standingHeight(prime)).isZero();
+        assertThat(rule.standingHeight(casino)).isEqualTo(rule.height(1));
+        assertThat(rule.labelled(prime, List.of(prime, casino))).isFalse();
+    }
+
+    @Test
+    @DisplayName("each Prime statue put up is one more: the lowest free place, none past the most")
+    void onePrimeAtATime() {
+        assertThat(rule.nextPrimePlace(List.of())).hasValue(1);
+        List<StatueSpot> some = List.of(StatueSpot.parse("w 0 64 0 0 prime 1 -").orElseThrow(),
+                StatueSpot.parse("w 2 64 0 0 prime 3 -").orElseThrow(),
+                StatueSpot.parse("w 4 64 0 0 casino 2 -").orElseThrow());
+        assertThat(rule.nextPrimePlace(some)).hasValue(2);
+        List<StatueSpot> full = new java.util.ArrayList<>();
+        for (int place = 1; place <= StatueSpot.MOST_PRIME; place++) {
+            full.add(StatueSpot.parse("w " + place + " 64 0 0 prime " + place + " -").orElseThrow());
+        }
+        assertThat(rule.nextPrimePlace(full)).isEmpty();
+    }
 }

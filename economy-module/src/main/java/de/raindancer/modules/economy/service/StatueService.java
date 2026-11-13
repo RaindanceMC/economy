@@ -155,11 +155,20 @@ public final class StatueService implements IEconomyService {
         } else {
             label.ifPresent(Entity::remove);
         }
-        if (find(pieces, BlockDisplay.class, own + "pedestal").isEmpty()) {
-            spawnPedestal(ground, own + "pedestal", spot.board() == Podium.Board.PRIME ? 1 : spot.place());
+        Optional<BlockDisplay> pedestal = find(pieces, BlockDisplay.class, own + "pedestal");
+        if (!rule.pedestal(spot.board())) {
+            // Prime's stand on the ground like a mannequin statue; one put up on a pedestal before 0.74.0 loses it.
+            pedestal.ifPresent(Entity::remove);
+        } else if (pedestal.isEmpty()) {
+            spawnPedestal(ground, own + "pedestal", spot.place());
         }
+        Location feet = standing(spot, ground);
         Mannequin statue = find(pieces, Mannequin.class, own + "statue")
-                .orElseGet(() -> spawnStatue(standing(spot, ground), spot.yaw(), own + "statue"));
+                .orElseGet(() -> spawnStatue(feet, spot.yaw(), own + "statue"));
+        if (!rule.pedestal(spot.board()) && Math.abs(statue.getLocation().getY() - feet.getY()) > 0.1) {
+            // Only a Prime statue put up on a pedestal before 0.74.0 steps down; nothing else is ever moved here.
+            statue.teleportAsync(feet);
+        }
         dress(statue, spot, holder, live);
     }
 
@@ -190,7 +199,7 @@ public final class StatueService implements IEconomyService {
     }
 
     private Location standing(StatueSpot spot, Location ground) {
-        Location at = ground.clone().add(0, rule.height(spot.place()), 0);
+        Location at = ground.clone().add(0, rule.standingHeight(spot), 0);
         at.setYaw(spot.yaw());
         at.setPitch(0);
         return at;
@@ -265,6 +274,12 @@ public final class StatueService implements IEconomyService {
                 feet.getBlockZ() + 0.5, rule.facing(feet.getYaw(), 90f), board, group);
         write(lines -> three.forEach(spot -> lines.add(spot.written())));
         return three;
+    }
+
+    /** One more Prime statue on the block the player stands on, in the lowest free place; empty when all stand. */
+    public Optional<StatueSpot> placePrime(Player player) {
+        java.util.OptionalInt next = rule.nextPrimePlace(spots());
+        return next.isEmpty() ? Optional.empty() : Optional.of(placeOne(player, Podium.Board.PRIME, next.getAsInt()));
     }
 
     /** One statue for {@code place} on the block the player stands on, facing the nearest eighth of their look. */

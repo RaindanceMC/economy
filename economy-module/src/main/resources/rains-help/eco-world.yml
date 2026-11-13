@@ -34,6 +34,11 @@ sections:
     when: economy:features.statues
     text: |
       Stand where the winner should stand, look toward where the crowd will be, and type {run:/eco statue place} — a podium of the three biggest casino winners (net, the lottery included). {cmd:/eco statue place richest} ranks balances instead, {cmd:/eco statue place playtime} time played on the network. Each statue wears its player's skin and changes hands by itself.
+  - question: How do I put up Prime statues?
+    title: Prime statues
+    when: economy:features.statues
+    text: |
+      Stand where it should stand, look toward the crowd, and type {cmd:/eco statue place prime}: one statue of a Prime member, on the ground like a mannequin statue, no pedestal and no label, just their name with the PRIME mark. Each time you type it, one more goes up (up to 64). With more Prime members than statues they take turns every 10 minutes. {cmd:/eco statue remove} takes the nearest away.
   - question: Can I place each statue on its own?
     title: Statues one by one
     when: economy:features.statues

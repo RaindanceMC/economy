@@ -558,13 +558,21 @@ public final class EcoCommand extends EconomyCommand {
                     : "economy.admin.statue-board", "what", typed);
             return;
         }
+        if (args.length <= 3 && !moving && board.get() == de.raindancer.modules.economy.model.Podium.Board.PRIME) {
+            // Prime's statues go up one at a time, each where its placer stands.
+            statues.placePrime(player).ifPresentOrElse(
+                    spot -> live.messages().send(player, "economy.admin.statue-placed-prime", "place", spot.place()),
+                    () -> live.messages().send(player, "economy.admin.statue-prime-full",
+                            "most", de.raindancer.modules.economy.model.StatueSpot.MOST_PRIME));
+            return;
+        }
         if (args.length <= 3 && !moving) {
             statues.place(player, board.get());
             live.messages().send(player, switch (board.get()) {
                 case RICHEST -> "economy.admin.statue-placed-richest";
                 case CASINO -> "economy.admin.statue-placed-casino";
                 case PLAYTIME -> "economy.admin.statue-placed-playtime";
-                case PRIME -> "economy.admin.statue-placed-prime";
+                case PRIME -> throw new IllegalStateException("Prime statues go up one at a time, above");
             });
             return;
         }

@@ -33,6 +33,28 @@ public final class StatueRule implements IEconomyRule {
         };
     }
 
+    /** Prime's statues stand on the ground like a mannequin statue; the boards' stand on their podium. */
+    public boolean pedestal(Podium.Board board) {
+        return board != Podium.Board.PRIME;
+    }
+
+    /** How far above its ground block a statue's feet are: its pedestal's height, or none. */
+    public double standingHeight(StatueSpot spot) {
+        return pedestal(spot.board()) ? height(spot.place()) : 0;
+    }
+
+    /** The place a new Prime statue takes: the lowest free one, none once all {@link StatueSpot#MOST_PRIME} stand. */
+    public java.util.OptionalInt nextPrimePlace(List<StatueSpot> all) {
+        java.util.Set<Integer> taken = new java.util.HashSet<>();
+        all.stream().filter(spot -> spot.board() == Podium.Board.PRIME).forEach(spot -> taken.add(spot.place()));
+        for (int place = 1; place <= StatueSpot.MOST_PRIME; place++) {
+            if (!taken.contains(place)) {
+                return java.util.OptionalInt.of(place);
+            }
+        }
+        return java.util.OptionalInt.empty();
+    }
+
     /** How high over the ground a statue's label floats: above its name tag, which the mannequin draws over its head. */
     public double labelHeight(int place) {
         return height(place) + 2.9;
@@ -166,6 +188,9 @@ public final class StatueRule implements IEconomyRule {
      * share one label instead of stacking the same heading.
      */
     public boolean labelled(StatueSpot spot, List<StatueSpot> all) {
+        if (spot.board() == Podium.Board.PRIME) {
+            return false;
+        }
         if (!spot.standalone()) {
             return all.stream().noneMatch(other -> other.group().equals(spot.group()) && other.place() < spot.place());
         }
