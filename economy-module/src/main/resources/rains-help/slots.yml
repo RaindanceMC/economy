@@ -2,7 +2,7 @@ id: slots
 title: Slot machine
 summary: Three reels, a pay line and a paytable that returns exactly what the owner set.
 intro: |
-  Pull the lever and hope the netherite lines up. It does so rarely, which is why it pays so well.
+  Pull the lever. Netherite is the rarest symbol and pays the most.
 icon: DIAMOND
 category: Games
 order: 73
@@ -16,7 +16,7 @@ sections:
   - question: How do I play?
     title: Playing
     text: |
-      {run:/slots} opens the machine. Set your bet and pull the lever; the reels stop one after another and you are paid at once. The book in the corner shows the paytable.
+      {run:/slots} opens the machine. Set your bet and pull the lever. The reels stop one after another and you are paid at once. The book in the corner shows the paytable.
   - question: What pays?
     title: Paytable
     text: |

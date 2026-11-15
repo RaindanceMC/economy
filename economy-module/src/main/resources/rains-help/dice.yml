@@ -1,8 +1,8 @@
 id: dice
 title: Dice
-summary: Rolling 1 to 100 over or under a number you choose — the longer the odds, the bigger the win.
+summary: Roll 1 to 100 over or under a number you choose. The longer the odds, the bigger the win.
 intro: |
-  You pick the number and the odds. The dice have no opinion.
+  You pick the number, and that sets the odds.
 icon: WHITE_WOOL
 category: Games
 order: 72
@@ -20,7 +20,7 @@ sections:
   - question: Which numbers are allowed?
     title: Odds
     text: |
-      Any that give you between a one and a ninety-five percent chance of winning. The payout is your stake times the house's fair return divided by your chance, so a long shot pays a lot and a near-certainty barely anything. The screen shows what a win would pay before you roll.
+      Any that give you between a one and a ninety-five percent chance of winning. The payout is your stake times the house's fair return divided by your chance, so a long shot pays a lot and a near-certainty pays very little. The screen shows what a win would pay before you roll.
   - question: What is the edge and the minimum?
     title: Edge and minimum
     text: |

@@ -1,8 +1,8 @@
 id: eco-shop
-title: Staff - the shop's prices
+title: "Staff: the shop's prices"
 summary: Looking up and changing prices, repricing, calming the market, packs and the Sell Wand.
 intro: |
-  Prices are mostly automatic, which leaves the staff free to be blamed for them.
+  Prices are mostly automatic. Staff can look up and change them here.
 icon: EMERALD_BLOCK
 category: Staff
 order: 911
@@ -23,15 +23,15 @@ sections:
   - question: What is not priced?
     title: Unpriced items
     text: |
-      {cmd:/eco unpriced [page]} lists every item the shop would not buy, forty at a time — so you see what is missing from the price list.
-  - question: Prices are weird. Now what?
+      {cmd:/eco unpriced [page]} lists every item the shop would not buy, forty at a time, so you can see what is missing from the price list.
+  - question: Prices look wrong. What now?
     title: Reprice and calm
     text: |
-      {run:/eco reprice} reads every recipe again and reprices everything from them — after changing recipes or custom values. {run:/eco calm} clears all supply-and-demand pushes: every price back to plain.
+      {run:/eco reprice} reads every recipe again and reprices everything from them. Use it after changing recipes or custom values. {run:/eco calm} clears all supply-and-demand pushes: every price back to plain.
   - question: How do I manage packs?
     title: Packs
     text: |
-      Packs are written in <white>packs.yml</white>. {run:/eco packs} reads it again; {cmd:/eco packs give <player> <pack>} hands one out. Delete the file to get the shipped packs back.
+      Packs are written in <white>packs.yml</white>. {run:/eco packs} reads it again; {cmd:/eco packs give <player> <pack>} hands one out. Delete the file to get the default packs back.
   - question: How do I give out a Sell Wand?
     title: Sell Wand
     text: |

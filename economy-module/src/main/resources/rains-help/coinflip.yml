@@ -2,7 +2,7 @@ id: coinflip
 title: Coin flip
 summary: Heads or tails against the house, or a duel against another player.
 intro: |
-  The oldest game in the book, and the only one with a plot twist: you can play against a friend.
+  Heads or tails. You can also challenge another player.
 icon: SUNFLOWER
 category: Games
 order: 71
@@ -16,7 +16,7 @@ sections:
   - question: How do I flip?
     title: Against the house
     text: |
-      {cmd:/coinflip <amount> [heads|tails]}, or {run:/coinflip} for the screen. Call a side; the coin is flipped and paid the moment you call. A win returns your stake and as much again, minus the house's {if:economy:coinflip.house-edge-percent}{setting:economy:coinflip.house-edge-percent|percent}{else}{setting:economy:gamble.house-edge-percent|percent}{/if} edge. The alias is <white>/cf</white>.
+      {cmd:/coinflip <amount> [heads|tails]}, or {run:/coinflip} for the screen. Call a side. The coin is flipped and paid at once. A win returns your stake and as much again, minus the house's {if:economy:coinflip.house-edge-percent}{setting:economy:coinflip.house-edge-percent|percent}{else}{setting:economy:gamble.house-edge-percent|percent}{/if} edge. The alias is <white>/cf</white>.
   - question: What is the smallest bet?
     title: Smallest bet
     text: |

@@ -2,7 +2,7 @@ id: auctions
 title: Auction house
 summary: Selling an item to the highest bidder, bidding, buy-it-now, the queue, fees and picking up what you won.
 intro: |
-  Going once, going twice — one auction at a time for the whole server, announced in chat with a countdown, and the bids on a boss bar. Dramatic, I know.
+  One auction runs at a time for the whole server. It is announced in chat with a countdown, and the bids show on a boss bar.
 icon: BELL
 category: Economy & trade
 order: 23
@@ -16,7 +16,7 @@ sections:
   - question: How do I put something up?
     title: Selling
     text: |
-      Hold the stack you want to sell and type {cmd:/auction sell <start> [buy it now] [length]} — for example <white>/auction sell 500 2000 5m</white>: starting at 500, buy it now for 2,000, running five minutes. Or open {run:/auction} and use the sell screen. The whole stack goes up, and leaves your inventory.
+      Hold the stack you want to sell and type {cmd:/auction sell <start> [buy it now] [length]}, for example <white>/auction sell 500 2000 5m</white>: start at 500, buy it now for 2,000, runs five minutes. Or open {run:/auction} and use the sell screen. The whole stack goes up and leaves your inventory.
 
       Cash and insured items cannot be auctioned. The lowest starting price is {setting:economy:auction.smallest-start|money}.
   - question: How long does an auction run?
@@ -26,15 +26,15 @@ sections:
   - question: What does it cost me?
     title: Fees
     text: |
-      A listing fee of {setting:economy:auction.listing-fee|money}, paid when the item goes up — sold or not — and the auction house keeps {setting:economy:auction.fee-percent|percent} of the final price. That money leaves the economy.
+      A listing fee of {setting:economy:auction.listing-fee|money}, paid when the item goes up, whether it sells or not. The auction house keeps {setting:economy:auction.fee-percent|percent} of the final price. That money leaves the economy.
   - question: How do I bid?
     title: Bidding
     text: |
-      Click <white>[Bid]</white> in chat or on the screen, or {cmd:/auction bid [amount]} — without an amount it bids the smallest accepted. A bid must beat the last by at least {setting:economy:auction.step|money} or {setting:economy:auction.step-percent|percent}, whichever is more. Your money is held while you lead and returned the moment somebody outbids you. You cannot bid on your own auction.
+      Click <white>[Bid]</white> in chat or on the screen, or {cmd:/auction bid [amount]}. Without an amount it bids the smallest accepted amount. A bid must beat the last by at least {setting:economy:auction.step|money} or {setting:economy:auction.step-percent|percent}, whichever is more. Your money is held while you lead and returned the moment somebody outbids you. You cannot bid on your own auction.
   - question: What is buy it now?
     title: Buy it now
     text: |
-      A seller may set a price at which the item is simply yours. Bid that much (or click the button) and the auction ends at once.
+      A seller can set a price at which you get the item at once. Bid that much (or click the button) and the auction ends at once.
   - question: Can I snipe in the last second?
     title: Late bids
     when: economy:auction.snipe-seconds > 0
@@ -47,20 +47,20 @@ sections:
   - question: Can I take my auction back?
     title: Cancelling
     text: |
-      {cmd:/auction cancel} withdraws your newest auction — as long as it has no bids. Once somebody bid, it runs to the end.
+      {cmd:/auction cancel} withdraws your newest auction as long as it has no bids. Once somebody has bid, it runs to the end.
   - question: Can I skip the queue?
     title: Jumping the queue
     when: economy-supply:auction.jump-queue && economy-supply:auction.jump-queue-price
     text: |
       For {setting:economy-supply:auction.jump-queue-price|money}, {cmd:/auction jump} moves your waiting auction to the front. You are shown the price with a button before anything is paid.
-  - question: Too much auction chatter!
+  - question: How do I mute auction messages?
     title: Muting
     text: |
-      {cmd:/auction mute} silences auction and raffle announcements for you; run it again to hear them.
+      {cmd:/auction mute} silences auction and raffle announcements for you; run it again to hear them again.
       {if:!economy:auction.announce-bids}
 
-      The server announces only the start, the countdown and the result anyway.{/if}
+      The server announces only the start, the countdown and the result.{/if}
   - question: What is running right now?
     title: Info
     text: |
-      {run:/auction info} (works from chat too) tells you the running auction, time left and the highest bid, and how many wait behind it.
+      {run:/auction info} (works from chat too) shows the running auction, the time left, the highest bid and how many auctions wait behind it.

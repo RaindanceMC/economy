@@ -1,8 +1,8 @@
 id: crash
 title: Crash
-summary: One shared round, a multiplier climbs until it crashes — cash out first.
+summary: One shared round. A multiplier climbs until it crashes, so cash out first.
 intro: |
-  Everybody on the server watches the same number go up. Only one of you will be smug about it.
+  Everybody plays the same round and watches the same multiplier.
 icon: FIREWORK_ROCKET
 category: Games
 order: 79
@@ -28,4 +28,4 @@ sections:
   - question: Edge and minimum?
     title: Edge and minimum
     text: |
-      The house keeps {if:economy:crash.house-edge-percent}{setting:economy:crash.house-edge-percent|percent}{else}{setting:economy:gamble.house-edge-percent|percent}{/if} on average at any target — a crash at 1.00× happens with exactly that chance. Smallest bet: {if:economy:crash.min-bet}{setting:economy:crash.min-bet|money}{else}{setting:economy:gamble.min-bet|money}{/if}. Open stakes are refunded if the server stops.
+      The house keeps {if:economy:crash.house-edge-percent}{setting:economy:crash.house-edge-percent|percent}{else}{setting:economy:gamble.house-edge-percent|percent}{/if} on average at any target. A crash at 1.00× happens with exactly that chance. Smallest bet: {if:economy:crash.min-bet}{setting:economy:crash.min-bet|money}{else}{setting:economy:gamble.min-bet|money}{/if}. Open stakes are refunded if the server stops.

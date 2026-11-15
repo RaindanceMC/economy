@@ -2,7 +2,7 @@ id: mines
 title: Mines
 summary: Clear tiles on a field hiding mines, cash out before you hit one.
 intro: |
-  Twenty-five tiles, some of them explosive. Sweeping is easy; stopping is the hard part.
+  Twenty-five tiles, some of them mines. Cash out before you hit one.
 icon: TNT
 category: Games
 order: 78

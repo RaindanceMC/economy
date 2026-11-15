@@ -2,7 +2,7 @@ id: earning
 title: Earning money
 summary: Passive income, the daily reward, advancement pay, back pay, interest and the hourly cap.
 intro: |
-  The honest ways to get rich on this server, besides selling things (see {topic:selling}). None involve a pickaxe, which is rather the point.
+  The ways to earn money here, besides selling items (see {topic:selling}).
 icon: SUNFLOWER
 category: Progress & rewards
 order: 14
@@ -23,8 +23,8 @@ sections:
     title: Passive income
     when: economy:features.income
     text: |
-      Money for simply being online: {setting:economy:income.amount|money} every {setting:economy:income.minutes|minutes} while you play.
-      {if:economy:income.away-amount}Away from the keyboard you get {setting:economy:income.away-amount|money} instead.{else}Away from the keyboard you get nothing — go and play.{/if}
+      Money for being online: {setting:economy:income.amount|money} every {setting:economy:income.minutes|minutes} while you play.
+      {if:economy:income.away-amount}Away from the keyboard you get {setting:economy:income.away-amount|money} instead.{else}Away from the keyboard you get nothing.{/if}
       Creative and spectator mode do not count, and you need to be allowed to earn.
   - question: Do advancements pay?
     title: Advancements
@@ -35,7 +35,7 @@ sections:
     title: Back pay
     when: economy:features.advancement-rewards && economy:earn.advancement-backpay
     text: |
-      {cmd:/claimadvancements} pays what you missed — once per player — for advancements made before they paid, or paid less than they pay now. Players with some waiting are told when they join. It reads the ledger, so nothing is ever paid twice.
+      {cmd:/claimadvancements} pays what you missed, once per player, for advancements made before they paid, or paid less than they pay now. Players with some waiting are told when they join. It checks the ledger, so nothing is paid twice.
   - question: Is there interest on my savings?
     title: Interest
     when: economy:features.interest
@@ -45,13 +45,13 @@ sections:
     title: Hourly cap
     when: economy:earn.hourly-cap
     text: |
-      Passive income and advancement pay together are capped at {setting:economy:earn.hourly-cap|money} an hour. Past that, they simply stop until the hour rolls over.
+      Passive income and advancement pay together are capped at {setting:economy:earn.hourly-cap|money} an hour. Past that, they stop until the hour is over.
   - question: Why did a reward come out smaller?
     title: Smaller payouts
     when: economy-supply:money-supply.capped || economy-supply:features.stabilizer || economy-supply:earn.per-player-brake
     text: |
-      The server watches the total amount of money. When the treasury runs low, when prices rise too fast, or when everybody is rich, payouts shrink on purpose — and grow again when things calm down. {cmd:/treasury} shows how the economy is doing.
+      The server watches the total amount of money. When the treasury runs low, when prices rise too fast, or when everybody is rich, payouts shrink on purpose and grow again when things calm down. {cmd:/treasury} shows how the economy is doing.
   - question: Are mobs and mining paid?
     title: Mobs and mining
     text: |
-      No. What you gather, you sell. It keeps the economy honest.
+      No. What you gather, you sell.

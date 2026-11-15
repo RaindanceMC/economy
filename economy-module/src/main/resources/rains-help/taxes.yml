@@ -1,8 +1,8 @@
 id: taxes
 title: Taxes & fees
-summary: Every way money leaves the economy — payment tax, wealth tax, fees, death costs and the rest.
+summary: "Every way money leaves the economy: payment tax, wealth tax, fees, death costs and more."
 intro: |
-  Money that is only ever made would soon be worthless, so some of it must go. Here is where.
+  Money that is only created would lose its value, so some of it has to be removed. This is where.
 icon: IRON_BARS
 category: Economy & trade
 order: 16
@@ -15,7 +15,7 @@ sections:
     title: Payment tax
     when: economy:features.pay && economy:pay.tax-percent > 0 || economy-supply:pay.tax-by-brackets
     text: |
-      Yes — see {topic:pay}. It is taken from what arrives and destroyed.
+      Yes, see {topic:pay}. It is taken from what arrives and destroyed.
   - question: What is the wealth tax?
     title: Wealth tax
     when: economy:features.wealth-tax
@@ -43,8 +43,8 @@ sections:
     title: Casino and lottery
     when: economy:features.gambling
     text: |
-      The house edge is the price of playing: on average the casino keeps a share of every stake — see {topic:casino}.{if:economy:features.lottery} The lottery destroys {setting:economy:lottery.cut-percent|percent} of each ticket.{/if}
+      The house edge is the price of playing: on average the casino keeps a share of every stake. See {topic:casino}.{if:economy:features.lottery} The lottery destroys {setting:economy:lottery.cut-percent|percent} of each ticket.{/if}
   - question: What else costs money?
     title: Other costs
     text: |
-      {if:economy-supply:features.repair}{cmd:/repair} costs money, scaled by the item's worth and how worn it is. {/if}{if:economy:features.loans}Loan interest and late fees are destroyed when paid. {/if}{if:economy-supply:features.funds}Community fund donations are destroyed. {/if}{if:economy-supply:gamble.insurance}Bet insurance premiums beyond the payback are a sink. {/if}All of these, and everything above, are what keeps your coins worth something.
+      {if:economy-supply:features.repair}{cmd:/repair} costs money, scaled by the item's worth and how worn it is. {/if}{if:economy:features.loans}Loan interest and late fees are destroyed when paid. {/if}{if:economy-supply:features.funds}Community fund donations are destroyed. {/if}{if:economy-supply:gamble.insurance}Bet insurance premiums beyond the payback are a sink. {/if}These and the costs above keep your coins valuable.

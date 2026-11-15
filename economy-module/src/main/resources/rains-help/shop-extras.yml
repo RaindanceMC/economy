@@ -1,8 +1,8 @@
 id: shop-extras
 title: "Shop drawers: books, potions & more"
-summary: The special drawers — enchanted books, potions, packs, spawn eggs, Rain's enchantments, experience and Rain's items.
+summary: "The special drawers: enchanted books, potions, packs, spawn eggs, Rain's enchantments, experience and Rain's items."
 intro: |
-  Beyond sticks and stones the shop also deals in knowledge (books), bottled opinions (potions) and a few bundles for the indecisive.
+  Besides normal items, the shop sells enchanted books, potions and item packs.
 icon: ENCHANTED_BOOK
 category: Economy & trade
 order: 22
@@ -16,7 +16,7 @@ sections:
     title: Enchantments drawer
     when: economy:shop.enchant-books
     text: |
-      Yes: every enchantment at every level up to its normal maximum, as a book for the anvil. A book costs a plain book plus what making it costs, times how useful the enchantment is — so Mending costs far more than Bane of Arthropods. Prices move with supply and demand like any item.
+      Yes: every enchantment at every level up to its normal maximum, as a book for the anvil. A book costs a plain book plus what making it costs, times how useful the enchantment is, so Mending costs far more than Bane of Arthropods. Prices move with supply and demand like any item.
       {if:economy:shop.enchant-treasure}Treasure enchantments (Mending, Frost Walker, Soul Speed…) are for sale too.{else}Treasure enchantments, normally found only as loot, are not for sale here.{/if}
   - question: What about potions?
     title: Potions drawer
@@ -27,17 +27,17 @@ sections:
     title: Packs
     when: economy:features.packs
     text: |
-      Ready-made bundles — an explorer's, a builder's, a miner's pack and so on. A pack is one item: buy it, right-click to unpack everything inside. It can be given away or kept for later. Unless it has a price of its own, it costs {setting:economy:shop.pack-discount-percent|percent} less than its contents bought one by one. Some, like the starter pack, are one per player.
+      Ready-made bundles, such as an explorer's, a builder's or a miner's pack. A pack is one item: buy it, right-click to unpack everything inside. It can be given away or kept for later. Unless it has a price of its own, it costs {setting:economy:shop.pack-discount-percent|percent} less than its contents bought one by one. Some, like the starter pack, are one per player.
   - question: Can I buy spawn eggs?
     title: Spawn eggs
     when: economy:shop.spawn-eggs
     text: |
-      Yes — a drawer with every mob's egg at {setting:economy:shop.spawn-egg-value|money} before markup. A bought egg hatches the mob but never changes a spawner. The mighty ones (wither, ender dragon) are usually left out.
+      Yes. A drawer has every mob's egg at {setting:economy:shop.spawn-egg-value|money} before markup. A bought egg hatches the mob but never changes a spawner. The mighty ones (wither, ender dragon) are usually left out.
   - question: Can I buy a spawner?
     title: Spawners
     when: economy:shop.sell-spawners
     text: |
-      An empty spawner costs exactly {setting:economy:shop.spawner-price|money} — no markup, no supply and demand. It is the server's way of saying "are you sure?"
+      An empty spawner costs exactly {setting:economy:shop.spawner-price|money}, with no markup and no supply and demand.
   - question: Rain's enchantments in the shop?
     title: Rain's enchantments
     when: economy:rains-enchantments.enabled

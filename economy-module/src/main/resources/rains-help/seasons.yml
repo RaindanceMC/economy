@@ -2,7 +2,7 @@ id: seasons
 title: Seasons
 summary: Season points, what happens when a season ends and what you keep.
 intro: |
-  Everything resets eventually. Seasons make it a feature.
+  A season ends with a reset. Your balance turns into points.
 icon: NETHER_STAR
 category: Progress & rewards
 order: 30
@@ -20,7 +20,7 @@ sections:
   - question: How are points worked out?
     title: Points
     text: |
-      On a sliding scale: the richer you are, the fewer points each further coin is worth, so the leaderboard rewards wealth without making early lead permanent. The scale is {setting:economy-supply:season.points-brackets}, each step reading "from how much, points per coin".
+      On a sliding scale: the richer you are, the fewer points each further coin is worth, so the leaderboard rewards wealth without making an early lead permanent. The scale is {setting:economy-supply:season.points-brackets}, each step reading "from how much, points per coin".
   - question: Do I keep anything?
     title: Keeping
     when: economy-supply:season.keep-percent > 0

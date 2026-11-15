@@ -1,8 +1,8 @@
 id: blackjack
 title: Blackjack
-summary: Beat the dealer to 21 — hit, stand, double down and split, with the real casino rules.
+summary: "Beat the dealer to 21: hit, stand, double down and split, with the real casino rules."
 intro: |
-  Closer to 21 than the dealer, without going over. Count cards if you like; each player has their own shoe, so nobody will mind.
+  Get closer to 21 than the dealer without going over. Each player has their own shoe.
 icon: PAPER
 category: Games
 order: 75

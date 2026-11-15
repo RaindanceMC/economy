@@ -2,7 +2,7 @@ id: raffles
 title: Raffles & giveaways
 summary: Raffling off an item or money, buying tickets, free giveaways and how the draw works.
 intro: |
-  Lotteries run by players. One ticket, one chance, one winner — and nobody has to fight over a diamond block.
+  Raffles run by players. Each ticket is one chance, and one ticket wins.
 icon: NAME_TAG
 category: Economy & trade
 order: 24
@@ -17,22 +17,22 @@ sections:
     title: Starting a raffle
     when: economy:features.raffles
     text: |
-      Hold the item and type {cmd:/raffle start <ticket price> [length] [most tickets] [per player]}, e.g. <white>/raffle start 100 1h</white>. To raffle money from your account: {cmd:/raffle money <prize> <ticket price> [length]…}. Starting costs {setting:economy:raffle.listing-fee|money}; tickets cost at least {setting:economy:raffle.smallest-ticket|money} each.
+      Hold the item and type {cmd:/raffle start <ticket price> [length] [most tickets] [per player]}, e.g. <white>/raffle start 100 1h</white>. To raffle money from your account: {cmd:/raffle money <prize> <ticket price> [length]}. Starting costs {setting:economy:raffle.listing-fee|money}; tickets cost at least {setting:economy:raffle.smallest-ticket|money} each.
       Lengths run from {setting:economy:raffle.min-minutes|minutes} to {setting:economy:raffle.max-minutes|minutes}, {setting:economy:raffle.default-minutes|minutes} by default. Up to {setting:economy:raffle.most-running|count} raffles run at once, {setting:economy:raffle.per-host|count} per host.
   - question: How do I buy tickets?
     title: Tickets
     when: economy:features.raffles
     text: |
-      {run:/raffle} lists the running raffles; {cmd:/raffle buy <number> [tickets]}. Each ticket is one equal chance — the tooltip shows your chance. You cannot buy tickets for your own raffle. The host may limit tickets in total or per player.
+      {run:/raffle} lists the running raffles. {cmd:/raffle buy <number> [tickets]} buys tickets. Each ticket is one equal chance, and the tooltip shows your chance. You cannot buy tickets for your own raffle. The host may limit tickets in total or per player.
   - question: What happens at the draw?
     title: The draw
     when: economy:features.raffles
     text: |
-      A drumroll in chat, then one ticket is picked. The winner gets the prize in their inventory. The host gets the ticket money after the house's {setting:economy:raffle.fee-percent|percent} cut. Nobody bought a ticket? The prize goes back to the host.
+      The draw is announced in chat, then one ticket is picked. The winner gets the prize in their inventory. The host gets the ticket money after the house's {setting:economy:raffle.fee-percent|percent} cut. Nobody bought a ticket? The prize goes back to the host.
   - question: Can I cancel my raffle?
     title: Cancelling
     text: |
-      {cmd:/raffle cancel <number>} — only while no ticket is sold; after that it runs to the draw. If staff call one off, every ticket is paid back.
+      {cmd:/raffle cancel <number>} works only while no ticket is sold. After that the raffle runs to the draw. If staff call one off, every ticket is paid back.
   - question: What is a giveaway?
     title: Giveaways
     when: economy:features.giveaways

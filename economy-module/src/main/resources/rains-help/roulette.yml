@@ -1,8 +1,8 @@
 id: roulette
 title: Roulette
-summary: European roulette — red, black, green, odd, even, halves, dozens or a single number.
+summary: "European roulette: red, black, green, odd, even, halves, dozens or a single number."
 intro: |
-  Thirty-seven pockets, one ball, and a green zero that has ruined better players than you.
+  Thirty-seven pockets, one ball and a green zero.
 icon: ENDER_PEARL
 category: Games
 order: 74
@@ -23,7 +23,7 @@ sections:
       <white>•</white> Red, black, odd, even, low (1 to 18), high (19 to 36): about even money.
       <white>•</white> A dozen (1 to 12, 13 to 24, 25 to 36): about three to one.
       <white>•</white> A single number: about 36 to one.
-      <white>•</white> Green, the zero: a rare treat.
+      <white>•</white> Green, the zero: it comes up rarely.
       Zero loses every bet except green. Every bet returns the same on average: the house edge below.
   - question: Edge and minimum?
     title: Edge and minimum

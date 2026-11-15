@@ -2,7 +2,7 @@ id: hilo
 title: Hi-Lo
 summary: Guess whether the next card is higher or lower, and cash out any time.
 intro: |
-  A streak game. Every right guess grows the pot; every wrong one ends it. Greed is optional, but traditional.
+  Every right guess grows the pot. A wrong guess ends it. You can cash out at any time.
 icon: LIME_CONCRETE
 category: Games
 order: 77
@@ -20,7 +20,7 @@ sections:
   - question: When do I get paid?
     title: Cashing out
     text: |
-      Whenever you like, press <white>Cash out</white> and take what the stake has grown to. A wrong guess loses it all. Cashing out before any guess just returns the bet, and closing the window or leaving cashes out for you.
+      At any time, press <white>Cash out</white> and take what the stake has grown to. A wrong guess loses it all. Cashing out before any guess just returns the bet, and closing the window or leaving cashes out for you.
   - question: Edge and minimum?
     title: Edge and minimum
     text: |

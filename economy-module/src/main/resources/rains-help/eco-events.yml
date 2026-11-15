@@ -1,8 +1,8 @@
 id: eco-events
-title: Staff - auctions, raffles & funds
+title: "Staff: auctions, raffles & funds"
 summary: Calling off auctions, running server raffles and giveaways, starting funds and ending seasons.
 intro: |
-  Prizes with the server's money behind them, and the power to say "no, that auction is over".
+  Server prizes, and calling off auctions.
 icon: BEACON
 category: Staff
 order: 913
@@ -15,7 +15,7 @@ sections:
   - question: How do I stop an auction?
     title: Auctions
     text: |
-      {run:/eco auction stop} calls off the running one; {cmd:/eco auction cancel <number or seller>} a particular one; {cmd:/eco auction clear} all of them. Items and every bid go back to their owners.
+      {run:/eco auction stop} calls off the running one. {cmd:/eco auction cancel <number or seller>} calls off a particular one. {cmd:/eco auction clear} calls off all of them. Items and every bid go back to their owners.
   - question: How do I run a raffle with server money?
     title: Server raffles
     text: |
@@ -23,11 +23,11 @@ sections:
   - question: And a giveaway?
     title: Server giveaways
     text: |
-      {cmd:/eco giveaway <prize> [length]} gives server money away to one lucky player; {cmd:/eco giveaway cancel <number>} stops it.
+      {cmd:/eco giveaway <prize> [length]} gives server money to one random player. {cmd:/eco giveaway cancel <number>} stops it.
   - question: How do I start a community fund?
     title: Funds
     text: |
-      {cmd:/eco fund start <name> <target> [effect]}. The effect is either <white>boost <percent> <hours></white> (every payout is raised for that long once full) or <white>command <a> && <b></white> (console commands run once), or nothing at all for a plain goal. {cmd:/eco fund remove <name>} removes one; what was given stays given. Players donate with {cmd:/fund}.
+      {cmd:/eco fund start <name> <target> [effect]}. The effect is either <white>boost <percent> <hours></white> (every payout is raised for that long once full) or <white>command <a> && <b></white> (console commands run once), or nothing for a plain goal. {cmd:/eco fund remove <name>} removes one; what was given stays given. Players donate with {cmd:/fund}.
   - question: How do I end a season?
     title: Seasons
     text: |

@@ -1,8 +1,8 @@
 id: horse-race
 title: Horse race
-summary: One race for everybody — bet on a horse while the gate is closed and watch them run.
+summary: One race for everybody. Bet on a horse while the gate is closed and watch them run.
 intro: |
-  Four horses, long shots and favourites, and a track that runs whether you bet or not.
+  Four horses race, with a favourite and long shots.
 icon: SADDLE
 category: Games
 order: 81
@@ -16,8 +16,8 @@ sections:
   - question: How does it work?
     title: Betting
     text: |
-      {run:/race} shows the race. While the gate is closed ({setting:economy:race.betting-seconds|seconds} before each start) bet on any horse — as often as you like, on several if you want. Then watch them run; the winner pays out.
-  - question: Which horse should I back?
+      {run:/race} shows the race. While the gate is closed ({setting:economy:race.betting-seconds|seconds} before each start) bet on any horse, as often as you like, also on several. Then watch the race. The winner pays out.
+  - question: What are the odds?
     title: Odds
     text: |
       Thunder is the favourite, then Biscuit, Comet and Shadow, the long shot. Each horse has a fixed chance of winning and pays its fair return minus the edge, so the favourite pays little and the long shot a lot.

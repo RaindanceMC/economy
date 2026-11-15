@@ -2,7 +2,7 @@ id: bet-insurance
 title: Bet insurance
 summary: Insuring your casino stakes, what it costs and what a lost bet pays back.
 intro: |
-  For the gambler who wants a safety net. The house is happy to sell you one — at a price, naturally.
+  Insurance pays back part of a lost stake, for a price.
 icon: TOTEM_OF_UNDYING
 category: Games
 order: 80
@@ -22,4 +22,4 @@ sections:
   - question: What does it cost and pay?
     title: Terms
     text: |
-      Every stake costs {setting:economy-supply:gamble.insurance-premium-percent|percent} more, paid on top. A lost stake pays {setting:economy-supply:gamble.insurance-payback-percent|percent} of it back. Over time the house keeps the difference, so it is comfort rather than a strategy.
+      Every stake costs {setting:economy-supply:gamble.insurance-premium-percent|percent} more, paid on top. A lost stake pays {setting:economy-supply:gamble.insurance-payback-percent|percent} of it back. Over time the house keeps the difference, so insurance does not make you win.
