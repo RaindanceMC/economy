@@ -1,18 +1,1 @@
-# The serious wording for this module, for a server whose Message tone is SERIOUS. Only lines that differ.
-economy:
-  gamble:
-    dealers-only: "<red>This game is played in person. <gray>Please go to the <white><dealer></white>."
-    go-to-casino: "<gray>Go to the casino instead? This uses /warp casino."
-    duel-at-table: "<red>Duels are played at a coin flip table. <gray>Please stand by a <white><dealer></white> first."
-    duel-won: "<green>You won the coin flip: <amount><green>."
-    duel-lost: "<red><player> won the coin flip. You lost <amount><red>."
-    wait: "<red>Please wait a moment before the next game."
-    loan-overdue: "<red>Gambling is not available while your loan is overdue. Pay it back with <white>/loan</white>."
-  loan:
-    off: "<red>Loans are switched off on this server."
-    too-little: "<red>The smallest loan is <amount><red>."
-    too-much: "<red>The largest loan is <amount><red>."
-    over-own-limit: "<red>Your loan limit is <amount><red>. <white>/loan</white> shows how it is worked out."
-    nothing-owed: "<gray>You do not owe the bank anything."
-    forgiven-you: "<green>The bank has forgiven your loan of <owed><green>."
-  away: "<green>Received while you were offline: <amount><green>."
+# One tone only: messages.yml already says everything plainly. This file stays empty because the wording contract still expects it.
