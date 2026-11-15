@@ -170,7 +170,7 @@ public final class ShopMenu extends Menu implements IEconomyScreen {
     @Override
     protected List<String> helpLines() {
         return List.of("Top row: drawers sorted the way the creative inventory is.",
-                "Second row: the server's own wares — eggs, books,",
+                "Second row: the server's own wares: eggs, books,",
                 "potions, Rain's enchantments and items, packs, levels.",
                 "Below: search by name, or sell what you carry.",
                 "",

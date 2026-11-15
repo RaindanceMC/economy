@@ -591,10 +591,10 @@ public final class GamblingService implements IEconomyService {
             payBack(player, lost, Money.ZERO);
         }
         if (payout.isPositive()) {
-            EconomyResult result = economy.move(player, payout, TransactionKind.GAMBLE, game + " — won");
+            EconomyResult result = economy.move(player, payout, TransactionKind.GAMBLE, game + ": won");
             if (result.outcome() == EconomyResult.Outcome.TREASURY_EMPTY) {
                 // A capped server's treasury ran low after the stake was taken: pay what it can, and say so.
-                EconomyResult part = economy.moveUpTo(player, payout, TransactionKind.GAMBLE, game + " — won, in part");
+                EconomyResult part = economy.moveUpTo(player, payout, TransactionKind.GAMBLE, game + ": won, in part");
                 Player online = server.getPlayer(player);
                 if (online != null) {
                     messages.send(online, "economy.gamble.treasury-short", "amount",
@@ -603,7 +603,7 @@ public final class GamblingService implements IEconomyService {
                 }
             } else if (!result.succeeded()) {
                 // An account that cannot take its winnings (frozen, full) gets the stake back at least.
-                economy.move(player, stake, TransactionKind.GAMBLE, game + " — returned");
+                economy.move(player, stake, TransactionKind.GAMBLE, game + ": returned");
             }
         }
     }

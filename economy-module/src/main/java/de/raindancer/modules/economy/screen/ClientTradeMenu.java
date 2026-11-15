@@ -97,7 +97,7 @@ public final class ClientTradeMenu extends Menu implements IEconomyScreen {
             Optional<ShopDesk.Price> selling = price(quote.sells(), buying.count());
             band(MenuLayout.LAND, column, quote.sellable() && selling.isPresent() && carrying >= buying.count(),
                     Icons.of(Material.RED_STAINED_GLASS_PANE, "<red>Sell " + buying.count(),
-                            "<gray>For " + selling.map(ShopDesk.Price::shown).orElse("—")),
+                            "<gray>For " + selling.map(ShopDesk.Price::shown).orElse("none")),
                     quote.sellable() ? "You do not carry that many." : "The shop does not buy this.",
                     click -> shop.sell(viewer, material, buying.count()).thenAccept(done -> again()));
             column++;
@@ -105,7 +105,7 @@ public final class ClientTradeMenu extends Menu implements IEconomyScreen {
         Optional<ShopDesk.Price> all = price(quote.sells(), carrying);
         band(MenuLayout.LAND, 7, quote.sellable() && carrying > 0 && all.isPresent(),
                 Icons.of(Material.HOPPER, "<red>Sell all " + carrying, "<gray>For " + all.map(ShopDesk.Price::shown)
-                        .orElse("—")), quote.sellable() ? "You carry none." : "The shop does not buy this.",
+                        .orElse("none")), quote.sellable() ? "You carry none." : "The shop does not buy this.",
                 click -> shop.sell(viewer, material, carrying).thenAccept(done -> again()));
     }
 

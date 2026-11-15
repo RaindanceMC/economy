@@ -161,7 +161,7 @@ public final class SellWandService {
                 consequences.add("<gray>… and " + (lines.size() - LINES) + " more kinds");
                 break;
             }
-            consequences.add("<white>" + line.getValue()[0] + " × " + mini.escapeTags(line.getKey()) + " <dark_gray>— "
+            consequences.add("<white>" + line.getValue()[0] + " × " + mini.escapeTags(line.getKey()) + " <dark_gray>"
                     + mini.serialize(shop.render(worth.get(line.getKey()))));
         }
         if (kept > 0) {

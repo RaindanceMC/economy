@@ -196,7 +196,7 @@ public final class AuctionMenu extends Menu implements IEconomyScreen {
     @Override
     protected List<String> helpLines() {
         return List.of("One auction at a time for the whole server.", "A bid holds your money until somebody",
-                "outbids you — then it comes straight back.", "What you win is put in your inventory.");
+                "outbids you. Then it comes straight back.", "What you win is put in your inventory.");
     }
 
     @Override

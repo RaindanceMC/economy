@@ -190,7 +190,7 @@ public final class BlackjackMenu extends Menu implements IEconomyScreen {
     protected List<String> helpLines() {
         return List.of("Get closer to 21 than the dealer without going over.",
                 "Aces count 1 or 11, faces 10. The dealer stands on 17.",
-                "A blackjack — 21 on two cards — pays 3 to 2.");
+                "A blackjack (21 on two cards) pays 3 to 2.");
     }
 
     @Override

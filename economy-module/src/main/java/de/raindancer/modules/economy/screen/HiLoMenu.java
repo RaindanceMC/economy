@@ -119,7 +119,7 @@ public final class HiLoMenu extends Menu implements IEconomyScreen {
     @Override
     protected List<String> helpLines() {
         return List.of("Will the next card be higher or lower?", "The same rank loses either way.",
-                "Every right guess grows your stake. Cash out whenever —", "closing the window cashes out too.");
+                "Every right guess grows your stake. Cash out at any time.", "Closing the window cashes out too.");
     }
 
     @Override

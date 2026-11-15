@@ -42,11 +42,11 @@ public final class EconomyCommands {
                 ModuleCommand.of("hire", "Hire somebody for a wage paid at an interval",
                         new de.raindancer.modules.economy.command.HireCommand(EconomyCommands::require))
                         .aliased("jobs").taking("<player> <wage> <every> [job]", "list", "fire|quit <player>"),
-                ModuleCommand.of("contract", "Pay somebody regularly for a service, like rent — either side proposes it",
+                ModuleCommand.of("contract", "Pay somebody regularly for a service, like rent. Either side proposes it",
                         new de.raindancer.modules.economy.command.ContractCommand(EconomyCommands::require))
                         .aliased("contracts", "rent")
-                        .taking("pay <player> <amount> <every> <what> — you pay them",
-                                "charge <player> <amount> <every> <what> — they pay you, e.g. rent",
+                        .taking("pay <player> <amount> <every> <what>: you pay them",
+                                "charge <player> <amount> <every> <what>: they pay you, e.g. rent",
                                 "list", "end <player>"),
                 ModuleCommand.of("loan", "Borrow from the bank, and pay it back",
                         new de.raindancer.modules.economy.command.LoanCommand(EconomyCommands::require))

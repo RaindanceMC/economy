@@ -64,7 +64,7 @@ public final class MinesMenu extends Menu implements IEconomyScreen {
                 set(row * 9 + column, Icons.of(Material.EMERALD, "<green>Safe"));
             } else if (field.finished && field.mines.contains(tile)) {
                 set(row * 9 + column, Icons.of(tile == field.boom ? Material.TNT : Material.COAL_BLOCK,
-                        tile == field.boom ? "<red>Boom!" : "<dark_gray>A mine"));
+                        tile == field.boom ? "<red>Mine hit" : "<dark_gray>A mine"));
             } else if (playing) {
                 set(row * 9 + column, Icons.of(Material.GRAY_STAINED_GLASS, "<gray>?", "<yellow>Click<gray> to clear it"),
                         click -> {

@@ -77,13 +77,13 @@ public final class CrashMenu extends Menu implements IEconomyScreen {
         String big = String.format("%.2f×", at);
         set(MenuLayout.HEADER_SUBJECT, Icons.of(phase == CrashService.Phase.CRASHED ? Material.TNT : Material.FIREWORK_ROCKET,
                 (phase == CrashService.Phase.CRASHED ? "<red><bold>Crashed at " : "<green><bold>") + big,
-                phase == CrashService.Phase.BETTING ? "<gray>Starts in " + crash.secondsToStart() + " s — bets are open"
+                phase == CrashService.Phase.BETTING ? "<gray>Starts in " + crash.secondsToStart() + " s, bets are open"
                         : phase == CrashService.Phase.RUNNING ? "<gray>Climbing…" : "<gray>Next round in a moment"));
         set(MenuLayout.HEADER_LEFT, Icons.of(Material.GOLD_INGOT, "<white>Balance",
                 Mini.of(currency.render(services.economy().balance(viewer.getUniqueId())))));
         StringBuilder last = new StringBuilder();
         crash.history().forEach(point -> last.append(point >= 2 ? "<green>" : "<red>").append(String.format("%.2f× ", point)));
-        set(MenuLayout.HEADER_RIGHT, Icons.of(Material.CLOCK, "<white>Last rounds", last.isEmpty() ? "<gray>—" : last.toString()));
+        set(MenuLayout.HEADER_RIGHT, Icons.of(Material.CLOCK, "<white>Last rounds", last.isEmpty() ? "<gray>none" : last.toString()));
 
         // The climb: three columns of glass rise one row per doubling, up to the top of the window.
         int filled = phase == CrashService.Phase.BETTING ? 0 : (int) Math.min(4, Math.floor(Math.log(at) / Math.log(2) * 2) + 1);
@@ -136,7 +136,7 @@ public final class CrashMenu extends Menu implements IEconomyScreen {
 
     @Override
     protected List<String> helpLines() {
-        return List.of("One round for everybody. The multiplier climbs", "until it crashes — cash out before it does.",
+        return List.of("One round for everybody. The multiplier climbs", "until it crashes. Cash out before it does.",
                 "Your stake times the multiplier when you cash out.");
     }
 

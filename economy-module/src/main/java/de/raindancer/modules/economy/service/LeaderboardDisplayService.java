@@ -108,7 +108,7 @@ public final class LeaderboardDisplayService implements IEconomyService {
         for (int i = 0; i < top.size(); i++) {
             built.append(Component.newline())
                     .append(MINI.deserialize(rule.colourOf(i + 1) + (i + 1) + ". <white>"
-                            + MINI.escapeTags(top.get(i).name()) + "<gray> — "))
+                            + MINI.escapeTags(top.get(i).name()) + "<gray> "))
                     .append(worth(top.get(i), board, currency));
         }
         return built.build();

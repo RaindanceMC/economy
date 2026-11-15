@@ -77,7 +77,7 @@ public record EconomySettings(
         @Describe("Before the amount ($5), after it (5 €), or the name instead of a symbol (5 Coins).")
         @Key("currency.placement") Currency.Placement currencyPlacement,
 
-        @In("economy/currency") @Title("Thousands separator") @Describe("1,000 or 1.000 — one character. "
+        @In("economy/currency") @Title("Thousands separator") @Describe("1,000 or 1.000. One character. "
                 + "Money comes in whole coins only: there are no decimals anywhere.")
         @Key("currency.group-separator") String groupSeparator,
 
@@ -117,7 +117,7 @@ public record EconomySettings(
         @Key("pay.minimum") String payMinimum,
 
         @In("economy/pay") @Title("Tax on payments, percent")
-        @Describe("Taken from what arrives and destroyed — a money sink. 0 for none, at most 50.")
+        @Describe("Taken from what arrives and destroyed. 0 for none, at most 50.")
         @Key("pay.tax-percent") double payTaxPercent,
 
         @In("economy/pay") @Title("Ask to confirm above")
@@ -155,11 +155,11 @@ public record EconomySettings(
 
         // ------------------------------------------------------------------ cash
         @In("economy/cash") @Title("Coins and notes")
-        @Describe("Withdrawing money as items you can carry, trade, drop and lose — and paying it back in.")
+        @Describe("Withdrawing money as items you can carry, trade, drop and lose, and paying it back in.")
         @Key("features.cash") boolean cashEnabled,
 
         @In("economy/cash") @Title("The coin")
-        @Describe("What one coin is made of — any item. Change it in game with /eco coin and the item in your "
+        @Describe("What one coin is made of, any item. Change it in game with /eco coin and the item in your "
                 + "hand. Coins already out keep working: a coin is recognised by its seal, not its look. A coin "
                 + "is never usable as its item: no crafting, smelting, trading or bartering.")
         @Key("cash.coin-item") Material coinItem,
@@ -227,12 +227,12 @@ public record EconomySettings(
         @Key("shop.not-bought") List<String> notBought,
 
         @In("economy/shop") @Title("Takes worthless items")
-        @Describe("Selling something the shop pays nothing for — sold off until its price fell to nothing — still "
-                + "takes it, for nothing, so players can get rid of it. Not what 'Never bought from players' lists.")
+        @Describe("Selling something the shop pays nothing for (sold off until its price fell to nothing) still "
+                + "takes it for nothing, so players can get rid of it. Not what 'Never bought from players' lists.")
         @Key("shop.take-worthless") boolean takeWorthless,
 
         @In("economy/shop") @Title("Price crafted things from their recipes")
-        @Describe("Planks from logs, iron blocks from ingots — every recipe on the server, worked out "
+        @Describe("Planks from logs, iron blocks from ingots: every recipe on the server, worked out "
                 + "from the prices of raw materials. Off prices only what has a price of its own.")
         @Key("shop.derive-from-recipes") boolean deriveFromRecipes,
 
@@ -245,7 +245,7 @@ public record EconomySettings(
 
         @In("economy/shop") @Title("Sold off, worth at least")
         @Describe("Selling the same item again and again makes it cheaper, down to this times its normal price: 0.5 "
-                + "is half. 0 lets a flooded item become worthless — the shop stops buying it and gives it away "
+                + "is half. 0 lets a flooded item become worthless. The shop stops buying it and gives it away "
                 + "until it is bought back up. Between 0 and 1.")
         @Key("shop.lowest-multiplier") double lowestMultiplier,
 
@@ -269,19 +269,19 @@ public record EconomySettings(
         @Key("shop.follow-materials") boolean followMaterials,
 
         @In("economy/shop") @Title("Raw materials push softer")
-        @Describe("While made things follow their materials, a stack of a raw material — one with a price of its "
-                + "own, made of nothing — pushes its price only this times as hard: everything made of it moves "
-                + "with it, so cobblestone should not run out of worth as fast as furnaces do. 1 pushes in full.")
+        @Describe("While made things follow their materials, a stack of a raw material (one with a price of its "
+                + "own, made of nothing) pushes its price only this times as hard. Everything made of it moves "
+                + "with it, so cobblestone loses value more slowly than furnaces. 1 pushes in full.")
         @Key("shop.raw-pressure-share") double rawPressureShare,
 
         @In("economy/shop") @Title("Rare items for sale")
-        @Describe("Off: the shop does not sell what should stay rare — netherite, nether stars, totems, shulker "
-                + "boxes, the shipped list — nor anything made from it, like a beacon. It still buys them.")
+        @Describe("Off: the shop does not sell what should stay rare (netherite, nether stars, totems, shulker "
+                + "boxes, the shipped list) or anything made from it, like a beacon. It still buys them.")
         @Key("shop.sell-rare") boolean sellRare,
 
         @In("economy/shop") @Title("Spawners for sale")
-        @Describe("The shop sells an empty spawner at the price below — exactly that, no markup, no supply and "
-                + "demand. Off, it sells none; rare items being for sale changes nothing here.")
+        @Describe("The shop sells an empty spawner at the price below, exactly that, with no markup and no supply and "
+                + "demand. Off, it sells none. Rare items being for sale changes nothing here.")
         @Key("shop.sell-spawners") boolean sellSpawners,
 
         @In("economy/shop") @Title("A spawner costs")
@@ -290,7 +290,7 @@ public record EconomySettings(
 
         @In("economy/shop") @Title("Enchanted books for sale")
         @Describe("An Enchantments drawer in the shop: every enchantment at every level up to its normal maximum, "
-                + "each priced like an item — with supply and demand, the buy markup and sell ratio, roles. A book "
+                + "each priced like an item, with supply and demand, the buy markup and sell ratio, and roles. A book "
                 + "is worth a plain book plus what making it costs, times how useful the enchantment is: level I "
                 + "a full enchanting-table roll (3 lapis and levels 27 to 30, experience at the bottle's price), "
                 + "each level above two of the level below, a book and the anvil's levels. Priced by hand like "
@@ -324,8 +324,8 @@ public record EconomySettings(
 
         @In("economy/shop") @Title("Potions for sale")
         @Describe("A Potions drawer in the shop: every potion type as a drinkable, a splash and a lingering "
-                + "potion, and the ominous bottles Bad Omen I to V, each priced like an item — with supply and "
-                + "demand, the buy markup and sell ratio, roles. A potion is worth what brewing it costs: a glass "
+                + "potion, and the ominous bottles Bad Omen I to V, each priced like an item, with supply and "
+                + "demand, the buy markup and sell ratio, and roles. A potion is worth what brewing it costs: a glass "
                 + "bottle and a third of each ingredient (one fills three bottles) plus the crafting markup, "
                 + "gunpowder for splash and dragon's breath for lingering. Bought and sold one stack at a time, "
                 + "only as the game makes them. Priced by hand like any item: 'potion:strong_healing 500' in the "
@@ -333,7 +333,7 @@ public record EconomySettings(
         @Key("shop.potions") boolean potions,
 
         @In("economy/shop") @Title("Potions not for sale")
-        @Describe("Potion types, comma separated, like luck or turtle_master — every form of them. One alone: "
+        @Describe("Potion types, comma separated, like luck or turtle_master, every form of them. One alone: "
                 + "'splash_potion:healing' in 'Never sold to players'. Selling them to the shop works either way.")
         @Key("shop.potions-closed") List<String> potionsClosed,
 
@@ -398,7 +398,7 @@ public record EconomySettings(
         @Key("income.minutes") int incomeMinutes,
 
         @In("economy/earn") @Title("Away after") @Range(min = 1, max = 120)
-        @Describe("Minutes without moving or looking around — only used when no plugin tells Core who is away.")
+        @Describe("Minutes without moving or looking around. Only used when no plugin tells Core who is away.")
         @Key("income.afk-minutes") int afkMinutes,
 
         @In("economy/earn") @Title("Daily reward") @Describe("/daily, once a day.")
@@ -417,7 +417,7 @@ public record EconomySettings(
         boolean advancementRewardsEnabled,
 
         @In("economy/earn") @Title("Per advancement")
-        @Describe("An ordinary one — a task, like Stone Age.")
+        @Describe("An ordinary task, like Stone Age.")
         @Key("earn.advancement") String advancementReward,
 
         @In("economy/earn") @Title("Per goal advancement")
@@ -433,7 +433,7 @@ public record EconomySettings(
         @Key("earn.advancement-tell") boolean advancementTell,
 
         @In("economy/earn") @Title("Back pay for earlier advancements")
-        @Describe("Once per player, /claimadvancements pays for advancements made before they paid — or tops up "
+        @Describe("Once per player, /claimadvancements pays for advancements made before they paid, or tops up "
                 + "ones paid less than they pay now. Players who have some waiting are told when they join.")
         @Key("earn.advancement-backpay") boolean advancementBackpay,
 
@@ -493,7 +493,7 @@ public record EconomySettings(
         @Key("coinflip.min-bet") String coinflipMinBet,
 
         @In("economy/gambling/coinflip") @Title("The house keeps, percent")
-        @Describe("What a coin flip keeps on average, 0 to 50 — the payouts are worked out from it exactly. "
+        @Describe("What a coin flip keeps on average, 0 to 50. The payouts are worked out from it exactly. "
                 + "Empty: the casino's house edge.")
         @Key("coinflip.house-edge-percent") String coinflipEdge,
 
@@ -509,7 +509,7 @@ public record EconomySettings(
         @Key("dice.min-bet") String diceMinBet,
 
         @In("economy/gambling/dice") @Title("The house keeps, percent")
-        @Describe("What dice keeps on average, 0 to 50 — the payouts are worked out from it exactly. "
+        @Describe("What dice keeps on average, 0 to 50. The payouts are worked out from it exactly. "
                 + "Empty: the casino's house edge.")
         @Key("dice.house-edge-percent") String diceEdge,
 
@@ -521,7 +521,7 @@ public record EconomySettings(
         @Key("slots.min-bet") String slotsMinBet,
 
         @In("economy/gambling/slots") @Title("The house keeps, percent")
-        @Describe("What the slot machine keeps on average, 0 to 50 — the payouts are worked out from it exactly. "
+        @Describe("What the slot machine keeps on average, 0 to 50. The payouts are worked out from it exactly. "
                 + "Empty: the casino's house edge.")
         @Key("slots.house-edge-percent") String slotsEdge,
 
@@ -533,7 +533,7 @@ public record EconomySettings(
         @Key("roulette.min-bet") String rouletteMinBet,
 
         @In("economy/gambling/roulette") @Title("The house keeps, percent")
-        @Describe("What roulette keeps on average, 0 to 50 — the payouts are worked out from it exactly. "
+        @Describe("What roulette keeps on average, 0 to 50. The payouts are worked out from it exactly. "
                 + "Empty: the casino's house edge.")
         @Key("roulette.house-edge-percent") String rouletteEdge,
 
@@ -580,7 +580,7 @@ public record EconomySettings(
         @Key("hilo.min-bet") String hiloMinBet,
 
         @In("economy/gambling/hilo") @Title("The house keeps, percent")
-        @Describe("What Hi-Lo keeps on average, 0 to 50 — the payouts are worked out from it exactly. "
+        @Describe("What Hi-Lo keeps on average, 0 to 50. The payouts are worked out from it exactly. "
                 + "Empty: the casino's house edge.")
         @Key("hilo.house-edge-percent") String hiloEdge,
 
@@ -592,7 +592,7 @@ public record EconomySettings(
         @Key("mines.min-bet") String minesMinBet,
 
         @In("economy/gambling/mines") @Title("The house keeps, percent")
-        @Describe("What mines keeps on average, 0 to 50 — the payouts are worked out from it exactly. "
+        @Describe("What mines keeps on average, 0 to 50. The payouts are worked out from it exactly. "
                 + "Empty: the casino's house edge.")
         @Key("mines.house-edge-percent") String minesEdge,
 
@@ -604,7 +604,7 @@ public record EconomySettings(
         @Key("crash.min-bet") String crashMinBet,
 
         @In("economy/gambling/crash") @Title("The house keeps, percent")
-        @Describe("What crash keeps on average, 0 to 50 — the payouts are worked out from it exactly. "
+        @Describe("What crash keeps on average, 0 to 50. The payouts are worked out from it exactly. "
                 + "Empty: the casino's house edge.")
         @Key("crash.house-edge-percent") String crashEdge,
 
@@ -624,7 +624,7 @@ public record EconomySettings(
         @Key("race.min-bet") String raceMinBet,
 
         @In("economy/gambling/race") @Title("The house keeps, percent")
-        @Describe("What a horse race keeps on average, 0 to 50 — the payouts are worked out from it exactly. "
+        @Describe("What a horse race keeps on average, 0 to 50. The payouts are worked out from it exactly. "
                 + "Empty: the casino's house edge.")
         @Key("race.house-edge-percent") String raceEdge,
 
@@ -638,7 +638,7 @@ public record EconomySettings(
         @In("economy/gambling/scratch") @Title("A scratch card costs") @Key("scratch.price") String scratchPrice,
 
         @In("economy/gambling/scratch") @Title("The house keeps, percent")
-        @Describe("What a scratch card keeps on average, 0 to 50 — the payouts are worked out from it exactly. "
+        @Describe("What a scratch card keeps on average, 0 to 50. The payouts are worked out from it exactly. "
                 + "Empty: the casino's house edge.")
         @Key("scratch.house-edge-percent") String scratchEdge,
 
@@ -664,7 +664,7 @@ public record EconomySettings(
         @Key("lottery.numbers") int lotteryNumbers,
 
         @In("economy/gambling/lottery") @Title("The lottery keeps, percent")
-        @Describe("Of every ticket's price — destroyed, a money sink; the rest goes into the pot. 0 to 50.")
+        @Describe("Share of every ticket's price that is destroyed. The rest goes into the pot. 0 to 50.")
         @Key("lottery.cut-percent") double lotteryCutPercent,
 
         // ------------------------------------------------------------------ auctions
@@ -766,7 +766,7 @@ public record EconomySettings(
 
         // ------------------------------------------------------------------ experience
         @In("economy/experience") @Title("Buying and selling experience")
-        @Describe("Levels to buy in the shop, and an experience bottle to sell in /sell, priced per point — a level "
+        @Describe("Levels to buy in the shop, and an experience bottle to sell in /sell, priced per point. A level "
                 + "near 30 holds far more points than one near 5.")
         @Key("features.xp-trade") boolean xpTradeEnabled,
 
@@ -790,8 +790,8 @@ public record EconomySettings(
 
         @In("economy/loans") @Title("A limit of their own")
         @Describe("Each player can borrow up to what they have, plus a quarter of what they earned in their last "
-                + "hours of play — less the more of it they spent and gambled away, more for every loan paid back on "
-                + "time, less for every late one. Never past the largest loan. Off: everybody may borrow the largest loan.")
+                + "hours of play, less the more of it they spent and gambled away, more for every loan paid back on "
+                + "time and less for every late one. Never past the largest loan. Off: everybody may borrow the largest loan.")
         @Key("loans.personal-limit") boolean loanPersonalLimit,
 
         @In("economy/loans") @Title("Counted: the last … hours of play") @Range(min = 1, max = 168)
@@ -816,7 +816,7 @@ public record EconomySettings(
 
         // ------------------------------------------------------------------ wealth tax
         @In("economy/tax") @Title("Wealth tax")
-        @Describe("Takes a percentage of every player's bank balance at an interval and destroys it — a money sink. "
+        @Describe("Takes a percentage of every player's bank balance at an interval and destroys it. "
                 + "Frozen accounts pay too. Switching it on starts its clock; the first run is one interval later.")
         @Key("features.wealth-tax") boolean wealthTaxEnabled,
 
@@ -887,8 +887,8 @@ public record EconomySettings(
 
         // ------------------------------------------------------------------ bulk
         @In("economy/shop") @Title("Cheaper in bulk")
-        @Describe("Whatever is on the list below costs less bought in quantity — by default everything that stacks, "
-                + "but enchanted books. Weapons, armour, tools and anything else that does not stack never.")
+        @Describe("Whatever is on the list below costs less bought in quantity. By default that is everything that stacks, "
+                + "except enchanted books. Weapons, armour, tools and anything else that does not stack never.")
         @Key("features.bulk-discount") boolean bulkDiscount,
 
         @In("economy/shop") @Title("Bulk discount steps")

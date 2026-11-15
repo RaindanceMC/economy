@@ -340,7 +340,7 @@ public final class EcoCommand extends EconomyCommand {
                     "reason", result.outcome().name().toLowerCase(Locale.ROOT).replace('_', ' '));
             return;
         }
-        audit(live, sender, how, who, live.currency().format(amount) + (reason.isBlank() ? "" : " — " + reason));
+        audit(live, sender, how, who, live.currency().format(amount) + (reason.isBlank() ? "" : ": " + reason));
         live.messages().send(sender, "economy.admin.done", "player", name,
                 "balance", live.currency().render(result.balance()));
     }

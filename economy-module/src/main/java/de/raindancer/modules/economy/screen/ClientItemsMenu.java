@@ -66,9 +66,9 @@ public final class ClientItemsMenu extends PaginatedMenu<ShopDesk.Line> implemen
         lore.add(line.buyable() ? "<gray>Buy: " + line.buy() : "<dark_gray>Not sold");
         lore.add(line.sellable() ? "<gray>Sell: " + line.sell() : "<dark_gray>Not bought");
         if (line.trend() > 0) {
-            lore.add("<red>▲ " + line.trend() + "%<gray> — bought a lot lately");
+            lore.add("<red>▲ " + line.trend() + "%<gray> bought a lot lately");
         } else if (line.trend() < 0) {
-            lore.add("<green>▼ " + -line.trend() + "%<gray> — sold a lot lately");
+            lore.add("<green>▼ " + -line.trend() + "%<gray> sold a lot lately");
         }
         lore.add("");
         lore.add("<yellow>Click<gray> to trade");

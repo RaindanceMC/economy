@@ -101,7 +101,7 @@ public final class EconomyScreens {
         boolean ready = account == null || account.dailyDay() < daily.today();
         int streak = account == null ? 0 : account.dailyStreak();
         return MINI.deserialize("<gold><bold>Daily reward</bold></gold>\n"
-                + (ready ? "<green>Ready! <white>/daily" : "<gray>Next in <white>" + daily.hoursLeft() + " h")
+                + (ready ? "<green>Ready. <white>/daily" : "<gray>Next in <white>" + daily.hoursLeft() + " h")
                 + (streak > 0 ? "\n<gray>Streak <white>" + streak + " day" + (streak == 1 ? "" : "s") : ""));
     }
 
@@ -110,7 +110,7 @@ public final class EconomyScreens {
         String word = rule.casinoWord(net);
         var text = Component.text().append(heading("Your casino record")).append(Component.newline());
         if (word.equals("even")) {
-            return text.append(MINI.deserialize("<gray>All even — try your luck")).build();
+            return text.append(MINI.deserialize("<gray>All even")).build();
         }
         return text.append(MINI.deserialize((word.equals("won") ? "<green>won " : "<red>lost ")))
                 .append(currency().render(net.isNegative() ? net.negate() : net)).build();
@@ -120,7 +120,7 @@ public final class EconomyScreens {
         var mine = lottery.ticketsOf(viewer.id());
         var text = Component.text().append(heading("Your lottery tickets"));
         if (mine.isEmpty()) {
-            return text.append(MINI.deserialize("\n<gray>None for this draw — <white>/lottery")).build();
+            return text.append(MINI.deserialize("\n<gray>None for this draw. <white>/lottery")).build();
         }
         mine.stream().limit(6).forEach(ticket -> text.append(MINI.deserialize("\n<white>"
                 + ticket.numbers().stream().map(String::valueOf).collect(Collectors.joining(" · ")))));
@@ -133,7 +133,7 @@ public final class EconomyScreens {
     private Component lottery() {
         var text = Component.text().append(heading("Lottery")).append(MINI.deserialize("\n<gray>Pot "))
                 .append(currency().render(lottery.pot()))
-                .append(MINI.deserialize(lottery.drawing() ? "\n<yellow>Drawing now!"
+                .append(MINI.deserialize(lottery.drawing() ? "\n<yellow>Drawing now"
                         : "\n<gray>Draw in <white>" + Times.describe(lottery.untilDraw())));
         List<Integer> last = lottery.lastDraw();
         if (last != null && !last.isEmpty()) {
@@ -148,11 +148,11 @@ public final class EconomyScreens {
         List<Auction> running = rule.endingSoonest(auctions.auctions(), now, AUCTIONS_SHOWN);
         var text = Component.text().append(heading("Auctions"));
         if (running.isEmpty()) {
-            return text.append(MINI.deserialize("\n<gray>Nothing up right now — <white>/auction")).build();
+            return text.append(MINI.deserialize("\n<gray>Nothing up right now. <white>/auction")).build();
         }
         for (Auction auction : running) {
             Money price = auction.bid().isPositive() ? auction.bid() : auction.start();
-            text.append(MINI.deserialize("\n<white>" + MINI.escapeTags(auction.itemName()) + "<gray> — "))
+            text.append(MINI.deserialize("\n<white>" + MINI.escapeTags(auction.itemName()) + "<gray> "))
                     .append(currency().render(price))
                     .append(MINI.deserialize("<gray> · " + Times.brief(Duration.ofMillis(auction.endsAt() - now))));
         }

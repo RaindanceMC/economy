@@ -78,6 +78,6 @@ public final class ContractCommand extends EconomyCommand {
 
     @Override
     public String describe() {
-        return "regular payments for a service, like rent — proposed by either side";
+        return "regular payments for a service, like rent, proposed by either side";
     }
 }

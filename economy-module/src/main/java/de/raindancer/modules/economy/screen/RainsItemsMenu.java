@@ -58,7 +58,7 @@ public final class RainsItemsMenu extends PaginatedMenu<Map.Entry<ShopGood, Mone
     protected ItemStack icon(Map.Entry<ShopGood, Money> offer) {
         List<String> lore = new ArrayList<>();
         lore.add("<gray>Costs " + MiniMessage.miniMessage().serialize(services.currency().render(offer.getValue()))
-                + "<gray> — what its ingredients cost:");
+                + "<gray>, what its ingredients cost:");
         offer.getKey().ingredients().forEach((material, count) ->
                 lore.add("<dark_gray> " + count + " × " + Catalogue.readable(material.name())));
         lore.add("");
@@ -76,7 +76,7 @@ public final class RainsItemsMenu extends PaginatedMenu<Map.Entry<ShopGood, Mone
     @Override
     protected List<String> helpLines() {
         return List.of("Things the server makes: the Sell Wand and the Auto Sell Chest.",
-                "Each costs what its ingredients cost you here — you can craft them too.");
+                "Each costs what its ingredients cost you here. You can craft them too.");
     }
 
     @Override

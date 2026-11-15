@@ -34,7 +34,7 @@ public final class LegacyEnchantSettings {
             return Optional.empty();
         }
         return Optional.of(String.join(" and ", found) + (found.size() == 1 ? " is" : " are")
-                + " no longer read: enchanted books are priced like every other item now — a plain book plus what "
+                + " no longer read: enchanted books are priced like every other item now: a plain book plus what "
                 + "making the enchantment costs (lapis, experience at the bottle's price, the anvil), times how "
                 + "useful it is (shop.enchant-worth), with supply and demand per enchantment and level. "
                 + (examples.isBlank() ? "" : "Now: " + examples + ". ")

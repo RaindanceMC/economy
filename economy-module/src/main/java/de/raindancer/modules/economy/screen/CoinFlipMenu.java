@@ -91,7 +91,7 @@ public final class CoinFlipMenu extends Menu implements IEconomyScreen, Bet.BetM
             return Icons.of(Material.SUNFLOWER, "<yellow>The coin", "<gray>Call it.");
         }
         return Icons.of(last.landedHeads() ? Material.GOLD_BLOCK : Material.IRON_BLOCK,
-                last.landedHeads() ? "<gold>Heads!" : "<white>Tails!");
+                last.landedHeads() ? "<gold>Heads" : "<white>Tails");
     }
 
     private void play(boolean heads) {

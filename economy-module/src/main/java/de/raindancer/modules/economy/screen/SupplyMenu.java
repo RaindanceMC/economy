@@ -118,7 +118,7 @@ public final class SupplyMenu extends Menu implements IEconomyScreen {
                     lore.add("<green>When full: everything pays " + boost.percent() + "% more for " + boost.hours() + "h");
                 }
             });
-            lore.add("<dark_gray>What you give is gone for good — it pays for this.");
+            lore.add("<dark_gray>What you give is gone for good. It pays for this.");
             lore.add("<yellow>Click<gray> to give");
             band(MenuLayout.RULES, index + 1, viewer.hasPermission(PermissionNodes.FUND),
                     Icons.of(Material.BEACON, "<yellow>" + fund.name(), lore), BankMenu.NOT_ALLOWED,

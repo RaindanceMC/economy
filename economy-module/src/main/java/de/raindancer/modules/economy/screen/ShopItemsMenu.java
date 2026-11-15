@@ -121,8 +121,8 @@ public final class ShopItemsMenu extends PaginatedMenu<Material> implements IEco
             return "";
         }
         return percent > 0
-                ? "<red>▲ " + percent + "%<gray> — bought a lot lately"
-                : "<green>▼ " + -percent + "%<gray> — sold a lot lately";
+                ? "<red>▲ " + percent + "%<gray> bought a lot lately"
+                : "<green>▼ " + -percent + "%<gray> sold a lot lately";
     }
 
     @Override

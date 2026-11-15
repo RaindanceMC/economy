@@ -71,8 +71,8 @@ public final class RaceMenu extends Menu implements IEconomyScreen {
                     "<gray>Click a horse to bet on it."), click -> { });
         } else {
             toolbar(4, Icons.of(phase == RaceService.Phase.RUNNING ? Material.SADDLE : Material.GOLD_BLOCK,
-                    phase == RaceService.Phase.RUNNING ? "<yellow>They're off!"
-                            : "<gold>" + HorseRaceRule.NAMES.get(Math.max(0, winner)) + " wins!"), click -> { });
+                    phase == RaceService.Phase.RUNNING ? "<yellow>The race is running"
+                            : "<gold>" + HorseRaceRule.NAMES.get(Math.max(0, winner)) + " wins"), click -> { });
         }
         List<RaceService.Bet> mine = race.betsOf(viewer.getUniqueId());
         if (!mine.isEmpty()) {
@@ -105,8 +105,8 @@ public final class RaceMenu extends Menu implements IEconomyScreen {
 
     @Override
     protected List<String> helpLines() {
-        return List.of("One race for everybody. Bet on a horse while", "the gate is closed — as often as you like —",
-                "then watch them run. Long shots pay more.");
+        return List.of("One race for everybody. Bet on a horse while", "the gate is closed, as often as you like.",
+                "Then watch them run. Long shots pay more.");
     }
 
     @Override

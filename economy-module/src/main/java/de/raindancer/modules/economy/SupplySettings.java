@@ -36,8 +36,8 @@ public record SupplySettings(
 
         // ------------------------------------------------------------------ hard cap and treasury
         @In("supply/treasury") @Title("Hard cap on money")
-        @Describe("No money is printed past the cap below. Every payout — rewards, salary, interest, the shop "
-                + "buying items, other plugins paying — comes out of the treasury, and every fee, tax, fine and "
+        @Describe("No money is printed past the cap below. Every payout (rewards, salary, interest, the shop "
+                + "buying items, other plugins paying) comes out of the treasury, and every fee, tax, fine and "
                 + "purchase goes back into it. The treasury is whatever of the cap nobody holds. When it is "
                 + "empty, payouts are refused with a message until money comes back.")
         @Key("money-supply.capped") boolean capped,
@@ -81,7 +81,7 @@ public record SupplySettings(
         // ------------------------------------------------------------------ stabiliser
         @In("supply/stabilizer") @Title("Stabiliser")
         @Describe("Once a day, compares the last week's inflation with the target and turns money coming in "
-                + "down (and fees up) when prices rise too fast — the other way round when they fall. Every "
+                + "down (and fees up) when prices rise too fast, and the other way round when they fall. Every "
                 + "change is logged and staff are told.")
         @Key("features.stabilizer") boolean stabilizer,
 
@@ -143,8 +143,8 @@ public record SupplySettings(
         @Key("pay.new-account-lock") boolean newAccountLock,
 
         @In("supply/earning") @Title("New accounts cannot send money for") @Range(min = 0, max = 720)
-        @Describe("Hours after an account opens before it may /pay, bill or withdraw cash — farming money "
-                + "on fresh accounts and handing it to a main one stops working. 0 is off.")
+        @Describe("Hours after an account opens before it may /pay, bill or withdraw cash. This stops players from farming money "
+                + "on fresh accounts and passing it to a main one. 0 is off.")
         @Key("pay.new-account-hours") int newAccountHours,
 
         @In("supply/tax") @Title("Payment tax in slices")
@@ -153,7 +153,7 @@ public record SupplySettings(
 
         // ------------------------------------------------------------------ progressive taxes
         @In("supply/tax") @Title("Payment tax by amount")
-        @Describe("'<from> <percent>', comma separated: '0 1, 1000 3, 10000 8' — each part of a payment "
+        @Describe("'<from> <percent>', comma separated: '0 1, 1000 3, 10000 8'. Each part of a payment "
                 + "is taxed at its own rate, like an income tax. Empty uses the flat payment tax.")
         @Key("pay.tax-brackets") List<String> payTaxBrackets,
 
@@ -203,7 +203,7 @@ public record SupplySettings(
         @Key("death.worlds") List<String> deathWorlds,
 
         @In("supply/sinks") @Title("Jumping the auction queue")
-        @Describe("A waiting auction can be moved to the front for the price below — /auction jump.")
+        @Describe("A waiting auction can be moved to the front for the price below with /auction jump.")
         @Key("auction.jump-queue") boolean auctionJump,
 
         @In("supply/sinks") @Title("Jumping the auction queue costs")
@@ -212,7 +212,7 @@ public record SupplySettings(
 
         @In("supply/sinks") @Title("Community funds")
         @Describe("Staff start a fund with a goal (/eco fund); everybody donates with /fund, and when it is "
-                + "full its reward happens — a boost to earnings for a while, or commands run. Donations are "
+                + "full its reward happens: a boost to earnings for a while, or commands run. Donations are "
                 + "destroyed.")
         @Key("features.funds") boolean funds,
 
@@ -250,7 +250,7 @@ public record SupplySettings(
         // ------------------------------------------------------------------ insurance
         @In("supply/insurance") @Title("Bet insurance")
         @Describe("Players can insure their bets (casino, Insure my bets): every stake costs the premium below on top, "
-                + "and a lost stake pays back the share below. The house keeps the difference — a money sink.")
+                + "and a lost stake pays back the share below. The house keeps the difference, which leaves the economy.")
         @Key("gamble.insurance") boolean gambleInsurance,
 
         @In("supply/insurance") @Title("Premium") @Range(min = 0, max = 100)
@@ -269,7 +269,7 @@ public record SupplySettings(
         @Key("features.seasons") boolean seasons,
 
         @In("supply/seasons") @Title("Points per coin")
-        @Describe("'<from> <points per coin>', comma separated: '0 1, 10000 0.5, 100000 0.1' — the richer, "
+        @Describe("'<from> <points per coin>', comma separated: '0 1, 10000 0.5, 100000 0.1'. The richer, "
                 + "the fewer points each further coin is worth.")
         @Key("season.points-brackets") List<String> seasonBrackets,
 

@@ -196,7 +196,7 @@ public final class TableService implements IEconomyService {
         }
         game.stakes.set(game.active, stake.times(2));
         game.hands.get(game.active).add(draw(player.getUniqueId()));
-        game.says = "Doubled — one card.";
+        game.says = "Doubled. One card.";
         next(player, game);
     }
 

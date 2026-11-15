@@ -81,7 +81,7 @@ public final class StatueRule implements IEconomyRule {
             return title(place, name);
         }
         if (name == null) {
-            return PRIME_MARK + " <dark_gray>— this spot is waiting";
+            return PRIME_MARK + " <dark_gray>This spot is waiting";
         }
         return PRIME_MARK + " <white>" + MiniMessage.miniMessage().escapeTags(name);
     }

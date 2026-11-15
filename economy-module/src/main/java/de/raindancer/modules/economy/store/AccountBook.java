@@ -935,7 +935,7 @@ public final class AccountBook {
             long now = clock.getAsLong();
             journal.add(new Transaction(now, id, null, stake.negate(), paying.after(), TransactionKind.GAMBLE, reason));
             if (payout.isPositive()) {
-                journal.add(new Transaction(now, id, null, payout, after, TransactionKind.GAMBLE, reason + " — won"));
+                journal.add(new Transaction(now, id, null, payout, after, TransactionKind.GAMBLE, reason + ": won"));
             }
             accounts.put(id, account.withBalance(after));
             dirty.add(id);

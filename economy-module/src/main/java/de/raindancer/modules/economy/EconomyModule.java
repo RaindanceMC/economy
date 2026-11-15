@@ -89,7 +89,7 @@ public final class EconomyModule implements FlexModule {
 
     private static final ModuleInfo INFO = ModuleInfo.of("economy", "Economy", "0.74.0")
             .describedAs("A bank, paying and hiring, coins you can carry, a creative-style shop priced from recipes, "
-                    + "passive income, live auctions and raffles, and a casino with sounds and animations — every part switchable.")
+                    + "passive income, live auctions and raffles, and a casino with sounds and animations. Every part is switchable.")
             .by("Raindancer118");
 
     /** How often what changed is written to the database. A crash loses at most this much. */
@@ -140,7 +140,7 @@ public final class EconomyModule implements FlexModule {
         });
         if (!book.isLoaded()) {
             log.error("The accounts could not be read from economy.db. Every payment will be refused as "
-                    + "unavailable until this is fixed — nothing is overwritten.");
+                    + "unavailable until this is fixed. Nothing is overwritten.");
         }
 
         byte[] basePrices = read(EconomyModule.class.getResourceAsStream(BasePrices.RESOURCE));
@@ -527,7 +527,7 @@ public final class EconomyModule implements FlexModule {
             bank.refresh();
             if (startedAsClient && bank.keepsIt() && !keptHere) {
                 log.error("This server was made the network's bank, but its economy started as a client and has no ledger. "
-                        + "Restart the server to run the bank here — until then nothing on the network can be paid.");
+                        + "Restart the server to run the bank here. Until then nothing on the network can be paid.");
             }
         });
         if (watching != null) {
