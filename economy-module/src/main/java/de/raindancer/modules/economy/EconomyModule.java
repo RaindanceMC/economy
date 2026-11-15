@@ -116,7 +116,6 @@ public final class EconomyModule implements FlexModule {
 
         context.core().messages().defineFrom(EconomyModule.class.getResourceAsStream("messages.yml"),
                 context.chat().brand()::chatPrefix);
-        context.core().messages().seriousFrom(EconomyModule.class.getResourceAsStream("messages-serious.yml"));
         int registered = PermissionNodes.register(server);
         if (registered > 0) {
             log.info("{} permission(s) registered.", registered);
