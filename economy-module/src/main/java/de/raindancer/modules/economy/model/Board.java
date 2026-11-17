@@ -29,7 +29,7 @@ public enum Board {
             case CASINO -> "<gold><bold>Biggest casino winners</bold></gold>";
             case RICHEST -> "<gold><bold>Richest players</bold></gold>";
             case PLAYTIME -> "<gold><bold>Most time played</bold></gold>";
-            case PRIME -> "<gold><bold>Prime supporters</bold></gold>";
+            case PRIME -> "<gold><bold>Prime members</bold></gold>";
             case CREATOR -> "<gold><bold>Creators</bold></gold>";
         };
     }
