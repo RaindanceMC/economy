@@ -219,21 +219,6 @@ public record SupplySettings(
         @In("supply/sinks") @Title("Funds in a boss bar")
         @Key("funds.boss-bar") boolean fundsBossBar,
 
-        @In("supply/sinks") @Title("/repair")
-        @Describe("Repairs the item in hand for money: the price below, scaled by how worn it is.")
-        @Key("features.repair") boolean repair,
-
-        @In("supply/sinks") @Title("A full repair costs")
-        @Describe("Percent of what the item is worth in the shop.")
-        @Key("repair.price-percent") double repairPercent,
-
-        @In("supply/sinks") @Title("A repair costs at least")
-        @Key("repair.least") String repairLeast,
-
-        @In("supply/sinks") @Title("Repairing also clears the anvil's cost")
-        @Describe("The 'too expensive' penalty an item collects each time it goes through an anvil.")
-        @Key("repair.reset-anvil-cost") boolean repairResetsAnvil,
-
         @In("supply/debts") @Title("Collect debts from income")
         @Describe("A share of every payout goes toward what a player owes the server (an unpaid fine, missed upkeep).")
         @Key("debts.collect") boolean debtCollect,
@@ -291,7 +276,7 @@ public record SupplySettings(
             // taxes
             false, List.of(), false, List.of(), false, 0, false, 0, 50,
             // sinks
-            false, 0.0, "0", List.of(), false, "0", false, true, false, 10.0, "1", false,
+            false, 0.0, "0", List.of(), false, "0", false, true,
             // debts
             false, 50, true,
             // insurance

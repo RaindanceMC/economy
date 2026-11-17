@@ -27,7 +27,7 @@ class EconomyCommandsTest {
         List<ModuleCommand> declared = EconomyCommands.declared();
         assertThat(declared).extracting(ModuleCommand::name).containsExactly("balance", "pay", "bill", "hire", "contract", "loan", "bank",
                 "withdraw", "deposit", "shop", "sell", "baltop", "daily", "claimadvancements", "casino", "slots", "coinflip", "dice",
-                "roulette", "lottery", "blackjack", "baccarat", "hilo", "mines", "crash", "race", "scratch", "auction", "raffle", "giveaway", "treasury", "fund", "repair", "season", "eco");
+                "roulette", "lottery", "blackjack", "baccarat", "hilo", "mines", "crash", "race", "scratch", "auction", "raffle", "giveaway", "treasury", "fund", "season", "eco");
         assertThat(declared).allMatch(command -> command.handler() != null);
         assertThat(declared.getFirst().names()).contains("bal", "money");
     }

@@ -29,7 +29,7 @@ sections:
     text: |
       {run:/bank} opens everything money does: paying somebody, your statement, your jobs, the richest list, withdrawing and paying in cash, loans, the shop, selling, the auction house and the casino. Buttons for switched-off features are greyed out. Click one to see why.
 
-      A button for <white>The server's money</white> leads to the treasury, community funds, repair, bet insurance and season points. See {topic:treasury}.
+      A button for <white>The server's money</white> leads to the treasury, community funds, bet insurance and season points. See {topic:treasury}.
       {if:core:bank-in-person-only}
       <gold>On this server the bank only opens when you talk to a banker standing in the world.</gold> Look for one near the spawn and right-click.{/if}
   - question: Where is my statement?

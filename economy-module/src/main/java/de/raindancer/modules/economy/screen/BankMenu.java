@@ -148,7 +148,7 @@ public final class BankMenu extends Menu implements IEconomyScreen {
                 "<gray>What is on the right of your screen:", "<gray>hide sections, put them in your order.",
                 "<yellow>Click<gray> to arrange it"), OFF, click -> sidebarMenu(this).open());
         toolbar(6, Icons.of(Material.BEACON, "<aqua>The server's money",
-                "<gray>The treasury, community funds, repair,", "<gray>bet insurance, season points, debts.",
+                "<gray>The treasury, community funds,", "<gray>bet insurance, season points, debts.",
                 "<yellow>Click<gray> to open"), click -> new SupplyMenu(services, viewer, this).open());
         if (viewer.hasPermission(PermissionNodes.ADMIN)) {
             toolbar(4, Icons.of(Material.COMMAND_BLOCK, "<red>Run the economy",

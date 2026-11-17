@@ -550,12 +550,6 @@ economy:
     exists: "<red>A fund by that name is already collecting."
     started: "<green>The fund <name> is collecting toward <target><green>."
     removed: "<green>The fund <name> is gone. What was given stays given."
-  repair:
-    off: "<red>/repair is switched off on this server."
-    nothing: "<red>Hold something that is worn to repair it."
-    offer: "<gray>Repairing it costs <amount><gray>: <button>"
-    changed: "<red>That is not the same item any more. Nothing was paid."
-    done: "<green>Repaired for <amount><green>. You have <balance><green> left."
   death:
     lost: "<red>Dying cost you <amount><red>. You have <balance><red> left."
   season:

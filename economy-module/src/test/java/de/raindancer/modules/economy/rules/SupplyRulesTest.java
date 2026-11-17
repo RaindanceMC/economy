@@ -152,20 +152,6 @@ class SupplyRulesTest {
     }
 
     @Test
-    @DisplayName("a repair costs a share of the item's worth, scaled by how worn it is, never under the least")
-    void repair() {
-        RepairRule rule = new RepairRule();
-        assertThat(rule.price(Optional.of(Money.of(10_000)), 50, 100, 10.0, Money.of(100)))
-                .contains(Money.of(500));
-        assertThat(rule.price(Optional.of(Money.of(10_000)), 1, 1000, 10.0, Money.of(100)))
-                .contains(Money.of(100));
-        assertThat(rule.price(Optional.empty(), 50, 100, 10.0, Money.of(100)))
-                .as("an item the shop does not price costs the least").contains(Money.of(100));
-        assertThat(rule.price(Optional.of(Money.of(10_000)), 0, 100, 10.0, Money.of(100)))
-                .as("nothing to repair").isEmpty();
-    }
-
-    @Test
     @DisplayName("dying costs a share of the balance, rounded down, never past the most")
     void death() {
         DeathRule rule = new DeathRule();

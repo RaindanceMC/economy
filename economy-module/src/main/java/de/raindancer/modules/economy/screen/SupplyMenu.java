@@ -22,8 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The server's money, as a player meets it: the treasury, community funds to give to, repairing what you
- * hold, bet insurance, season points and what you owe. Everything the owner switched off is shown greyed.
+ * The server's money, as a player meets it: the treasury, community funds to give to,
+ * bet insurance, season points and what you owe. Everything the owner switched off is shown greyed.
  */
 public final class SupplyMenu extends Menu implements IEconomyScreen {
 
@@ -73,13 +73,6 @@ public final class SupplyMenu extends Menu implements IEconomyScreen {
                 "<yellow>Click<gray> for where money came from this week"), BankMenu.OFF, click -> {
             viewer.closeInventory();
             viewer.performCommand("treasury");
-        });
-        boolean repairOn = live.repair() && viewer.hasPermission(PermissionNodes.REPAIR);
-        band(MenuLayout.WHO, 4, repairOn, Icons.of(Material.ANVIL, "<white>Repair what you hold",
-                "<gray>A share of what it is worth,", "<gray>scaled by how worn it is.",
-                "<yellow>Click<gray> for the price"), live.repair() ? BankMenu.NOT_ALLOWED : BankMenu.OFF, click -> {
-            viewer.closeInventory();
-            services.repair().offer(viewer);
         });
         boolean offered = services.gambling().insuranceOffered();
         boolean insured = services.gambling().insures(viewer.getUniqueId());
@@ -148,6 +141,6 @@ public final class SupplyMenu extends Menu implements IEconomyScreen {
 
     @Override
     public String describe() {
-        return "the server's money: the treasury, funds, repair, bet insurance, season points";
+        return "the server's money: the treasury, funds, bet insurance, season points";
     }
 }

@@ -47,4 +47,4 @@ sections:
   - question: What else costs money?
     title: Other costs
     text: |
-      {if:economy-supply:features.repair}{cmd:/repair} costs money, scaled by the item's worth and how worn it is. {/if}{if:economy:features.loans}Loan interest and late fees are destroyed when paid. {/if}{if:economy-supply:features.funds}Community fund donations are destroyed. {/if}{if:economy-supply:gamble.insurance}Bet insurance premiums beyond the payback are a sink. {/if}These and the costs above keep your coins valuable.
+      {if:economy:features.loans}Loan interest and late fees are destroyed when paid. {/if}{if:economy-supply:features.funds}Community fund donations are destroyed. {/if}{if:economy-supply:gamble.insurance}Bet insurance premiums beyond the payback are a sink. {/if}These and the costs above keep your coins valuable.

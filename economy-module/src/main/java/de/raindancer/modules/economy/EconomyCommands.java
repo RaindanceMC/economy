@@ -116,8 +116,6 @@ public final class EconomyCommands {
                 ModuleCommand.of("fund", "Community funds: give toward a goal everybody shares",
                         new de.raindancer.modules.economy.command.FundCommand(EconomyCommands::require))
                         .taking("[name] [amount]"),
-                ModuleCommand.of("repair", "Repair the item in your hand for money",
-                        new de.raindancer.modules.economy.command.RepairCommand(EconomyCommands::require)),
                 ModuleCommand.of("season", "Your season points",
                         new de.raindancer.modules.economy.command.SeasonCommand(EconomyCommands::require)),
                 ModuleCommand.of("eco", "Staff: run the economy", new EcoCommand(EconomyCommands::require))

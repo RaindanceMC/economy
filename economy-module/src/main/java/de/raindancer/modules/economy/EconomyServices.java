@@ -71,7 +71,6 @@ public record EconomyServices(
         de.raindancer.modules.economy.service.SupplyService supply,
         SettingsStore<SupplySettings> supplyStore,
         de.raindancer.modules.economy.service.FundService funds,
-        de.raindancer.modules.economy.service.RepairService repair,
         de.raindancer.modules.economy.service.DeathService death,
         de.raindancer.modules.economy.service.SeasonService seasons,
         de.raindancer.modules.economy.service.BackpayService backpay,
