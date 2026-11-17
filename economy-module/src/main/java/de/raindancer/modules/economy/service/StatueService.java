@@ -107,9 +107,9 @@ public final class StatueService implements IEconomyService {
             }
             List<Standing> top = tops.computeIfAbsent(spot.board(), leaderboard::standings);
             Standing holder;
-            if (spot.board() == Podium.Board.PRIME) {
-                int spots = (int) all.stream().filter(other -> other.board() == Podium.Board.PRIME).count();
-                // More Prime members than statues: they take turns, a new row every PRIME_TURN.
+            if (spot.board().thankYou()) {
+                int spots = (int) all.stream().filter(other -> other.board() == spot.board()).count();
+                // More Prime members (or creators) than statues: they take turns, a new row every PRIME_TURN.
                 holder = rule.standing(top, spot.place(), spots, System.currentTimeMillis() / PRIME_TURN.toMillis())
                         .orElse(null);
             } else {
@@ -175,7 +175,7 @@ public final class StatueService implements IEconomyService {
     private void dress(Mannequin statue, StatueSpot spot, Standing holder, EconomySettings live) {
         statue.customName(MINI.deserialize(rule.title(spot.place(), holder == null ? null : holder.name(), spot.board())));
         statue.setDescription(holder == null ? Component.empty()
-                : spot.board() == Podium.Board.PRIME ? MINI.deserialize(rule.caption(spot.board()))
+                : spot.board().thankYou() ? MINI.deserialize(rule.caption(spot.board()))
                 : MINI.deserialize(rule.caption(spot.board()))
                         .append(LeaderboardDisplayService.worth(holder, spot.board(), live.currency())));
         String wearing = statue.getPersistentDataContainer().get(HOLDER, PersistentDataType.STRING);
@@ -278,8 +278,13 @@ public final class StatueService implements IEconomyService {
 
     /** One more Prime statue on the block the player stands on, in the lowest free place; empty when all stand. */
     public Optional<StatueSpot> placePrime(Player player) {
-        java.util.OptionalInt next = rule.nextPrimePlace(spots());
-        return next.isEmpty() ? Optional.empty() : Optional.of(placeOne(player, Podium.Board.PRIME, next.getAsInt()));
+        return placeThankYou(player, Podium.Board.PRIME);
+    }
+
+    /** One more statue of a thank-you board (Prime, creators) where the player stands; empty when all stand. */
+    public Optional<StatueSpot> placeThankYou(Player player, Podium.Board board) {
+        java.util.OptionalInt next = rule.nextPlace(spots(), board);
+        return next.isEmpty() ? Optional.empty() : Optional.of(placeOne(player, board, next.getAsInt()));
     }
 
     /** One statue for {@code place} on the block the player stands on, facing the nearest eighth of their look. */

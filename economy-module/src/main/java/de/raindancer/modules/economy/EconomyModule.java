@@ -87,7 +87,11 @@ import java.util.UUID;
  */
 public final class EconomyModule implements FlexModule {
 
-    private static final ModuleInfo INFO = ModuleInfo.of("economy", "Economy", "0.76.0")
+    /** The LuckPerms group whose members the creator statues show. */
+    private static final String CREATOR_GROUP = "creator";
+
+
+    private static final ModuleInfo INFO = ModuleInfo.of("economy", "Economy", "0.77.0")
             .describedAs("A bank, paying and hiring, coins you can carry, a creative-style shop priced from recipes, "
                     + "passive income, live auctions and raffles, and a casino with sounds and animations. Every part is switchable.")
             .by("Raindancer118");
@@ -221,6 +225,16 @@ public final class EconomyModule implements FlexModule {
         leaderboard.primeFrom(() -> context.core().prime() == null ? java.util.List.of()
                 : context.core().prime().current(java.time.Instant.now()).stream()
                         .map(de.raindancer.core.social.support.PrimeMembers.Member::player).toList());
+        // The creators' statues: the LuckPerms group creator, asked off the server's threads every minute,
+        // since LuckPerms looks up offline members in its database.
+        java.util.concurrent.atomic.AtomicReference<java.util.List<java.util.UUID>> creators =
+                new java.util.concurrent.atomic.AtomicReference<>(java.util.List.of());
+        leaderboard.creatorsFrom(creators::get);
+        var creatorsRefresh = de.raindancer.core.platform.util.Scheduling.asyncTimer(context.plugin(), 1, 60,
+                task -> creators.set(java.util.List.copyOf(context.core().groups().membersOf(CREATOR_GROUP))));
+        if (creatorsRefresh != null) {
+            context.closeWith(creatorsRefresh::cancel);
+        }
         serveTheNetwork(context, bankClient, leaderboard, payments, settings, shop);
         var sidebar = new de.raindancer.modules.economy.service.SidebarService(economy, leaderboard,
                 context.core().scoreboards(), now);

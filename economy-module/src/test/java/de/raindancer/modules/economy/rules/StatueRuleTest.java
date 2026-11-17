@@ -217,6 +217,43 @@ class StatueRuleTest {
         }
     }
 
+    @org.junit.jupiter.api.Nested
+    @org.junit.jupiter.api.DisplayName("creator statues")
+    class Creators {
+
+        private final StatueRule rule = new StatueRule();
+
+        @org.junit.jupiter.api.Test
+        @org.junit.jupiter.api.DisplayName("creators get statues like Prime: any place up to 64, on the ground, taking turns")
+        void likePrime() {
+            assertThat(Podium.Board.read("creator")).contains(Podium.Board.CREATOR);
+            assertThat(Podium.Board.CREATOR.thankYou()).isTrue();
+            assertThat(Podium.Board.PRIME.thankYou()).isTrue();
+            assertThat(Podium.Board.RICHEST.thankYou()).isFalse();
+            assertThat(StatueSpot.readPlace(Podium.Board.CREATOR, "64")).contains(64);
+            assertThat(StatueSpot.parse("spawn 1.00 64.00 2.00 90.0 creator 17 -")).map(StatueSpot::place).contains(17);
+            assertThat(rule.pedestal(Podium.Board.CREATOR)).isFalse();
+        }
+
+        @org.junit.jupiter.api.Test
+        @org.junit.jupiter.api.DisplayName("their places are counted apart from Prime's")
+        void ownPlaces() {
+            List<StatueSpot> some = List.of(StatueSpot.parse("w 0 64 0 0 prime 1 -").orElseThrow(),
+                    StatueSpot.parse("w 2 64 0 0 creator 1 -").orElseThrow());
+            assertThat(rule.nextPlace(some, Podium.Board.CREATOR)).hasValue(2);
+            assertThat(rule.nextPlace(some, Podium.Board.PRIME)).hasValue(2);
+            assertThat(rule.nextPlace(List.of(), Podium.Board.CREATOR)).hasValue(1);
+        }
+
+        @org.junit.jupiter.api.Test
+        @org.junit.jupiter.api.DisplayName("a creator statue is labelled as one")
+        void words() {
+            assertThat(rule.heading(Podium.Board.CREATOR)).contains("creators");
+            assertThat(rule.title(3, "Ada", Podium.Board.CREATOR)).contains("CREATOR").contains("Ada").doesNotContain("#3");
+            assertThat(rule.title(3, null, Podium.Board.CREATOR)).contains("CREATOR").contains("waiting");
+        }
+    }
+
     @Test
     @DisplayName("a Prime statue stands like a mannequin statue: on the ground, no pedestal, no label over it")
     void primeStandsFree() {

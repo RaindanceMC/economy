@@ -39,7 +39,7 @@ public record StatueSpot(String world, double x, double y, double z, float yaw, 
 
     /** A place as typed for a board: 1 to 3, or for Prime's statues 1 to {@link #MOST_PRIME}. */
     public static Optional<Integer> readPlace(Podium.Board board, String typed) {
-        if (board != Podium.Board.PRIME) {
+        if (!board.thankYou()) {
             return readPlace(typed);
         }
         if (typed == null) {

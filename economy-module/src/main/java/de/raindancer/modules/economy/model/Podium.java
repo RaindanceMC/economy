@@ -18,7 +18,14 @@ public record Podium(String world, double x, double y, double z, float yaw, Boar
         /** Time played on the whole network, away time included, as Core counts it. */
         PLAYTIME,
         /** Who holds Prime right now, longest-running first — a thank-you, not a ranking; as many statues as staff place. */
-        PRIME;
+        PRIME,
+        /** The server's content creators — a thank-you like Prime's, from the LuckPerms group creator. */
+        CREATOR;
+
+        /** A thank-you rather than a ranking: as many statues as staff place, on the ground, taking turns. */
+        public boolean thankYou() {
+            return this == PRIME || this == CREATOR;
+        }
 
         public static Optional<Board> read(String typed) {
             if (typed == null) {

@@ -121,6 +121,7 @@ public final class EcoCommand extends EconomyCommand {
                     case CASINO -> "economy.admin.leaderboard-placed-casino";
                     case PLAYTIME -> "economy.admin.leaderboard-placed-playtime";
                     case PRIME -> "economy.admin.leaderboard-placed-prime";
+                    case CREATOR -> "economy.admin.leaderboard-placed-creator";
                 });
                 }
             });
@@ -558,11 +559,14 @@ public final class EcoCommand extends EconomyCommand {
                     : "economy.admin.statue-board", "what", typed);
             return;
         }
-        if (args.length <= 3 && !moving && board.get() == de.raindancer.modules.economy.model.Podium.Board.PRIME) {
-            // Prime's statues go up one at a time, each where its placer stands.
-            statues.placePrime(player).ifPresentOrElse(
-                    spot -> live.messages().send(player, "economy.admin.statue-placed-prime", "place", spot.place()),
-                    () -> live.messages().send(player, "economy.admin.statue-prime-full",
+        if (args.length <= 3 && !moving && board.get().thankYou()) {
+            // Prime's and creators' statues go up one at a time, each where its placer stands.
+            boolean creator = board.get() == de.raindancer.modules.economy.model.Podium.Board.CREATOR;
+            statues.placeThankYou(player, board.get()).ifPresentOrElse(
+                    spot -> live.messages().send(player, creator ? "economy.admin.statue-placed-creator"
+                            : "economy.admin.statue-placed-prime", "place", spot.place()),
+                    () -> live.messages().send(player, creator ? "economy.admin.statue-creator-full"
+                            : "economy.admin.statue-prime-full",
                             "most", de.raindancer.modules.economy.model.StatueSpot.MOST_PRIME));
             return;
         }
@@ -572,7 +576,7 @@ public final class EcoCommand extends EconomyCommand {
                 case RICHEST -> "economy.admin.statue-placed-richest";
                 case CASINO -> "economy.admin.statue-placed-casino";
                 case PLAYTIME -> "economy.admin.statue-placed-playtime";
-                case PRIME -> throw new IllegalStateException("Prime statues go up one at a time, above");
+                case PRIME, CREATOR -> throw new IllegalStateException("Thank-you statues go up one at a time, above");
             });
             return;
         }

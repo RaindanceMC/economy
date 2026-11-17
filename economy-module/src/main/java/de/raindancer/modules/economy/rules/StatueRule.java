@@ -19,6 +19,8 @@ public final class StatueRule implements IEconomyRule {
     public static final int PLACES = 3;
     /** Prime's badge colours, the default of Ranks' prime rank. */
     private static final String PRIME_MARK = "<gradient:#ff3d9a:#ff9ad5><bold>PRIME</bold></gradient>";
+    /** The creator rank's colour, as Ranks shows it. */
+    private static final String CREATOR_MARK = "<light_purple><bold>CREATOR</bold></light_purple>";
     private static final double SPACING = 1.0;
     public static final double SHARED_LABEL_REACH = 6.0;
 
@@ -35,7 +37,7 @@ public final class StatueRule implements IEconomyRule {
 
     /** Prime's statues stand on the ground like a mannequin statue; the boards' stand on their podium. */
     public boolean pedestal(Podium.Board board) {
-        return board != Podium.Board.PRIME;
+        return !board.thankYou();
     }
 
     /** How far above its ground block a statue's feet are: its pedestal's height, or none. */
@@ -45,8 +47,13 @@ public final class StatueRule implements IEconomyRule {
 
     /** The place a new Prime statue takes: the lowest free one, none once all {@link StatueSpot#MOST_PRIME} stand. */
     public java.util.OptionalInt nextPrimePlace(List<StatueSpot> all) {
+        return nextPlace(all, Podium.Board.PRIME);
+    }
+
+    /** The place a new statue of a thank-you board takes: the lowest free one of that board, none once all stand. */
+    public java.util.OptionalInt nextPlace(List<StatueSpot> all, Podium.Board board) {
         java.util.Set<Integer> taken = new java.util.HashSet<>();
-        all.stream().filter(spot -> spot.board() == Podium.Board.PRIME).forEach(spot -> taken.add(spot.place()));
+        all.stream().filter(spot -> spot.board() == board).forEach(spot -> taken.add(spot.place()));
         for (int place = 1; place <= StatueSpot.MOST_PRIME; place++) {
             if (!taken.contains(place)) {
                 return java.util.OptionalInt.of(place);
@@ -77,13 +84,14 @@ public final class StatueRule implements IEconomyRule {
 
     /** The name over a statue of a board; Prime's are a thank-you, so they carry no place. */
     public String title(int place, String name, Podium.Board board) {
-        if (board != Podium.Board.PRIME) {
+        if (!board.thankYou()) {
             return title(place, name);
         }
+        String mark = board == Podium.Board.CREATOR ? CREATOR_MARK : PRIME_MARK;
         if (name == null) {
-            return PRIME_MARK + " <dark_gray>This spot is waiting";
+            return mark + " <dark_gray>This spot is waiting";
         }
-        return PRIME_MARK + " <white>" + MiniMessage.miniMessage().escapeTags(name);
+        return mark + " <white>" + MiniMessage.miniMessage().escapeTags(name);
     }
 
     /**
@@ -117,6 +125,7 @@ public final class StatueRule implements IEconomyRule {
             case RICHEST -> "<gold><bold>Richest players</bold></gold>";
             case PLAYTIME -> "<gold><bold>Most time played</bold></gold>";
             case PRIME -> "<gradient:#ff3d9a:#ffd27a><bold>Our Prime supporters</bold></gradient>";
+            case CREATOR -> "<light_purple><bold>Our creators</bold></light_purple>";
         };
     }
 
@@ -127,6 +136,7 @@ public final class StatueRule implements IEconomyRule {
             case RICHEST -> "<gray>";
             case PLAYTIME -> "<gray>played ";
             case PRIME -> "<gray>Thank you for supporting the server";
+            case CREATOR -> "<gray>Making videos and streams about the server";
         };
     }
 
@@ -188,7 +198,7 @@ public final class StatueRule implements IEconomyRule {
      * share one label instead of stacking the same heading.
      */
     public boolean labelled(StatueSpot spot, List<StatueSpot> all) {
-        if (spot.board() == Podium.Board.PRIME) {
+        if (spot.board().thankYou()) {
             return false;
         }
         if (!spot.standalone()) {
@@ -227,6 +237,7 @@ public final class StatueRule implements IEconomyRule {
             case RICHEST -> "richest players";
             case PLAYTIME -> "players who played longest";
             case PRIME -> "Prime supporters";
+            case CREATOR -> "creators";
         };
     }
 

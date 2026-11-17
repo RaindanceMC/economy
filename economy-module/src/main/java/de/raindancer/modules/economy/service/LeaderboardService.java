@@ -62,6 +62,7 @@ public final class LeaderboardService {
             case CASINO -> casinoWinners();
             case PLAYTIME -> longestPlayed();
             case PRIME -> primeMembers();
+            case CREATOR -> creators();
         };
     }
 
@@ -70,6 +71,22 @@ public final class LeaderboardService {
     /** Who is Prime right now, longest-running first (Core's PrimeMembers). */
     public void primeFrom(java.util.function.Supplier<List<UUID>> current) {
         this.prime = current == null ? List::of : current;
+    }
+
+    private volatile java.util.function.Supplier<List<UUID>> creators = List::of;
+
+    /** The server's creators, as the LuckPerms group creator lists them (kept fresh off the server's threads). */
+    public void creatorsFrom(java.util.function.Supplier<List<UUID>> current) {
+        this.creators = current == null ? List::of : current;
+    }
+
+    /** Creators with an account here, by name. */
+    private List<Standing> creators() {
+        java.util.Map<UUID, String> names = new java.util.HashMap<>();
+        book.all().forEach(account -> names.put(account.id(), account.name()));
+        return creators.get().stream().filter(names::containsKey)
+                .map(id -> new Standing(id, names.get(id), Money.ZERO))
+                .sorted(java.util.Comparator.comparing(Standing::name, String.CASE_INSENSITIVE_ORDER)).toList();
     }
 
     /** Prime members with an account here — somebody who paid before ever joining has no statue yet. */
