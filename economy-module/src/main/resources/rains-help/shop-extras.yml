@@ -9,7 +9,7 @@ order: 22
 module: economy
 when: economy:features.shop
 aliases: [enchanted-books, books, potions, packs, spawn-eggs, spawners, xp, experience]
-keywords: [enchantment, bundle, egg, spawner, levels, shards]
+keywords: [enchantment, bundle, egg, spawner, levels]
 related: [shop, selling, economy]
 sections:
   - question: Can I buy enchanted books?
@@ -42,7 +42,7 @@ sections:
     title: Rain's enchantments
     when: economy:rains-enchantments.enabled
     text: |
-      Books of Rain's own enchantments, sold to members of a guild that has unlocked them. Each book costs shards of that enchantment plus {setting:economy:rains-enchantments.money-per-level|money} per level. {if:economy:rains-enchantments.free-once-unlocked}Once your guild unlocked an enchantment, books cost only the money.{/if} Unlocking itself is done by paying shards in at {run:/guild}. Shards drop from monsters and also sell to the shop.
+      Books of Rain's own enchantments, sold to members of a guild that has unlocked them. Each book costs {setting:economy:rains-enchantments.money-per-level|money} per level. Unlocking itself is done by the guild, from its bank, at {run:/guild}.
   - question: How do I buy experience?
     title: Experience
     when: economy:features.xp-trade

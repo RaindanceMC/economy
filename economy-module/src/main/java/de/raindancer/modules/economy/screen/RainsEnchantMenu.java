@@ -1,6 +1,5 @@
 package de.raindancer.modules.economy.screen;
 
-import de.raindancer.core.content.enchant.EnchantShards;
 import de.raindancer.core.ui.menu.Backdrop;
 import de.raindancer.core.ui.menu.Icons;
 import de.raindancer.core.ui.menu.Menu;
@@ -18,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The drawer of Rain's enchantments: every level of each, for its shards and money — to the members of a guild
+ * The drawer of Rain's enchantments: every level of each, for money — to the members of a guild
  * that unlocked it. Locked ones are shown too, with how to unlock them.
  */
 public final class RainsEnchantMenu extends PaginatedMenu<ShopService.RainsOffer> implements IEconomyScreen {
@@ -52,30 +51,21 @@ public final class RainsEnchantMenu extends PaginatedMenu<ShopService.RainsOffer
 
     @Override
     protected ItemStack emptyIcon() {
-        return Icons.of(Material.ECHO_SHARD, "<gray>Nothing here", "<gray>Rain's enchantments are not sold on this server.");
+        return Icons.of(Material.ENCHANTED_BOOK, "<gray>Nothing here", "<gray>Rain's enchantments are not sold on this server.");
     }
 
     @Override
     protected ItemStack icon(ShopService.RainsOffer offer) {
         String name = ShopService.rainsName(offer.enchantment()) + " " + roman(offer.level());
-        int carried = EnchantShards.count(viewer.getInventory(), offer.enchantment());
         List<String> lore = new ArrayList<>();
-        String money = MiniMessage.miniMessage().serialize(services.currency().render(offer.money()));
-        if (offer.shards() == 0) {
-            lore.add("<gray>Costs " + money + "<gray>, no shards:");
-            lore.add("<gray>your guild unlocked it.");
-        } else {
-            lore.add("<gray>Costs <white>" + offer.shards() + "<gray> of its shards");
-            lore.add("<gray>and " + money + "<gray>.");
-            lore.add("<gray>You carry <white>" + carried + "<gray>.");
-        }
+        lore.add("<gray>Costs " + MiniMessage.miniMessage().serialize(services.currency().render(offer.money())) + "<gray>.");
         lore.add("");
         if (!offer.unlocked()) {
             lore.add("<red>Locked: your guild unlocks it");
-            lore.add("<red>by paying its shards in at /guild.");
+            lore.add("<red>from its bank at /guild.");
             return Icons.of(Material.BOOK, "<gray>" + name, lore);
         }
-        lore.add(carried >= offer.shards() ? "<yellow>Click<gray> to buy the book" : "<dark_gray>Not enough shards yet");
+        lore.add("<yellow>Click<gray> to buy the book");
         return Icons.of(Material.ENCHANTED_BOOK, "<light_purple>" + name, lore);
     }
 
@@ -99,13 +89,12 @@ public final class RainsEnchantMenu extends PaginatedMenu<ShopService.RainsOffer
     @Override
     protected List<String> helpLines() {
         return List.of("Books of Rain's own enchantments.",
-                "Their shards drop from monsters in the shard world. Your guild",
-                "pays shards in to unlock an enchantment; then each book costs",
-                "its shards and a little money. Shards also sell, and trade.");
+                "Your guild unlocks an enchantment from its bank at /guild;",
+                "then every member can buy its books for money.");
     }
 
     @Override
     public String describe() {
-        return "Rain's enchantments for shards and money";
+        return "Rain's enchantments for money";
     }
 }

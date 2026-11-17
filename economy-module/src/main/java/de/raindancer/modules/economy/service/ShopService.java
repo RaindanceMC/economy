@@ -614,7 +614,7 @@ public final class ShopService implements IEconomyService, ShopDesk {
     // ---------------------------------------------------------------------------- Rain's enchantments
 
     /** One book in the drawer of Rain's enchantments: the enchantment, a level, and whether this player may buy it. */
-    public record RainsOffer(String enchantment, int level, int shards, Money money, boolean unlocked) {
+    public record RainsOffer(String enchantment, int level, Money money, boolean unlocked) {
     }
 
     public static String rainsName(String enchantment) {
@@ -630,7 +630,7 @@ public final class ShopService implements IEconomyService, ShopDesk {
         if (!live.rainsEnchantments()) {
             return List.of();
         }
-        de.raindancer.modules.economy.rules.ShardPriceRule pricing = live.shardPricing();
+        de.raindancer.modules.economy.rules.RainsBookPriceRule pricing = live.bookPricing();
         List<RainsOffer> offers = new ArrayList<>();
         try {
             io.papermc.paper.registry.RegistryAccess.registryAccess()
@@ -643,8 +643,7 @@ public final class ShopService implements IEconomyService, ShopDesk {
                         String key = enchantment.getKey().asString();
                         boolean unlocked = de.raindancer.core.content.enchant.EnchantUnlocks.isUnlocked(player, key);
                         for (int level = 1; level <= enchantment.getMaxLevel(); level++) {
-                            offers.add(new RainsOffer(key, level, pricing.shards(level, unlocked), pricing.money(level),
-                                    unlocked));
+                            offers.add(new RainsOffer(key, level, pricing.money(level), unlocked));
                         }
                     });
         } catch (RuntimeException | LinkageError noServer) {
@@ -656,8 +655,8 @@ public final class ShopService implements IEconomyService, ShopDesk {
     }
 
     /**
-     * Sells one book of Rain's enchantments: the shards are taken first, then the money; if the money cannot
-     * be paid the shards come back. Refused when the guild has not unlocked it or the price moved since shown.
+     * Sells one book of Rain's enchantments for money. Refused when the guild has not unlocked it or the price
+     * moved since shown.
      */
     public void buyRains(Player player, RainsOffer shown) {
         EconomySettings live = settings;
@@ -671,8 +670,7 @@ public final class ShopService implements IEconomyService, ShopDesk {
             refuse(player, "economy.shop.rains-locked", "name", name);
             return;
         }
-        de.raindancer.modules.economy.rules.ShardPriceRule pricing = live.shardPricing();
-        if (pricing.shards(shown.level(), true) != shown.shards() || !pricing.money(shown.level()).equals(shown.money())) {
+        if (!live.bookPricing().money(shown.level()).equals(shown.money())) {
             refuse(player, "economy.shop.enchant-gone");
             return;
         }
@@ -687,28 +685,17 @@ public final class ShopService implements IEconomyService, ShopDesk {
             refuse(player, "economy.shop.no-room");
             return;
         }
-        if (!de.raindancer.core.content.enchant.EnchantShards.take(player.getInventory(), shown.enchantment(),
-                shown.shards())) {
-            refuse(player, "economy.shop.rains-no-shards", "name", name, "shards", String.valueOf(shown.shards()));
-            return;
-        }
         String label = "Enchanted book: " + name + " " + shown.level();
         EconomyResult result = economy.move(player.getUniqueId(), shown.money().negate(), TransactionKind.BUY, label);
         if (!result.succeeded()) {
-            List<ItemStack> back = new ArrayList<>();
-            for (int left = shown.shards(); left > 0; left -= 64) {
-                back.add(de.raindancer.core.content.enchant.EnchantShards.of(shown.enchantment(), Math.min(64, left)));
-            }
-            de.raindancer.core.platform.util.Inventories.giveOrDrop(player, back);
             Outcomes.tell(messages, effects, player, EconomyResult.failed(result.outcome(), shown.money(),
                     result.balance()), currency, "");
             return;
         }
         de.raindancer.core.platform.util.Inventories.giveOrDrop(player, List.of(book));
         effects.play(player.getUniqueId(), Cues.REWARD);
-        messages.send(player, shown.shards() == 0 ? "economy.shop.rains-bought-free" : "economy.shop.rains-bought",
-                "name", name, "level", String.valueOf(shown.level()),
-                "shards", String.valueOf(shown.shards()), "amount", currency.render(shown.money()));
+        messages.send(player, "economy.shop.rains-bought", "name", name, "level", String.valueOf(shown.level()),
+                "amount", currency.render(shown.money()));
     }
 
     // ---------------------------------------------------------------------------- made things (Rain's items)
@@ -1081,17 +1068,6 @@ public final class ShopService implements IEconomyService, ShopDesk {
      * item carrying anything else (lore, plugin data, contents) is not bought at all.
      */
     public Optional<SaleLot> appraise(UUID seller, ItemStack stack, int slot) {
-        Optional<String> shard = de.raindancer.core.content.enchant.EnchantShards.enchantmentOf(stack);
-        if (shard.isPresent()) {
-            // Before the non-ingredient refusal below: a shard is marked as one, and is still for sale.
-            Money each = settings.shardPrice(shard.get());
-            if (!settings.sellingEnabled() || !each.isPositive()
-                    || de.raindancer.core.content.items.InsuredItems.isInsured(stack)) {
-                return Optional.empty();
-            }
-            return trade.total(each, stack.getAmount()).map(total -> new SaleLot(stack.getType(), slot,
-                    stack.getAmount(), total, rainsName(shard.get()) + " Shard"));
-        }
         Optional<Money> priced = de.raindancer.core.social.economy.ItemPrices.sellPrice(stack);
         if (priced.isPresent()) {
             // A plugin's own item (a fish, a dish) at the price its plugin gives it, never as its material.
@@ -1211,7 +1187,6 @@ public final class ShopService implements IEconomyService, ShopDesk {
         }
         if (depth > 3 || CashTags.isCash(stack) || de.raindancer.core.content.items.NonIngredients.isMarked(stack)
                 || de.raindancer.core.content.items.InsuredItems.isInsured(stack)
-                || de.raindancer.core.content.enchant.EnchantShards.enchantmentOf(stack).isPresent()
                 || potionKeyOf(stack).isPresent() || !settings.sellingEnabled()) {
             return Optional.empty();
         }

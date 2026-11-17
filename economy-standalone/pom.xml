@@ -69,7 +69,8 @@
         <!-- 0.61.2: a statue's label floats half a block higher, clear of the statue's own name tag; labels already standing are moved up. -->
         <!-- 0.72.0: sidebar.title and sidebar.balance-heading settings. -->
         <!-- 0.78.0: the statues are RainsCore's (2.106.0): casino, richest and playtime are offered as Core statue boards, the statues in statue.podiums are handed to Core once; Prime and creator statues come from the Prime and Ranks plugins. -->
-        <plugin.version>0.78.0</plugin.version>
+        <!-- 0.79.0: no more shards: books of Rain's enchantments cost money only, the shop no longer buys shards (settings rains-enchantments.shards, free-once-unlocked, shard-price and shard-prices removed). -->
+        <plugin.version>0.79.0</plugin.version>
     </properties>
 
     <dependencies>

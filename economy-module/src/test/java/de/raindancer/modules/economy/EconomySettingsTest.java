@@ -39,6 +39,28 @@ public class EconomySettingsTest {
     }
 
     @Test
+    @DisplayName("a settings file still holding the shard keys loads, and none of them is a setting any more")
+    void oldShardKeys(@org.junit.jupiter.api.io.TempDir Path folder) throws java.io.IOException {
+        Path file = folder.resolve("economy.yml");
+        java.nio.file.Files.writeString(file, """
+                rains-enchantments:
+                  shards: ["8", "16"]
+                  free-once-unlocked: true
+                  shard-price: "20"
+                  shard-prices: ["flight 60"]
+                  money-per-level: "400"
+                """);
+        SettingsStore<EconomySettings> store = new SettingsStore<>(
+                SettingsSchema.of(EconomySettings.class, EconomySettings.DEFAULTS), file);
+        store.load();
+        assertThat(store.current().rainsEnchantMoney()).isEqualTo("400");
+        assertThat(store.current().bookPricing().money(2).minor()).isEqualTo(2 * store.current().currency().parse("400").orElseThrow().minor());
+        assertThat(SettingsSchema.of(EconomySettings.class, EconomySettings.DEFAULTS).settings())
+                .extracting(setting -> setting.key()).noneMatch(key -> key.startsWith("rains-enchantments.shard")
+                        || key.equals("rains-enchantments.shards") || key.equals("rains-enchantments.free-once-unlocked"));
+    }
+
+    @Test
     @DisplayName("the defaults are what the comments promise")
     void defaults() {
         EconomySettings d = EconomySettings.DEFAULTS;

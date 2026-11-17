@@ -122,9 +122,9 @@ public final class ShopMenu extends Menu implements IEconomyScreen {
                 "<gray>" + bottles + " bottle(s), prices move with", "<gray>supply and demand.", "",
                 "<yellow>Click<gray> to open the drawer"),
                 click -> new PotionMenu(services, viewer, this).open());
-        drawer(4, live.rainsEnchantments(), Icons.of(Material.ECHO_SHARD, "<light_purple>Rain's enchantments",
+        drawer(4, live.rainsEnchantments(), Icons.of(Material.ENCHANTED_BOOK, "<light_purple>Rain's enchantments",
                 "<gray>Books of the server's own enchantments,",
-                "<gray>for their shards and a little money,",
+                "<gray>for money,",
                 "<gray>once your guild has unlocked them.", "", "<yellow>Click<gray> to open the drawer"),
                 click -> new RainsEnchantMenu(services, viewer, this).open());
         drawer(5, true, Icons.of(Material.BLAZE_ROD, "<gold>Rain's items",
