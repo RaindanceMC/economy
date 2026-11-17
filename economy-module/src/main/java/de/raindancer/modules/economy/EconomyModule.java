@@ -87,7 +87,7 @@ import java.util.UUID;
  */
 public final class EconomyModule implements FlexModule {
 
-    private static final ModuleInfo INFO = ModuleInfo.of("economy", "Economy", "0.75.0")
+    private static final ModuleInfo INFO = ModuleInfo.of("economy", "Economy", "0.76.0")
             .describedAs("A bank, paying and hiring, coins you can carry, a creative-style shop priced from recipes, "
                     + "passive income, live auctions and raffles, and a casino with sounds and animations. Every part is switchable.")
             .by("Raindancer118");
@@ -439,7 +439,7 @@ public final class EconomyModule implements FlexModule {
         // /preferences came with Core 2.103.0; /bank sidebar and /auction mute stay where there is none.
         try {
             for (de.raindancer.core.ui.preference.Preference choice : List.of(EconomyOffers.sidebar(sidebar),
-                    EconomyOffers.auctionNews(auctions))) {
+                    EconomyOffers.auctionNews(auctions), EconomyOffers.betInsurance(() -> services))) {
                 de.raindancer.core.ui.preference.Preferences.offer(context.plugin(), choice);
                 context.closeWith(() -> de.raindancer.core.ui.preference.Preferences.withdraw(choice));
             }

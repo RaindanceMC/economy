@@ -3,8 +3,10 @@ package de.raindancer.modules.economy;
 import de.raindancer.core.ui.preference.Preference;
 import de.raindancer.modules.economy.service.AuctionService;
 import de.raindancer.modules.economy.service.SidebarService;
+import de.raindancer.modules.economy.util.PermissionNodes;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 /** What Economy offers to Core's {@code /preferences} page: the same switches {@code /bank sidebar} and {@code /auction mute} flip. */
 final class EconomyOffers {
@@ -31,5 +33,22 @@ final class EconomyOffers {
                         auctions.toggleNews(player);
                     }
                 });
+    }
+
+    static Preference betInsurance(Supplier<EconomyServices> services) {
+        return Preference.toggle("economy:bet-insurance", "Casino", "Insure your bets",
+                "Every stake costs a little more, and part of a lost stake comes back.",
+                player -> services.get().gambling().insures(player.getUniqueId()), (player, on) -> {
+                    EconomyServices live = services.get();
+                    if (on != live.gambling().insures(player.getUniqueId())) {
+                        live.gambling().toggleInsurance(player);
+                    }
+                }).shownTo(player -> {
+            EconomyServices live = services.get();
+            return live != null && live.config().gamblingEnabled() && live.gambling().insuranceOffered()
+                    && player.hasPermission(PermissionNodes.GAMBLE)
+                    && !de.raindancer.core.social.desk.ServiceDesks.inPersonOnly(
+                            de.raindancer.core.social.desk.ServiceDesk.INSURANCE);
+        });
     }
 }
