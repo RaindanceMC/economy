@@ -22,7 +22,7 @@
     <properties>
         <economy-module.version>0.75.0</economy-module.version>
         <rainscore.version>2.103.0</rainscore.version>
-        <modules-wrapper.version>1.11.0</modules-wrapper.version>
+        <modules-wrapper.version>1.13.0</modules-wrapper.version>
     </properties>
 
     <modules>
