@@ -2,7 +2,7 @@ package de.raindancer.modules.economy.service;
 
 import de.raindancer.core.social.economy.Money;
 import de.raindancer.modules.economy.model.Account;
-import de.raindancer.modules.economy.model.Podium;
+import de.raindancer.modules.economy.model.Board;
 import de.raindancer.modules.economy.model.Standing;
 import de.raindancer.modules.economy.model.TransactionKind;
 import de.raindancer.modules.economy.store.AccountBook;
@@ -56,45 +56,26 @@ public final class LeaderboardService {
     }
 
     /** Whoever a board ranks, best first. The casino board lists only players who came out ahead. */
-    public List<Standing> standings(Podium.Board board) {
+    public List<Standing> standings(Board board) {
         return switch (board) {
             case RICHEST -> ranking().stream().map(each -> new Standing(each.id(), each.name(), each.balance())).toList();
             case CASINO -> casinoWinners();
             case PLAYTIME -> longestPlayed();
-            case PRIME -> primeMembers();
-            case CREATOR -> creators();
+            case PRIME, CREATOR -> thanked(board);
         };
     }
 
-    private volatile java.util.function.Supplier<List<UUID>> prime = List::of;
-
-    /** Who is Prime right now, longest-running first (Core's PrimeMembers). */
-    public void primeFrom(java.util.function.Supplier<List<UUID>> current) {
-        this.prime = current == null ? List::of : current;
-    }
-
-    private volatile java.util.function.Supplier<List<UUID>> creators = List::of;
-
-    /** The server's creators, as the LuckPerms group creator lists them (kept fresh off the server's threads). */
-    public void creatorsFrom(java.util.function.Supplier<List<UUID>> current) {
-        this.creators = current == null ? List::of : current;
-    }
-
-    /** Creators with an account here, by name. */
-    private List<Standing> creators() {
-        java.util.Map<UUID, String> names = new java.util.HashMap<>();
-        book.all().forEach(account -> names.put(account.id(), account.name()));
-        return creators.get().stream().filter(names::containsKey)
-                .map(id -> new Standing(id, names.get(id), Money.ZERO))
-                .sorted(java.util.Comparator.comparing(Standing::name, String.CASE_INSENSITIVE_ORDER)).toList();
-    }
-
-    /** Prime members with an account here — somebody who paid before ever joining has no statue yet. */
-    private List<Standing> primeMembers() {
-        java.util.Map<UUID, String> names = new java.util.HashMap<>();
-        book.all().forEach(account -> names.put(account.id(), account.name()));
-        return prime.get().stream().filter(names::containsKey)
-                .map(id -> new Standing(id, names.get(id), Money.ZERO)).toList();
+    /**
+     * Prime members or the server's creators, as their own plugins' statue boards name them (Prime, Ranks); nobody
+     * while that plugin is not here.
+     */
+    private static List<Standing> thanked(Board board) {
+        try {
+            return de.raindancer.core.ui.statue.StatueBoards.standings(board.id()).stream()
+                    .map(each -> new Standing(each.player(), each.name(), Money.ZERO)).toList();
+        } catch (LinkageError olderCore) {
+            return List.of();
+        }
     }
 
     private List<Standing> longestPlayed() {

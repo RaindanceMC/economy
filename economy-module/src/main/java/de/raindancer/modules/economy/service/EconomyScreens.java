@@ -8,7 +8,7 @@ import de.raindancer.core.world.time.Times;
 import de.raindancer.modules.economy.EconomySettings;
 import de.raindancer.modules.economy.model.Account;
 import de.raindancer.modules.economy.model.Auction;
-import de.raindancer.modules.economy.model.Podium;
+import de.raindancer.modules.economy.model.Board;
 import de.raindancer.modules.economy.rules.ScreenLinesRule;
 import de.raindancer.modules.economy.store.AccountBook;
 import net.kyori.adventure.text.Component;
@@ -67,11 +67,11 @@ public final class EconomyScreens {
         screens.register(owner, ScreenKind.everyone("auctions", "Auctions", "What is up for auction, ending soonest first.",
                 Material.BELL, this::auctions));
         screens.register(owner, ScreenKind.everyone("richest", "Richest players", "The richest players, like /baltop.",
-                Material.GOLD_BLOCK, () -> boards.board(Podium.Board.RICHEST)));
+                Material.GOLD_BLOCK, () -> boards.board(Board.RICHEST)));
         screens.register(owner, ScreenKind.everyone("casino-winners", "Biggest casino winners",
-                "Who won the most at the games and the lottery, net.", Material.DIAMOND, () -> boards.board(Podium.Board.CASINO)));
+                "Who won the most at the games and the lottery, net.", Material.DIAMOND, () -> boards.board(Board.CASINO)));
         screens.register(owner, ScreenKind.everyone("most-played", "Most time played",
-                "Who played longest on the network.", Material.CLOCK, () -> boards.board(Podium.Board.PLAYTIME)));
+                "Who played longest on the network.", Material.CLOCK, () -> boards.board(Board.PLAYTIME)));
     }
 
     private Currency currency() {

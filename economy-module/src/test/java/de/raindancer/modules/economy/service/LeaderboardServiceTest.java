@@ -4,7 +4,7 @@ import de.raindancer.core.data.sql.Database;
 import de.raindancer.core.testkit.TestDatabases;
 import de.raindancer.core.social.economy.Money;
 import de.raindancer.modules.economy.model.Account;
-import de.raindancer.modules.economy.model.Podium;
+import de.raindancer.modules.economy.model.Board;
 import de.raindancer.modules.economy.model.Standing;
 import de.raindancer.modules.economy.rules.BalanceRule;
 import de.raindancer.modules.economy.store.AccountBook;
@@ -79,10 +79,10 @@ class LeaderboardServiceTest {
 
         LeaderboardService leaderboard = new LeaderboardService(book, clock::get);
 
-        assertThat(leaderboard.standings(Podium.Board.CASINO)).extracting(Standing::name)
+        assertThat(leaderboard.standings(Board.CASINO)).extracting(Standing::name)
                 .containsExactly("Ada", "Bo");
-        assertThat(leaderboard.standings(Podium.Board.CASINO).getFirst().amount()).isEqualTo(Money.of(400));
-        assertThat(leaderboard.standings(Podium.Board.RICHEST).getFirst().name()).isEqualTo("Rich");
+        assertThat(leaderboard.standings(Board.CASINO).getFirst().amount()).isEqualTo(Money.of(400));
+        assertThat(leaderboard.standings(Board.RICHEST).getFirst().name()).isEqualTo("Rich");
     }
 
     @Test
@@ -100,8 +100,27 @@ class LeaderboardServiceTest {
         LeaderboardService leaderboard = new LeaderboardService(book, clock::get,
                 id -> minutes.getOrDefault(id, 0L));
 
-        assertThat(leaderboard.standings(Podium.Board.PLAYTIME)).extracting(Standing::name)
+        assertThat(leaderboard.standings(Board.PLAYTIME)).extracting(Standing::name)
                 .containsExactly("Ada", "Bo");
-        assertThat(leaderboard.standings(Podium.Board.PLAYTIME).getFirst().minutes()).isEqualTo(600L);
+        assertThat(leaderboard.standings(Board.PLAYTIME).getFirst().minutes()).isEqualTo(600L);
+    }
+
+    @Test
+    @DisplayName("the Prime and creator lists are whoever Prime's and Ranks' statue boards name, in their order")
+    void thankYouBoardsComeFromTheirPlugins() {
+        UUID ada = UUID.randomUUID();
+        UUID bo = UUID.randomUUID();
+        var prime = de.raindancer.core.ui.statue.StatueBoard.thanks("prime", "h", "", "PRIME", "Prime supporters",
+                () -> java.util.List.of(new de.raindancer.core.ui.statue.StatueBoard.Standing(bo, "Bo", null),
+                        new de.raindancer.core.ui.statue.StatueBoard.Standing(ada, "Ada", null)));
+        LeaderboardService leaderboard = new LeaderboardService(book, clock::get);
+        assertThat(leaderboard.standings(Board.PRIME)).as("no Prime board offered: nobody").isEmpty();
+        de.raindancer.core.ui.statue.StatueBoards.offer(getClass().getClassLoader(), prime);
+        try {
+            assertThat(leaderboard.standings(Board.PRIME)).extracting(Standing::name).containsExactly("Bo", "Ada");
+            assertThat(leaderboard.standings(Board.CREATOR)).isEmpty();
+        } finally {
+            de.raindancer.core.ui.statue.StatueBoards.withdraw(prime);
+        }
     }
 }

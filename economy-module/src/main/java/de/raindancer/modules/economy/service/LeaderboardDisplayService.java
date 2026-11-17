@@ -5,11 +5,10 @@ import de.raindancer.core.platform.util.Scheduling;
 import de.raindancer.core.social.economy.Currency;
 import de.raindancer.core.world.time.Times;
 import de.raindancer.modules.economy.EconomySettings;
-import de.raindancer.modules.economy.model.Podium;
+import de.raindancer.modules.economy.model.Board;
 import de.raindancer.modules.economy.model.Spot;
 import de.raindancer.modules.economy.model.Standing;
 import de.raindancer.modules.economy.rules.LeaderboardRule;
-import de.raindancer.modules.economy.rules.StatueRule;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Location;
@@ -46,7 +45,6 @@ public final class LeaderboardDisplayService implements IEconomyService {
     private final LeaderboardService leaderboard;
     private final SettingsStore<EconomySettings> store;
     private final LeaderboardRule rule = new LeaderboardRule();
-    private final StatueRule headings = new StatueRule();
     private volatile EconomySettings settings;
 
     public LeaderboardDisplayService(Plugin plugin, Server server, LeaderboardService leaderboard,
@@ -75,7 +73,7 @@ public final class LeaderboardDisplayService implements IEconomyService {
         if (!live.leaderboardsEnabled()) {
             return;
         }
-        Map<Podium.Board, Component> texts = new EnumMap<>(Podium.Board.class);
+        Map<Board, Component> texts = new EnumMap<>(Board.class);
         for (Spot spot : spots()) {
             Component text = texts.computeIfAbsent(spot.board(), board -> text(live, board));
             World world = server.getWorld(spot.world());
@@ -94,13 +92,13 @@ public final class LeaderboardDisplayService implements IEconomyService {
     }
 
     /** A board's text as a floating leaderboard shows it — for a screen too. */
-    public Component board(Podium.Board board) {
+    public Component board(Board board) {
         return text(settings, board);
     }
 
-    private Component text(EconomySettings live, Podium.Board board) {
+    private Component text(EconomySettings live, Board board) {
         Currency currency = live.currency();
-        var built = Component.text().append(MINI.deserialize(headings.heading(board)));
+        var built = Component.text().append(MINI.deserialize(heading(board)));
         List<Standing> top = rule.top(leaderboard.standings(board), live.leaderboardSize());
         if (top.isEmpty()) {
             built.append(Component.newline()).append(MINI.deserialize("<gray>Nobody yet"));
@@ -108,15 +106,30 @@ public final class LeaderboardDisplayService implements IEconomyService {
         for (int i = 0; i < top.size(); i++) {
             built.append(Component.newline())
                     .append(MINI.deserialize(rule.colourOf(i + 1) + (i + 1) + ". <white>"
-                            + MINI.escapeTags(top.get(i).name()) + "<gray> "))
-                    .append(worth(top.get(i), board, currency));
+                            + MINI.escapeTags(top.get(i).name()) + "<gray> "));
+            if (!board.thankYou()) {
+                built.append(worth(top.get(i), board, currency));
+            }
         }
         return built.build();
     }
 
+    /** A thank-you board's heading is its own plugin's statue board's, while that is offered. */
+    private static String heading(Board board) {
+        if (!board.thankYou()) {
+            return board.heading();
+        }
+        try {
+            return de.raindancer.core.ui.statue.StatueBoards.find(board.id())
+                    .map(de.raindancer.core.ui.statue.StatueBoard::heading).orElse(board.heading());
+        } catch (LinkageError olderCore) {
+            return board.heading();
+        }
+    }
+
     /** What a place on a board is worth: money, or time played. */
-    static Component worth(Standing standing, Podium.Board board, Currency currency) {
-        return board == Podium.Board.PLAYTIME
+    static Component worth(Standing standing, Board board, Currency currency) {
+        return board == Board.PLAYTIME
                 ? Component.text(Times.describe(Duration.ofMinutes(standing.minutes())))
                 : currency.render(standing.amount());
     }
@@ -141,7 +154,7 @@ public final class LeaderboardDisplayService implements IEconomyService {
     }
 
     /** A new leaderboard of {@code board} just above the player's head. */
-    public Spot place(Player player, Podium.Board board) {
+    public Spot place(Player player, Board board) {
         Location eye = player.getEyeLocation();
         Spot spot = new Spot(eye.getWorld().getName(), eye.getX(), eye.getY() + 0.75, eye.getZ(), board);
         write(lines -> lines.add(spot.written()));

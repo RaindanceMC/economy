@@ -75,7 +75,7 @@ public record EconomyServices(
         de.raindancer.modules.economy.service.SeasonService seasons,
         de.raindancer.modules.economy.service.BackpayService backpay,
         de.raindancer.modules.economy.service.SellWandService sellWands,
-        de.raindancer.modules.economy.service.StatueService statues) {
+        de.raindancer.modules.economy.service.StatueBoardService statues) {
 
     public EconomySettings config() {
         return settings.get();

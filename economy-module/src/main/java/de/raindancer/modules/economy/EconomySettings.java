@@ -865,9 +865,9 @@ public record EconomySettings(
                 + "wearing their skins: a whole podium or each one where you like, put down with /eco statue place.")
         @Key("features.statues") boolean statuesEnabled,
 
-        @In("economy/display") @Title("Statue places")
-        @Describe("'<world> <x> <y> <z> <yaw> <casino|richest|playtime> <1|2|3> <podium or ->', comma separated. "
-                + "Written by /eco statue place, move and remove; podiums from before 0.61 are read as three statues.")
+        @In("economy/display") @Title("Statue places before 0.78")
+        @Describe("Where the statues stood before Core kept them (0.78.0). Core took them over once and keeps them in "
+                + "its statues.yml now; changing this does nothing, /eco statue place, move and remove do.")
         @Key("statue.podiums") List<String> statuePodiums,
 
         // ------------------------------------------------------------------ general

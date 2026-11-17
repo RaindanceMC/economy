@@ -87,11 +87,7 @@ import java.util.UUID;
  */
 public final class EconomyModule implements FlexModule {
 
-    /** The LuckPerms group whose members the creator statues show. */
-    private static final String CREATOR_GROUP = "creator";
-
-
-    private static final ModuleInfo INFO = ModuleInfo.of("economy", "Economy", "0.77.0")
+    private static final ModuleInfo INFO = ModuleInfo.of("economy", "Economy", "0.78.0")
             .describedAs("A bank, paying and hiring, coins you can carry, a creative-style shop priced from recipes, "
                     + "passive income, live auctions and raffles, and a casino with sounds and animations. Every part is switchable.")
             .by("Raindancer118");
@@ -222,19 +218,6 @@ public final class EconomyModule implements FlexModule {
         DailyService daily = new DailyService(economy, messages, effects, Clock.systemDefaultZone(), now);
         LeaderboardService leaderboard = new LeaderboardService(book, System::currentTimeMillis,
                 playtime::minutes);
-        leaderboard.primeFrom(() -> context.core().prime() == null ? java.util.List.of()
-                : context.core().prime().current(java.time.Instant.now()).stream()
-                        .map(de.raindancer.core.social.support.PrimeMembers.Member::player).toList());
-        // The creators' statues: the LuckPerms group creator, asked off the server's threads every minute,
-        // since LuckPerms looks up offline members in its database.
-        java.util.concurrent.atomic.AtomicReference<java.util.List<java.util.UUID>> creators =
-                new java.util.concurrent.atomic.AtomicReference<>(java.util.List.of());
-        leaderboard.creatorsFrom(creators::get);
-        var creatorsRefresh = de.raindancer.core.platform.util.Scheduling.asyncTimer(context.plugin(), 1, 60,
-                task -> creators.set(java.util.List.copyOf(context.core().groups().membersOf(CREATOR_GROUP))));
-        if (creatorsRefresh != null) {
-            context.closeWith(creatorsRefresh::cancel);
-        }
         serveTheNetwork(context, bankClient, leaderboard, payments, settings, shop);
         var sidebar = new de.raindancer.modules.economy.service.SidebarService(economy, leaderboard,
                 context.core().scoreboards(), now);
@@ -246,8 +229,12 @@ public final class EconomyModule implements FlexModule {
         context.closeWith(sidebar::unregisterSections);
         var displays = new de.raindancer.modules.economy.service.LeaderboardDisplayService(context.plugin(), server,
                 leaderboard, settings, now);
-        var statues = new de.raindancer.modules.economy.service.StatueService(context.plugin(), server, leaderboard,
-                settings, now);
+        // The statues are Core's (2.106.0); Economy offers its rankings as boards and hands its old statues over once.
+        var statues = new de.raindancer.modules.economy.service.StatueBoardService(context.plugin(),
+                leaderboard::standings, now);
+        statues.settings(now);
+        statues.handOver();
+        context.closeWith(statues::close);
         GamblingService gambling = new GamblingService(context.plugin(), server, economy, messages, effects, buttons,
                 Clock.systemDefaultZone(), sounds, now);
         gambling.offersWarp(name -> context.core().places().ofKind("warp").stream()
@@ -444,7 +431,6 @@ public final class EconomyModule implements FlexModule {
         }
         var boards = Scheduling.globalTimer(context.plugin(), 100L, 100L, task -> {
             displays.refresh();
-            statues.refresh();
         });
         if (boards != null) {
             context.closeWith(boards::cancel);

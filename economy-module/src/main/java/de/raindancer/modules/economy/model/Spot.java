@@ -7,14 +7,14 @@ import java.util.Optional;
  * Where a leaderboard floats and what it lists, as written in the settings: {@code "world 10.5 70 -3.5 playtime"}.
  * A line without a board is from before boards existed and lists the richest.
  */
-public record Spot(String world, double x, double y, double z, Podium.Board board) {
+public record Spot(String world, double x, double y, double z, Board board) {
 
     public Spot {
-        board = board == null ? Podium.Board.RICHEST : board;
+        board = board == null ? Board.RICHEST : board;
     }
 
     public Spot(String world, double x, double y, double z) {
-        this(world, x, y, z, Podium.Board.RICHEST);
+        this(world, x, y, z, Board.RICHEST);
     }
 
     public static Optional<Spot> parse(String line) {
@@ -25,8 +25,8 @@ public record Spot(String world, double x, double y, double z, Podium.Board boar
         if (words.length != 4 && words.length != 5) {
             return Optional.empty();
         }
-        Optional<Podium.Board> board = words.length == 5 ? Podium.Board.read(words[4])
-                : Optional.of(Podium.Board.RICHEST);
+        Optional<Board> board = words.length == 5 ? Board.read(words[4])
+                : Optional.of(Board.RICHEST);
         if (board.isEmpty()) {
             return Optional.empty();
         }

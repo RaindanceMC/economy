@@ -12,14 +12,14 @@ class SpotTest {
     @DisplayName("a leaderboard written before boards existed lists the richest")
     void old() {
         Spot spot = Spot.parse("world 10.50 70.00 -3.50").orElseThrow();
-        assertThat(spot.board()).isEqualTo(Podium.Board.RICHEST);
+        assertThat(spot.board()).isEqualTo(Board.RICHEST);
         assertThat(spot.x()).isEqualTo(10.5);
     }
 
     @Test
     @DisplayName("written and read back with its board")
     void roundTrip() {
-        Spot spot = new Spot("world", 1.25, 64, -2, Podium.Board.PLAYTIME);
+        Spot spot = new Spot("world", 1.25, 64, -2, Board.PLAYTIME);
         assertThat(Spot.parse(spot.written())).contains(spot);
     }
 

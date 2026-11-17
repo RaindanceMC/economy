@@ -14,6 +14,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
@@ -26,6 +27,8 @@ import java.util.function.Supplier;
  */
 public final class EcoCommand extends EconomyCommand {
 
+    /** The board {@code /eco statue place} puts up when none is named. */
+    private static final String FIRST_BOARD = "casino";
     private static final List<String> SUBCOMMANDS = List.of("give", "take", "set", "reset", "freeze", "unfreeze",
             "history", "menu", "price", "unpriced", "wand", "reprice", "draw", "calm", "coin", "leaderboard", "statue", "dealer", "agent", "banker", "auction", "raffle", "giveaway", "tax", "loan", "packs", "health", "fund", "season");
 
@@ -110,7 +113,7 @@ public final class EcoCommand extends EconomyCommand {
                     // "/eco leaderboard", "/eco leaderboard place [board]" or "/eco leaderboard <board>"
                     String typed = args.length > 2 ? args[2]
                             : args.length > 1 && !args[1].equalsIgnoreCase("place") ? args[1] : "richest";
-                    var board = de.raindancer.modules.economy.model.Podium.Board.read(typed);
+                    var board = de.raindancer.modules.economy.model.Board.read(typed);
                     if (board.isEmpty()) {
                         live.messages().send(player, "economy.admin.statue-board", "what", typed);
                         return;
@@ -499,17 +502,7 @@ public final class EcoCommand extends EconomyCommand {
             return starting(args[2], List.of("forgive"));
         }
         if (args[0].equalsIgnoreCase("statue")) {
-            boolean placing = args[1].equalsIgnoreCase("place") || args[1].equalsIgnoreCase("move");
-            if (args.length == 2) {
-                return starting(args[1], List.of("place", "move", "remove"));
-            }
-            if (args.length == 3) {
-                return placing ? starting(args[2], List.of("casino", "richest", "playtime"))
-                        : args[1].equalsIgnoreCase("remove") ? starting(args[2], List.of("podium")) : List.of();
-            }
-            return args.length == 4 && placing
-                    && de.raindancer.modules.economy.model.Podium.Board.read(args[2]).isPresent()
-                    ? starting(args[3], List.of("1", "2", "3")) : List.of();
+            return de.raindancer.core.ui.statue.Statues.suggest(Arrays.copyOfRange(args, 1, args.length));
         }
         if (args[0].equalsIgnoreCase("leaderboard")) {
             return args.length == 2 ? starting(args[1], List.of("place", "remove"))
@@ -529,72 +522,21 @@ public final class EcoCommand extends EconomyCommand {
     }
 
     /**
-     * {@code /eco statue place [board] [1|2|3]} puts up a whole podium, or one statue where the player stands;
-     * {@code move <board> <1|2|3>} brings the nearest such statue here; {@code remove [podium]} takes away the
-     * nearest statue, or the whole podium it stands on.
+     * {@code /eco statue …}: Core's statues (since 0.78.0), for Economy's boards and every other plugin's (Prime,
+     * creators). Placing one of Economy's own while its statues are switched off is refused here, as before.
      */
     private static void statue(EconomyServices live, Player player, String[] args) {
-        String action = args.length > 1 ? args[1].toLowerCase(Locale.ROOT) : "place";
-        var statues = live.statues();
-        if (action.equals("remove")) {
-            boolean whole = args.length > 2 && args[2].equalsIgnoreCase("podium");
-            live.messages().send(player, statues.remove(player, whole)
-                    ? whole ? "economy.admin.statue-podium-removed" : "economy.admin.statue-removed"
-                    : "economy.admin.statue-none");
-            return;
-        }
-        if (!live.config().statuesEnabled()) {
+        String[] rest = Arrays.copyOfRange(args, 1, args.length);
+        boolean placing = rest.length == 0 || rest[0].equalsIgnoreCase("place");
+        boolean moving = rest.length > 0 && rest[0].equalsIgnoreCase("move");
+        String typed = rest.length > 1 ? rest[1] : placing ? FIRST_BOARD : "";
+        if ((placing || moving) && !live.config().statuesEnabled() && live.statues().ours(typed)) {
             live.messages().send(player, "economy.admin.statues-off");
             return;
         }
-        boolean moving = action.equals("move");
-        if (!moving && !action.equals("place")) {
-            live.messages().send(player, "economy.admin.statue-usage");
-            return;
-        }
-        String typed = args.length > 2 ? args[2] : moving ? "" : "casino";
-        var board = de.raindancer.modules.economy.model.Podium.Board.read(typed);
-        if (board.isEmpty()) {
-            live.messages().send(player, moving && typed.isEmpty() ? "economy.admin.statue-usage"
-                    : "economy.admin.statue-board", "what", typed);
-            return;
-        }
-        if (args.length <= 3 && !moving && board.get().thankYou()) {
-            // Prime's and creators' statues go up one at a time, each where its placer stands.
-            boolean creator = board.get() == de.raindancer.modules.economy.model.Podium.Board.CREATOR;
-            statues.placeThankYou(player, board.get()).ifPresentOrElse(
-                    spot -> live.messages().send(player, creator ? "economy.admin.statue-placed-creator"
-                            : "economy.admin.statue-placed-prime", "place", spot.place()),
-                    () -> live.messages().send(player, creator ? "economy.admin.statue-creator-full"
-                            : "economy.admin.statue-prime-full",
-                            "most", de.raindancer.modules.economy.model.StatueSpot.MOST_PRIME));
-            return;
-        }
-        if (args.length <= 3 && !moving) {
-            statues.place(player, board.get());
-            live.messages().send(player, switch (board.get()) {
-                case RICHEST -> "economy.admin.statue-placed-richest";
-                case CASINO -> "economy.admin.statue-placed-casino";
-                case PLAYTIME -> "economy.admin.statue-placed-playtime";
-                case PRIME, CREATOR -> throw new IllegalStateException("Thank-you statues go up one at a time, above");
-            });
-            return;
-        }
-        var place = de.raindancer.modules.economy.model.StatueSpot.readPlace(board.get(), args.length > 3 ? args[3] : null);
-        if (place.isEmpty()) {
-            live.messages().send(player, "economy.admin.statue-place", "what", args.length > 3 ? args[3] : "");
-            return;
-        }
-        String ranks = new de.raindancer.modules.economy.rules.StatueRule().ranks(board.get());
-        if (moving) {
-            live.messages().send(player, statues.move(player, board.get(), place.get())
-                    ? "economy.admin.statue-moved" : "economy.admin.statue-not-found",
-                    "place", String.valueOf(place.get()), "board", ranks);
-            return;
-        }
-        statues.placeOne(player, board.get(), place.get());
-        live.messages().send(player, "economy.admin.statue-placed-one", "place", String.valueOf(place.get()),
-                "board", ranks);
+        de.raindancer.core.ui.statue.Statues.installed().ifPresentOrElse(
+                statues -> statues.command(player, "/eco statue", rest, FIRST_BOARD),
+                () -> live.messages().send(player, "economy.admin.statues-off"));
     }
 
     /** {@code /eco packs} reads packs.yml again; {@code /eco packs give <player> <pack>} hands one out free. */
