@@ -436,6 +436,16 @@ public final class EconomyModule implements FlexModule {
             context.closeWith(boards::cancel);
         }
         context.closeWith(() -> server.getOnlinePlayers().forEach(player -> sidebar.forget(player.getUniqueId())));
+        // /preferences came with Core 2.103.0; /bank sidebar and /auction mute stay where there is none.
+        try {
+            for (de.raindancer.core.ui.preference.Preference choice : List.of(EconomyOffers.sidebar(sidebar),
+                    EconomyOffers.auctionNews(auctions))) {
+                de.raindancer.core.ui.preference.Preferences.offer(context.plugin(), choice);
+                context.closeWith(() -> de.raindancer.core.ui.preference.Preferences.withdraw(choice));
+            }
+        } catch (LinkageError olderCore) {
+            log.info("RainsCore is older than 2.103.0: the sidebar and auction news are not on /preferences.");
+        }
         var pruning = Scheduling.asyncTimer(context.plugin(), 60, 6 * 3600, task -> {
             long cutoff = System.currentTimeMillis() - settings.current().historyDays() * 86_400_000L;
             int forgotten = book.forgetHistoryBefore(cutoff);

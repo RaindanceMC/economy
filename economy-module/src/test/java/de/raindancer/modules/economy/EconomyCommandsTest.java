@@ -33,6 +33,13 @@ class EconomyCommandsTest {
     }
 
     @Test
+    @DisplayName("/market and /jobs belong to the shops and jobs plugins, and the paid /repair is gone")
+    void namesOthersOwn() {
+        List<String> names = EconomyCommands.declared().stream().flatMap(command -> command.names().stream()).toList();
+        assertThat(names).doesNotContain("market", "jobs", "repair");
+    }
+
+    @Test
     @DisplayName("running one while the module is stopped says so rather than throwing a null")
     void stopped() {
         EconomyCommands.stopped();

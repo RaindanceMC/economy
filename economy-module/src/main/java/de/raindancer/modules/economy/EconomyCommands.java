@@ -41,7 +41,7 @@ public final class EconomyCommands {
                         .aliased("request").taking("<player> <amount> [what for]"),
                 ModuleCommand.of("hire", "Hire somebody for a wage paid at an interval",
                         new de.raindancer.modules.economy.command.HireCommand(EconomyCommands::require))
-                        .aliased("jobs").taking("<player> <wage> <every> [job]", "list", "fire|quit <player>"),
+                        .taking("<player> <wage> <every> [job]", "list", "fire|quit <player>"),
                 ModuleCommand.of("contract", "Pay somebody regularly for a service, like rent. Either side proposes it",
                         new de.raindancer.modules.economy.command.ContractCommand(EconomyCommands::require))
                         .aliased("contracts", "rent")
@@ -59,7 +59,7 @@ public final class EconomyCommands {
                 ModuleCommand.of("deposit", "Pay cash back in",
                         new CashCommand(EconomyCommands::require, false)).taking("[hand|all]"),
                 ModuleCommand.of("shop", "Buy from the server's shop",
-                        new ShopCommand(EconomyCommands::require, false)).aliased("market")
+                        new ShopCommand(EconomyCommands::require, false))
                         .taking("[category|item|search <text>]"),
                 ModuleCommand.of("sell", "Sell to the server's shop",
                         new ShopCommand(EconomyCommands::require, true)).taking("[hand|all|enchantments]"),

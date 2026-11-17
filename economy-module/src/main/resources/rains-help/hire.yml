@@ -8,7 +8,7 @@ category: Economy & trade
 order: 12
 module: economy
 when: economy:features.hire
-aliases: [job, jobs, wage, salary, rent, contracts, employ, employee]
+aliases: [job, wage, salary, rent, contracts, employ, employee]
 keywords: [hire, fire, quit, landlord, service, regular, payment]
 commands: [hire, contract]
 related: [pay, economy, taxes]
