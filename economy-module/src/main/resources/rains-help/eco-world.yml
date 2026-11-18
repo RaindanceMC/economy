@@ -37,7 +37,7 @@ sections:
   - question: How do I put up thank-you statues?
     title: Prime and creator statues
     text: |
-      With Prime on the server, stand where it should stand, look toward the crowd, and type {cmd:/eco statue place prime}: one statue of a Prime member, on the ground like a mannequin statue, with no pedestal and no label, only their name with the PRIME mark. Each time you type it, one more goes up (up to 64). With more Prime members than statues they take turns every 10 minutes. With Ranks on the server, {cmd:/eco statue place creator} does the same for everybody holding the creator rank. {cmd:/eco statue remove} takes the nearest away.
+      With Prime on the server, stand where it should stand, look toward the crowd, and type {cmd:/eco statue place prime}: one statue of a Prime member, on the ground like a mannequin statue, with no pedestal and no label, only their name in its colours behind the Prime badge. Each time you type it, one more goes up (up to 64). With more Prime members than statues they take turns every 10 minutes. With Ranks on the server, {cmd:/eco statue place creator} does the same for everybody holding the creator rank, and {cmd:/eco statue place team} for the team, each member under the badge of their highest team rank. Somebody who loses the rank leaves the statue at once. {run:/eco statue reload} dresses the statues of your world afresh, {run:/eco statue reload all} every statue on the server. {cmd:/eco statue remove} takes the nearest away.
   - question: Can I place each statue on its own?
     title: Statues one by one
     when: economy:features.statues
