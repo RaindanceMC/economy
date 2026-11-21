@@ -118,13 +118,13 @@ public final class HiLoMenu extends Menu implements IEconomyScreen {
     @Override
     public void handleClose(org.bukkit.event.inventory.InventoryCloseEvent event) {
         super.handleClose(event);
-        services.tables().cashOutHiLo(viewer);
+        services.tables().walkAway(viewer);
     }
 
     @Override
     protected List<String> helpLines() {
         return List.of("Will the next card be higher or lower?", "The same rank loses either way.",
-                "Every right guess grows your stake. Cash out at any time.", "Closing the window cashes out too.");
+                "Every right guess grows your stake. Cash out after the first one.", "Closing the window cashes out too, once you have guessed.");
     }
 
     @Override

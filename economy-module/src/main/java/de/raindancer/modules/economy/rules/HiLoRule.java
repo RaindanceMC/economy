@@ -35,6 +35,14 @@ public final class HiLoRule implements IEconomyRule {
         return cap > 0 && multiplier >= cap;
     }
 
+    /**
+     * Whether closing the table or leaving the server cashes out. Not before the first right guess: handing the bet
+     * back then would let anyone redraw the first card until it is an easy one.
+     */
+    public boolean leavingPaysOut(int streak) {
+        return streak > 0;
+    }
+
     public boolean wins(int shown, int next, boolean higher) {
         return higher ? next > shown : next < shown;
     }

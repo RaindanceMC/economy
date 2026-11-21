@@ -20,7 +20,7 @@ sections:
   - question: When do I get paid?
     title: Cashing out
     text: |
-      At any time, press <white>Cash out</white> and take what the stake has grown to. {if:economy:hilo.max-multiplier}A run that reaches {setting:economy:hilo.max-multiplier}× is paid out by itself.{/if} A wrong guess loses it all. Cashing out before any guess just returns the bet, and closing the window or leaving cashes out for you.
+      After a right guess, press <white>Cash out</white> whenever you like and take what the stake has grown to. {if:economy:hilo.max-multiplier}A run that reaches {setting:economy:hilo.max-multiplier}× is paid out by itself.{/if} A wrong guess loses it all. Once the first card is showing, your bet is on the table: you can only cash out after a right guess. Closing the window or leaving then cashes out for you; before your first guess the card waits for you, and {run:/hilo} picks it up again.
   - question: Edge and minimum?
     title: Edge and minimum
     text: |

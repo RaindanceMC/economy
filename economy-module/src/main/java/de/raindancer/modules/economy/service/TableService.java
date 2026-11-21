@@ -370,9 +370,27 @@ public final class TableService implements IEconomyService {
         }
     }
 
-    public void cashOutHiLo(Player player) {
+    /** Closing the table or leaving: cashes out after a right guess; before one the card stays on the table. */
+    public void walkAway(Player player) {
         HiLo game = hiLo.get(player.getUniqueId());
         if (game == null || game.finished) {
+            return;
+        }
+        if (hiLoRule.leavingPaysOut(game.streak)) {
+            cashOutHiLo(player);
+        } else {
+            gambling.tell(player, "economy.gamble.hilo-waiting");
+        }
+    }
+
+    /** Cash out; before the first right guess there is nothing to take, the bet is on the table. */
+    public void cashOutHiLo(Player player) {
+        cashOutHiLo(player, false);
+    }
+
+    private void cashOutHiLo(Player player, boolean stopping) {
+        HiLo game = hiLo.get(player.getUniqueId());
+        if (game == null || game.finished || (game.streak == 0 && !stopping)) {
             return;
         }
         game.finished = true;
@@ -465,18 +483,23 @@ public final class TableService implements IEconomyService {
         if (game != null) {
             tell(player, game);
         }
-        cashOutHiLo(player);
+        walkAway(player);
         cashOutMines(player);
     }
 
+    /** The module stops: every table is settled, an untouched Hi-Lo bet comes back. */
     public void leaveAll() {
-        server.getOnlinePlayers().forEach(this::leave);
+        server.getOnlinePlayers().forEach(player -> {
+            leave(player);
+            cashOutHiLo(player, true);
+        });
     }
 
     public void forget(UUID player) {
         shoes.forget(player);
         blackjack.remove(player);
-        hiLo.remove(player);
+        // A first card nobody has guessed on yet waits for them: /hilo picks it up again.
+        hiLo.computeIfPresent(player, (id, game) -> game.finished || game.streak > 0 ? null : game);
         mines.remove(player);
     }
 }

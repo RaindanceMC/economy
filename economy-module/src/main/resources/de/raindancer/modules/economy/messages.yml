@@ -213,6 +213,7 @@ economy:
     mines-lost: "<red>You hit a mine after <tiles> safe tiles. You lose <amount><red>. Balance: <balance><red>."
     mines-count: "<red>Pick between 1 and 24 mines."
     returned: "<gray>Your <amount><gray> comes back."
+    hilo-waiting: "<gray>Your card is still on the table, and your bet with it: <white>/hilo</white> to play on."
     crash-won: "<green>Cashed out at <white><at>×</white>: <amount><green>. Balance: <balance><green>."
     crash-lost: "<red>Crashed at <white><at>×</white>. You lose <amount><red>. Balance: <balance><red>."
     crash-closed: "<red>Bets for this round are closed. Wait for the next one."

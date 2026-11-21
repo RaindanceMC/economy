@@ -152,6 +152,14 @@ class CardGamesTest {
     }
 
     @Test
+    @DisplayName("hi-lo: walking away from the first card does not hand the bet back, or you could redraw until the odds suit you")
+    void hiLoNoFreeRedraw() {
+        HiLoRule rule = new HiLoRule();
+        assertThat(rule.leavingPaysOut(0)).as("the first card is showing: the bet stays on the table").isFalse();
+        assertThat(rule.leavingPaysOut(1)).as("after a right guess, leaving is cashing out").isTrue();
+    }
+
+    @Test
     @DisplayName("crash reaches any multiplier with exactly the chance that makes it fair less the edge")
     void crash() {
         CrashRule rule = new CrashRule();
