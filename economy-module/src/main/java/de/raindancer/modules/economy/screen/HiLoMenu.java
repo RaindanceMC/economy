@@ -63,8 +63,13 @@ public final class HiLoMenu extends Menu implements IEconomyScreen {
             }
             band(MenuLayout.RULES, 4, flipping ? CardIcons.back() : CardIcons.face(game.showing));
             Money worth = game.stake.share(game.multiplier);
-            set(MenuLayout.HEADER_SUBJECT, Icons.of(Material.EMERALD, "<green>Worth " + Mini.of(currency.render(worth)),
-                    "<gray>" + String.format("%.2f", game.multiplier) + "× after " + game.streak + " right"));
+            double cap = tables.hiloCap();
+            set(MenuLayout.HEADER_SUBJECT, cap > 0
+                    ? Icons.of(Material.EMERALD, "<green>Worth " + Mini.of(currency.render(worth)),
+                            "<gray>" + String.format("%.2f", game.multiplier) + "× after " + game.streak + " right",
+                            "<dark_gray>Paid out by itself at " + String.format("%.2f", cap) + "×")
+                    : Icons.of(Material.EMERALD, "<green>Worth " + Mini.of(currency.render(worth)),
+                            "<gray>" + String.format("%.2f", game.multiplier) + "× after " + game.streak + " right"));
         });
 
         if (playing && !flipping) {

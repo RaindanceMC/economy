@@ -25,6 +25,16 @@ public final class HiLoRule implements IEconomyRule {
         return chance <= 0 ? 0 : (1.0 - Math.max(0, Math.min(0.5, edge))) / chance;
     }
 
+    /** The multiplier, held at {@code cap}; a cap of 0 or less holds nothing. */
+    public double capped(double multiplier, double cap) {
+        return cap > 0 ? Math.min(multiplier, cap) : multiplier;
+    }
+
+    /** Whether a run has grown as far as the server lets it, and is paid out. */
+    public boolean reached(double multiplier, double cap) {
+        return cap > 0 && multiplier >= cap;
+    }
+
     public boolean wins(int shown, int next, boolean higher) {
         return higher ? next > shown : next < shown;
     }

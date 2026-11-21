@@ -580,9 +580,13 @@ public record EconomySettings(
         @Key("hilo.min-bet") String hiloMinBet,
 
         @In("economy/gambling/hilo") @Title("The house keeps, percent")
-        @Describe("What Hi-Lo keeps on average, 0 to 50. The payouts are worked out from it exactly. "
+        @Describe("What Hi-Lo keeps of every right guess, 0 to 50. The payouts are worked out from it exactly. "
                 + "Empty: the casino's house edge.")
         @Key("hilo.house-edge-percent") String hiloEdge,
+
+        @In("economy/gambling/hilo") @Title("Largest multiplier")
+        @Describe("A run stops growing here and is paid out, e.g. 3 for three times the bet. Empty: no limit.")
+        @Key("hilo.max-multiplier") String hiloMaxMultiplier,
 
         @In("economy/gambling/mines") @Title("Mines") @Describe("Clear tiles on a field hiding mines; cash out any time.")
         @Key("features.mines") boolean minesEnabled,
@@ -945,7 +949,7 @@ public record EconomySettings(
             true, "", "",
             true, "", NaturalPay.THREE_TO_TWO, false, 6,
             true, "", 8, 5.0,
-            true, "", "",
+            true, "", "", "",
             true, "", "",
             true, "", "", 10, 1000,
             true, "", "", 45,
@@ -1212,6 +1216,20 @@ public record EconomySettings(
             return Double.isFinite(read) ? percent(read, 50) : houseEdge();
         } catch (NumberFormatException unreadable) {
             return houseEdge();
+        }
+    }
+
+    /** Hi-Lo's largest multiplier; 0 for none (empty, 1 or less, or unreadable). */
+    public double hiloCap() {
+        if (hiloMaxMultiplier == null || hiloMaxMultiplier.isBlank()) {
+            return 0;
+        }
+        try {
+            double read = Double.parseDouble(hiloMaxMultiplier.strip().toLowerCase(java.util.Locale.ROOT)
+                    .replace("x", "").replace("×", "").replace(',', '.').strip());
+            return Double.isFinite(read) && read > 1 ? read : 0;
+        } catch (NumberFormatException unreadable) {
+            return 0;
         }
     }
 

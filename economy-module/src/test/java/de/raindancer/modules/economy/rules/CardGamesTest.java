@@ -140,6 +140,18 @@ class CardGamesTest {
     }
 
     @Test
+    @DisplayName("hi-lo stops growing at the server's largest multiplier, and a run that gets there is paid out")
+    void hiLoCap() {
+        HiLoRule rule = new HiLoRule();
+        assertThat(rule.capped(2.5, 3)).isEqualTo(2.5);
+        assertThat(rule.capped(3.4, 3)).isEqualTo(3.0);
+        assertThat(rule.reached(3.0, 3)).isTrue();
+        assertThat(rule.reached(2.99, 3)).isFalse();
+        assertThat(rule.capped(40, 0)).as("0: no cap").isEqualTo(40.0);
+        assertThat(rule.reached(40, 0)).isFalse();
+    }
+
+    @Test
     @DisplayName("crash reaches any multiplier with exactly the chance that makes it fair less the edge")
     void crash() {
         CrashRule rule = new CrashRule();

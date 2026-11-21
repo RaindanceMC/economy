@@ -265,6 +265,16 @@ public class EconomySettingsTest {
     }
 
     @Test
+    @DisplayName("hi-lo's largest multiplier: none by default, read from the setting, nothing for 1 or less or rubbish")
+    void hiLoCap() {
+        assertThat(EconomySettings.DEFAULTS.hiloCap()).isZero();
+        assertThat(with("hilo.max-multiplier", "3").hiloCap()).isEqualTo(3.0);
+        assertThat(with("hilo.max-multiplier", "2,5x").hiloCap()).isEqualTo(2.5);
+        assertThat(with("hilo.max-multiplier", "1").hiloCap()).isZero();
+        assertThat(with("hilo.max-multiplier", "lots").hiloCap()).isZero();
+    }
+
+    @Test
     @DisplayName("a largest bet left in an old settings file caps nothing: there is no largest bet any more")
     void noLargestBet() {
         assertThat(java.util.Arrays.stream(EconomySettings.class.getRecordComponents())

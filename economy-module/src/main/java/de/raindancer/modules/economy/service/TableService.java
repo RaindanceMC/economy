@@ -118,6 +118,11 @@ public final class TableService implements IEconomyService {
         return minesRule;
     }
 
+    /** Hi-Lo's largest multiplier; 0 for none. */
+    public double hiloCap() {
+        return settings.hiloCap();
+    }
+
     public double edge(Game game) {
         return settings.edge(game);
     }
@@ -349,10 +354,14 @@ public final class TableService implements IEconomyService {
         Card next = draw(player.getUniqueId());
         game.last = game.showing;
         if (hiLoRule.wins(game.showing.rank(), next.rank(), higher)) {
-            game.multiplier *= hiLoRule.step(chance, settings.edge(Game.HILO));
+            double cap = settings.hiloCap();
+            game.multiplier = hiLoRule.capped(game.multiplier * hiLoRule.step(chance, settings.edge(Game.HILO)), cap);
             game.streak++;
             game.showing = next;
             gambling.sounds().play(player.getUniqueId(), GameSounds.WIN_STEP);
+            if (hiLoRule.reached(game.multiplier, cap)) {
+                cashOutHiLo(player);
+            }
         } else {
             game.showing = next;
             game.finished = true;
