@@ -225,8 +225,6 @@ public final class PackService implements IEconomyService {
         player.getInventory().addItem(contents.toArray(ItemStack[]::new)).values()
                 .forEach(left -> player.getWorld().dropItemNaturally(player.getLocation(), left));
         effects.play(player.getUniqueId(), Cues.REWARD);
-        messages.send(player, "economy.packs.unpacked", "pack", title.toLowerCase(Locale.ROOT).startsWith("the ")
-                ? title.substring(4) : title);
     }
 
     private void refuse(Player player, String key, Object... values) {

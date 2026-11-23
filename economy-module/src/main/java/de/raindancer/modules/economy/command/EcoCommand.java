@@ -72,8 +72,9 @@ public final class EcoCommand extends EconomyCommand {
             case "packs" -> packs(live, sender, args);
             case "dealer" -> player(live, sender).ifPresent(player -> {
                 if (args.length > 1 && args[1].equalsIgnoreCase("remove")) {
-                    live.messages().send(player, live.dealers().remove(player)
-                            ? "economy.admin.dealer-removed" : "economy.admin.dealer-none");
+                    if (!live.dealers().remove(player)) {
+                        live.messages().send(player, "economy.admin.dealer-none");
+                    }
                     return;
                 }
                 var game = de.raindancer.modules.economy.model.DealerGame.read(args.length > 2 ? args[2] : "casino");
@@ -86,8 +87,9 @@ public final class EcoCommand extends EconomyCommand {
             });
             case "agent" -> player(live, sender).ifPresent(player -> {
                 if (args.length > 1 && args[1].equalsIgnoreCase("remove")) {
-                    live.messages().send(player, de.raindancer.core.social.desk.ServiceDesks.removeNearest(player)
-                            ? "economy.admin.agent-removed" : "economy.admin.agent-none");
+                    if (!de.raindancer.core.social.desk.ServiceDesks.removeNearest(player)) {
+                        live.messages().send(player, "economy.admin.agent-none");
+                    }
                     return;
                 }
                 de.raindancer.core.social.desk.ServiceDesks.place(player, de.raindancer.core.social.desk.ServiceDesk.INSURANCE);
@@ -95,8 +97,9 @@ public final class EcoCommand extends EconomyCommand {
             });
             case "banker" -> player(live, sender).ifPresent(player -> {
                 if (args.length > 1 && args[1].equalsIgnoreCase("remove")) {
-                    live.messages().send(player, de.raindancer.core.social.desk.ServiceDesks.removeNearest(player)
-                            ? "economy.admin.banker-removed" : "economy.admin.banker-none");
+                    if (!de.raindancer.core.social.desk.ServiceDesks.removeNearest(player)) {
+                        live.messages().send(player, "economy.admin.banker-none");
+                    }
                     return;
                 }
                 de.raindancer.core.social.desk.ServiceDesks.place(player, de.raindancer.core.social.desk.ServiceDesk.BANK);
@@ -105,8 +108,9 @@ public final class EcoCommand extends EconomyCommand {
             case "leaderboard" -> player(live, sender).ifPresent(player -> {
                 boolean removing = args.length > 1 && args[1].equalsIgnoreCase("remove");
                 if (removing) {
-                    live.messages().send(player, live.displays().remove(player)
-                            ? "economy.admin.leaderboard-removed" : "economy.admin.leaderboard-none");
+                    if (!live.displays().remove(player)) {
+                        live.messages().send(player, "economy.admin.leaderboard-none");
+                    }
                 } else if (!live.config().leaderboardsEnabled()) {
                     live.messages().send(player, "economy.admin.leaderboards-off");
                 } else {
