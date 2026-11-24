@@ -22,4 +22,17 @@ public final class FallbackPriceRule implements IEconomyRule {
             default -> 50;
         };
     }
+
+    /**
+     * What something handed over to be sold is priced as when the shop has no price for it as it is: a potion or a
+     * book it does not stock is still a bottle or a book, a tipped arrow still an arrow.
+     */
+    public org.bukkit.Material pricedAs(org.bukkit.Material material) {
+        return switch (material) {
+            case ENCHANTED_BOOK -> org.bukkit.Material.BOOK;
+            case POTION, SPLASH_POTION, LINGERING_POTION -> org.bukkit.Material.GLASS_BOTTLE;
+            case TIPPED_ARROW -> org.bukkit.Material.ARROW;
+            default -> material;
+        };
+    }
 }

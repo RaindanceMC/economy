@@ -32,4 +32,15 @@ class FallbackPriceRuleTest {
         assertThat(only.matches("ORE")).as("a star stands for something").isFalse();
         assertThat(only.matches("ELYTRA_WINGS")).isFalse();
     }
+
+    @Test
+    @DisplayName("a bottle, a book or an arrow the shop does not stock sells as what holds it")
+    void pricedAsItsVessel() {
+        assertThat(rule.pricedAs(org.bukkit.Material.ENCHANTED_BOOK)).isEqualTo(org.bukkit.Material.BOOK);
+        assertThat(rule.pricedAs(org.bukkit.Material.POTION)).isEqualTo(org.bukkit.Material.GLASS_BOTTLE);
+        assertThat(rule.pricedAs(org.bukkit.Material.SPLASH_POTION)).isEqualTo(org.bukkit.Material.GLASS_BOTTLE);
+        assertThat(rule.pricedAs(org.bukkit.Material.LINGERING_POTION)).isEqualTo(org.bukkit.Material.GLASS_BOTTLE);
+        assertThat(rule.pricedAs(org.bukkit.Material.TIPPED_ARROW)).isEqualTo(org.bukkit.Material.ARROW);
+        assertThat(rule.pricedAs(org.bukkit.Material.DIAMOND_SHOVEL)).isEqualTo(org.bukkit.Material.DIAMOND_SHOVEL);
+    }
 }

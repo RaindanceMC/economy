@@ -37,6 +37,21 @@ public final class StackSaleRule implements IEconomyRule {
         return sold;
     }
 
+    /**
+     * The same with the stacks that were appraised one by one (enchanted, worn, filled, a plugin's own): those went
+     * when the one payment for everything went through.
+     */
+    public List<Boolean> sold(List<Optional<Material>> plain, Set<Material> paid, List<Boolean> appraised,
+                              boolean paidOut) {
+        List<Boolean> sold = sold(plain, paid);
+        for (int index = 0; index < sold.size(); index++) {
+            if (paidOut && Boolean.TRUE.equals(appraised.get(index))) {
+                sold.set(index, true);
+            }
+        }
+        return sold;
+    }
+
     /** The statement line: "12 × Oak Log", or "7 items" for several kinds. */
     public String what(Map<Material, Integer> counts) {
         int items = counts.values().stream().mapToInt(Integer::intValue).sum();

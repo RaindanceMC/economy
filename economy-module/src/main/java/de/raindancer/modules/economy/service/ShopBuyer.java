@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * The shop, offered to the rest of the server through Core's {@code ItemSales}: a vault's "sell this page" is a
- * {@code /sell} of plain items, at the seller's prices, within the day's budgets. Here, where the ledger is, a sale is
+ * The shop, offered to the rest of the server through Core's {@code ItemSales}: a vault's "sell this page" sells
+ * whatever a sell wand would, at the seller's prices, within the day's budgets. Here, where the ledger is, a sale is
  * settled at once; on a client server it is a question to the bank.
  */
 public final class ShopBuyer implements ItemBuyer {
@@ -22,7 +22,7 @@ public final class ShopBuyer implements ItemBuyer {
 
     @Override
     public boolean buys(ItemStack stack) {
-        return shop.buysPlain(stack).isPresent();
+        return shop.buys(stack);
     }
 
     @Override

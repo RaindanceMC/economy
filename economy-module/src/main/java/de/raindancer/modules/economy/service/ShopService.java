@@ -68,6 +68,8 @@ public final class ShopService implements IEconomyService, ShopDesk {
     private final BulkRule bulk = new BulkRule();
     private final de.raindancer.modules.economy.rules.StackSaleRule stackSale =
             new de.raindancer.modules.economy.rules.StackSaleRule();
+    private final de.raindancer.modules.economy.rules.FallbackPriceRule fallbackPrice =
+            new de.raindancer.modules.economy.rules.FallbackPriceRule();
     private volatile BulkSetup bulkSetup = new BulkSetup(null, ItemSelection.NOTHING, List.of());
     private final de.raindancer.modules.economy.rules.EnchantValueRule enchants =
             new de.raindancer.modules.economy.rules.EnchantValueRule();
@@ -980,7 +982,7 @@ public final class ShopService implements IEconomyService, ShopDesk {
             refuse(player, "economy.shop.nothing-in-hand");
             return;
         }
-        Optional<SaleLot> lot = appraise(player.getUniqueId(), held, player.getInventory().getHeldItemSlot());
+        Optional<SaleLot> lot = appraiseForSale(player.getUniqueId(), held, player.getInventory().getHeldItemSlot());
         if (lot.isPresent() && !lot.get().plain()) {
             sellLot(player, lot.get());
         } else {
@@ -1164,6 +1166,16 @@ public final class ShopService implements IEconomyService, ShopDesk {
         return appraiseAnything(seller, stack, 0);
     }
 
+    /** What a stack in this slot fetches on {@code /sell}: {@link #appraise}, else {@link #appraiseAnything}. */
+    public Optional<SaleLot> appraiseForSale(UUID seller, ItemStack stack, int slot) {
+        Optional<SaleLot> lot = appraise(seller, stack, slot);
+        if (lot.isPresent() || slot < 0) {
+            return lot;
+        }
+        return appraiseAnything(seller, stack).map(any -> new SaleLot(any.material(), slot, any.count(), any.total(),
+                any.label()));
+    }
+
     private volatile java.util.function.Predicate<ItemStack> pluginItem = stack -> false;
 
     /** How to tell a plugin's own item (Core's custom items: wands, tokens) — never sold as its material. */
@@ -1175,7 +1187,8 @@ public final class ShopService implements IEconomyService, ShopDesk {
         if (stack == null || stack.getType().isAir()) {
             return Optional.empty();
         }
-        if (pluginItem.test(stack)) {
+        // A plugin's own item is sold at its plugin's price (a fish), never as the material it happens to be.
+        if (pluginItem.test(stack) && de.raindancer.core.social.economy.ItemPrices.sellPrice(stack).isEmpty()) {
             return Optional.empty();
         }
         List<ItemStack> inside = contentsOf(stack);
@@ -1186,12 +1199,12 @@ public final class ShopService implements IEconomyService, ShopDesk {
             }
         }
         if (depth > 3 || CashTags.isCash(stack) || de.raindancer.core.content.items.NonIngredients.isMarked(stack)
-                || de.raindancer.core.content.items.InsuredItems.isInsured(stack)
-                || potionKeyOf(stack).isPresent() || !settings.sellingEnabled()) {
+                || de.raindancer.core.content.items.InsuredItems.isInsured(stack) || !settings.sellingEnabled()) {
             return Optional.empty();
         }
         Material material = stack.getType();
-        if (!tag(material).sellable() || !enchants.countable(stack.getAmount(), stack.getMaxStackSize())) {
+        Material pricedAs = fallbackPrice.pricedAs(material);
+        if (!tag(pricedAs).sellable() || !enchants.countable(stack.getAmount(), stack.getMaxStackSize())) {
             return Optional.empty();
         }
         Money held = Money.ZERO;
@@ -1203,7 +1216,7 @@ public final class ShopService implements IEconomyService, ShopDesk {
             held = held.plus(lot.get().total());
         }
         try {
-            Optional<Money> plain = priceFor(seller, material).sellFor(1);
+            Optional<Money> plain = priceFor(seller, pricedAs).sellFor(1);
             if (plain.isEmpty()) {
                 return Optional.empty();
             }
@@ -1275,7 +1288,7 @@ public final class ShopService implements IEconomyService, ShopDesk {
         ItemStack[] contents = player.getInventory().getStorageContents();
         for (int slot = 0; slot < contents.length; slot++) {
             ItemStack stack = contents[slot];
-            Optional<SaleLot> lot = appraise(player.getUniqueId(), stack, slot);
+            Optional<SaleLot> lot = appraiseForSale(player.getUniqueId(), stack, slot);
             if (lot.isEmpty()) {
                 continue;
             }
@@ -1321,7 +1334,7 @@ public final class ShopService implements IEconomyService, ShopDesk {
         }
         PlayerInventory inventory = player.getInventory();
         ItemStack there = inventory.getItem(lot.slot());
-        Optional<SaleLot> now = appraise(player.getUniqueId(), there, lot.slot());
+        Optional<SaleLot> now = appraiseForSale(player.getUniqueId(), there, lot.slot());
         if (now.isEmpty() || now.get().plain() || !now.get().total().equals(lot.total())) {
             refuse(player, "economy.shop.changed");
             return;
@@ -1412,6 +1425,11 @@ public final class ShopService implements IEconomyService, ShopDesk {
      * message. The caller hands the items back when this says no.
      */
     private boolean settle(Player player, Map<Material, Integer> taken, Money total) {
+        return settle(player, taken, taken, total);
+    }
+
+    /** @param market what moves the market: the plain items among {@code taken}, not the one-of-a-kind ones */
+    private boolean settle(Player player, Map<Material, Integer> taken, Map<Material, Integer> market, Money total) {
         Currency currency = settings.currency();
         int items = taken.values().stream().mapToInt(Integer::intValue).sum();
         String what = stackSale.what(taken);
@@ -1425,14 +1443,14 @@ public final class ShopService implements IEconomyService, ShopDesk {
             Outcomes.tell(messages, effects, player, result, currency, "");
             return false;
         }
-        recordSold(player.getUniqueId(), taken);
+        recordSold(player.getUniqueId(), market);
         effects.play(player.getUniqueId(), Cues.EARNED);
         messages.send(player, "economy.shop.sold", "count", String.valueOf(items), "what", what,
                 "amount", currency.render(total));
         return true;
     }
 
-    /** The material of a plain stack this shop buys, or empty — the one test for what a vault may sell here. */
+    /** The material of a plain stack this shop buys, or empty. */
     public Optional<Material> buysPlain(ItemStack stack) {
         if (stack == null || stack.isEmpty() || !settings.sellingEnabled()) {
             return Optional.empty();
@@ -1441,13 +1459,23 @@ public final class ShopService implements IEconomyService, ShopDesk {
         return sellableStack(stack, material) && tag(material).sellable() ? Optional.of(material) : Optional.empty();
     }
 
+    /** Whether a vault may sell this stack here: plain, or anything {@link #appraiseAnything} puts a price on. */
+    public boolean buys(ItemStack stack) {
+        return buysPlain(stack).isPresent()
+                || stack != null && !stack.isEmpty() && appraiseAnything(NOBODY, stack).isPresent();
+    }
+
+    private static final UUID NOBODY = new UUID(0, 0);
+
     /**
-     * Sells stacks somebody else already took out — a vault's page — at this player's prices, in one payment.
-     * Only plain items; anything enchanted, worn or named goes back.
+     * Sells stacks somebody else already took out — a vault's page — at this player's prices, in one payment:
+     * plain ones by kind, everything else (enchanted, worn, potions, filled boxes, a plugin's fish) one by one,
+     * the way a sell wand appraises it.
      *
      * @return per stack, whether it was sold
      */
     public List<Boolean> sellStacks(Player player, List<ItemStack> stacks) {
+        UUID seller = player.getUniqueId();
         if (!settings.sellingEnabled()) {
             refuse(player, "economy.shop.selling-off");
             return stackSale.sold(stacks.stream().map(stack -> Optional.<Material>empty()).toList(), java.util.Set.of());
@@ -1457,17 +1485,39 @@ public final class ShopService implements IEconomyService, ShopDesk {
         Money total = Money.ZERO;
         Map<Material, Integer> priced = new LinkedHashMap<>();
         for (Map.Entry<Material, Integer> each : counts.entrySet()) {
-            Optional<Money> worth = priceFor(player.getUniqueId(), each.getKey()).sellFor(each.getValue());
+            Optional<Money> worth = priceFor(seller, each.getKey()).sellFor(each.getValue());
             if (worth.isPresent() && worth.get().isPositive()) {
                 total = total.plus(worth.get());
                 priced.put(each.getKey(), each.getValue());
             }
         }
-        if (priced.isEmpty()) {
+        Map<Material, Integer> shown = new LinkedHashMap<>(priced);
+        List<Boolean> appraised = new ArrayList<>(stacks.size());
+        List<ItemStack> special = new ArrayList<>();
+        for (int index = 0; index < stacks.size(); index++) {
+            ItemStack stack = stacks.get(index);
+            Optional<SaleLot> lot = plain.get(index).isPresent() ? Optional.empty() : appraiseAnything(seller, stack);
+            appraised.add(lot.isPresent());
+            if (lot.isPresent()) {
+                total = total.plus(lot.get().total());
+                shown.merge(stack.getType(), stack.getAmount(), Integer::sum);
+                special.add(stack);
+            }
+        }
+        if (shown.isEmpty()) {
             refuse(player, "economy.shop.nothing-to-sell");
             return stackSale.sold(plain, java.util.Set.of());
         }
-        return stackSale.sold(plain, settle(player, priced, total) ? priced.keySet() : java.util.Set.of());
+        boolean paid = settle(player, shown, priced, total);
+        if (paid) {
+            for (ItemStack each : special) {
+                soldEnchantments(seller, enchantSells(seller, each, false).map(Map::keySet).orElse(java.util.Set.of()),
+                        each.getAmount());
+                potionKeyOf(each).filter(key -> tag(key.name()).sellable())
+                        .ifPresent(key -> soldPotion(seller, key, each.getAmount()));
+            }
+        }
+        return stackSale.sold(plain, paid ? priced.keySet() : java.util.Set.of(), appraised, paid);
     }
 
     /** A sale moves the market and the seller's own "sold lately", whichever way it was made. */

@@ -54,4 +54,14 @@ class StackSaleRuleTest {
                 .isEqualTo("7 items");
         assertThat(Arrays.asList(rule.describe())).isNotEmpty();
     }
+
+    @Test
+    @DisplayName("an enchanted, worn or filled stack goes with the sale when it was appraised and the sale was paid")
+    void specialStacksGoWithThePayment() {
+        List<Optional<Material>> plain = List.of(Optional.of(Material.DIRT), Optional.empty(), Optional.empty());
+        List<Boolean> appraised = List.of(false, true, false);
+
+        assertThat(rule.sold(plain, Set.of(Material.DIRT), appraised, true)).containsExactly(true, true, false);
+        assertThat(rule.sold(plain, Set.of(), appraised, false)).containsExactly(false, false, false);
+    }
 }
