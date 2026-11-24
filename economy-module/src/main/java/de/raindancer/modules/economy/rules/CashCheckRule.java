@@ -95,6 +95,18 @@ public final class CashCheckRule implements IEconomyRule {
         return new CashCheck(Money.of(total), serials, coins, taken, confiscated, overTheFloat);
     }
 
+    /**
+     * Cash a vault handed over, by its index there: how many of each stack are left once what was paid in or
+     * confiscated is gone.
+     */
+    public List<Integer> leftOver(List<Integer> amounts, Map<Integer, Integer> gone) {
+        List<Integer> left = new ArrayList<>(amounts.size());
+        for (int index = 0; index < amounts.size(); index++) {
+            left.add(Math.max(0, amounts.get(index) - gone.getOrDefault(index, 0)));
+        }
+        return left;
+    }
+
     @Override
     public String describe() {
         return "which of the cash being paid in is real, and what it is worth";

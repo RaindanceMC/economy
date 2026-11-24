@@ -1073,8 +1073,7 @@ public final class ShopService implements IEconomyService, ShopDesk {
         Optional<Money> priced = de.raindancer.core.social.economy.ItemPrices.sellPrice(stack);
         if (priced.isPresent()) {
             // A plugin's own item (a fish, a dish) at the price its plugin gives it, never as its material.
-            if (!settings.sellingEnabled() || CashTags.isCash(stack)
-                    || de.raindancer.core.content.items.InsuredItems.isInsured(stack)) {
+            if (!settings.sellingEnabled() || CashTags.isCash(stack)) {
                 return Optional.empty();
             }
             return trade.total(priced.get(), stack.getAmount()).map(total -> new SaleLot(stack.getType(), slot,
@@ -1157,12 +1156,13 @@ public final class ShopService implements IEconomyService, ShopDesk {
     }
 
     /**
-     * What a stack fetches when it is handed over to be sold — into an Auto Sell Chest, by a sell wand, by Auto
-     * Sell: {@link #appraise} first, and otherwise whatever it is, as is: its material's price shrunk by wear,
-     * its enchantments' parts on top, and what it holds (a shulker box, a bundle) appraised the same way. Never
-     * cash, an insured item or a plugin's own item, and nothing holding one — those go back whole.
+     * What a stack fetches when it is handed over to be sold — into an Auto Sell Chest, by a sell wand, from a vault,
+     * by Auto Sell: {@link #appraise} first, and otherwise whatever it is, as is: its material's price shrunk by wear,
+     * its enchantments' parts on top, and what it holds (a shulker box, a bundle) appraised the same way. Insured
+     * items, tokens and a plugin's unpriced items go as their material. Never cash — that is paid in at its face
+     * value — nor anything holding cash.
      */
-    public Optional<SaleLot> appraiseAnything(UUID seller, ItemStack stack) {
+        public Optional<SaleLot> appraiseAnything(UUID seller, ItemStack stack) {
         return appraiseAnything(seller, stack, 0);
     }
 
@@ -1176,19 +1176,8 @@ public final class ShopService implements IEconomyService, ShopDesk {
                 any.label()));
     }
 
-    private volatile java.util.function.Predicate<ItemStack> pluginItem = stack -> false;
-
-    /** How to tell a plugin's own item (Core's custom items: wands, tokens) — never sold as its material. */
-    public void pluginItems(java.util.function.Predicate<ItemStack> isPluginItem) {
-        this.pluginItem = isPluginItem == null ? stack -> false : isPluginItem;
-    }
-
     private Optional<SaleLot> appraiseAnything(UUID seller, ItemStack stack, int depth) {
         if (stack == null || stack.getType().isAir()) {
-            return Optional.empty();
-        }
-        // A plugin's own item is sold at its plugin's price (a fish), never as the material it happens to be.
-        if (pluginItem.test(stack) && de.raindancer.core.social.economy.ItemPrices.sellPrice(stack).isEmpty()) {
             return Optional.empty();
         }
         List<ItemStack> inside = contentsOf(stack);
@@ -1198,8 +1187,8 @@ public final class ShopService implements IEconomyService, ShopDesk {
                 return lot;
             }
         }
-        if (depth > 3 || CashTags.isCash(stack) || de.raindancer.core.content.items.NonIngredients.isMarked(stack)
-                || de.raindancer.core.content.items.InsuredItems.isInsured(stack) || !settings.sellingEnabled()) {
+        // Cash is paid in at its face value (CashService), never sold as the paper it is printed on.
+        if (depth > 3 || CashTags.isCash(stack) || !settings.sellingEnabled()) {
             return Optional.empty();
         }
         Material material = stack.getType();

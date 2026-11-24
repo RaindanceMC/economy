@@ -350,18 +350,77 @@ public final class CashService implements IEconomyService {
         deposit(player, slots);
     }
 
+    /** Where the cash being paid in lies: an inventory's slots, or stacks a vault already took out. */
+    private interface Holder {
+        ItemStack at(int slot);
+
+        void take(int slot, int count);
+    }
+
+    /**
+     * Pays in cash a vault already took out — its "sell" — and says per stack whether it is all gone. A stack only
+     * partly paid in (coins beyond what is in circulation) is cut down to what is left and reported as not gone,
+     * so the vault puts the rest back.
+     */
+    public List<Boolean> depositStacks(Player player, List<ItemStack> stacks) {
+        List<Integer> slots = new ArrayList<>();
+        for (int index = 0; index < stacks.size(); index++) {
+            if (CashTags.isCash(stacks.get(index))) {
+                slots.add(index);
+            }
+        }
+        Map<Integer, Integer> gone = new LinkedHashMap<>();
+        if (!slots.isEmpty()) {
+            deposit(player, slots, new Holder() {
+                @Override
+                public ItemStack at(int slot) {
+                    return stacks.get(slot);
+                }
+
+                @Override
+                public void take(int slot, int count) {
+                    gone.merge(slot, Math.max(0, count), Integer::sum);
+                }
+            });
+        }
+        List<Integer> left = check.leftOver(stacks.stream().map(ItemStack::getAmount).toList(), gone);
+        List<Boolean> sold = new ArrayList<>(stacks.size());
+        for (int index = 0; index < stacks.size(); index++) {
+            boolean all = gone.containsKey(index) && left.get(index) == 0;
+            if (!all && left.get(index) < stacks.get(index).getAmount()) {
+                stacks.get(index).setAmount(left.get(index));
+            }
+            sold.add(all);
+        }
+        return sold;
+    }
+
     /** Pays in the cash in these slots — what is genuine of it; forgeries are confiscated. */
     private void deposit(Player player, List<Integer> slots) {
+        PlayerInventory inventory = player.getInventory();
+        deposit(player, slots, new Holder() {
+            @Override
+            public ItemStack at(int slot) {
+                return inventory.getItem(slot);
+            }
+
+            @Override
+            public void take(int slot, int count) {
+                CashService.take(inventory, slot, count);
+            }
+        });
+    }
+
+    private void deposit(Player player, List<Integer> slots, Holder holder) {
         EconomySettings live = settings;
         Currency currency = live.currency();
         if (!live.cashEnabled()) {
             refuse(player, "economy.cash.off");
             return;
         }
-        PlayerInventory inventory = player.getInventory();
         Map<Integer, CashPiece> pieces = new LinkedHashMap<>();
         for (int slot : slots) {
-            CashTags.read(inventory.getItem(slot)).ifPresent(piece -> pieces.put(slot, piece));
+            CashTags.read(holder.at(slot)).ifPresent(piece -> pieces.put(slot, piece));
         }
         if (pieces.isEmpty()) {
             refuse(player, "economy.cash.none");
@@ -375,7 +434,7 @@ public final class CashService implements IEconomyService {
             return;
         }
         if (!check.confiscated().isEmpty()) {
-            check.confiscated().forEach((slot, count) -> take(inventory, slot, count));
+            check.confiscated().forEach(holder::take);
             confiscate(player, pieces, check);
         }
         if (check.overTheFloat() > 0) {
@@ -396,7 +455,7 @@ public final class CashService implements IEconomyService {
             Outcomes.tell(messages, effects, player, result, currency, "");
             return;
         }
-        check.taken().forEach((slot, count) -> take(inventory, slot, count - check.confiscated().getOrDefault(slot, 0)));
+        check.taken().forEach((slot, count) -> holder.take(slot, count - check.confiscated().getOrDefault(slot, 0)));
         economy.tell(player.getUniqueId(), result.amount(), result.balance(), TransactionKind.DEPOSIT);
         effects.play(player.getUniqueId(), Cues.EARNED);
         messages.send(player, "economy.cash.deposited", "amount", currency.render(result.amount()),

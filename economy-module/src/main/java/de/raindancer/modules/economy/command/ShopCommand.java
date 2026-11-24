@@ -4,6 +4,7 @@ import de.raindancer.modules.economy.service.ShopService;
 
 import de.raindancer.core.ui.choose.Category;
 import de.raindancer.modules.economy.EconomyServices;
+import de.raindancer.modules.economy.store.CashTags;
 import de.raindancer.modules.economy.util.PermissionNodes;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import org.bukkit.Material;
@@ -39,9 +40,20 @@ public final class ShopCommand extends EconomyCommand {
                 }
                 String how = args.length == 0 ? "" : args[0].toLowerCase(Locale.ROOT);
                 switch (how) {
-                    case "hand" -> live.shop().sellHand(player);
+                    case "hand" -> {
+                        if (CashTags.isCash(player.getInventory().getItemInMainHand())) {
+                            live.cash().depositHand(player);
+                        } else {
+                            live.shop().sellHand(player);
+                        }
+                    }
                     case "enchantments", "enchants" -> live.shop().sellEnchantments(player);
-                    case "all" -> live.shop().sellEverything(player);
+                    case "all" -> {
+                        if (java.util.Arrays.stream(player.getInventory().getStorageContents()).anyMatch(CashTags::isCash)) {
+                            live.cash().depositAll(player);
+                        }
+                        live.shop().sellEverything(player);
+                    }
                     default -> live.screens().sell(player);
                 }
                 return;

@@ -106,4 +106,12 @@ class CashCheckRuleTest {
         assertThat(result.confiscated()).isEmpty();
         assertThat(result.overTheFloat()).isEqualTo(6);
     }
+
+    @Test
+    @DisplayName("cash a vault hands over: what is left of each stack once the paid-in and confiscated pieces are gone")
+    void leftOverPerStack() {
+        java.util.List<Integer> left = rule.leftOver(java.util.List.of(10, 5, 1, 3), Map.of(0, 10, 1, 2, 3, 7));
+
+        assertThat(left).containsExactly(0, 3, 1, 0);
+    }
 }

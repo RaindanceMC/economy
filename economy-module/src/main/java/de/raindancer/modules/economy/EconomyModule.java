@@ -87,7 +87,7 @@ import java.util.UUID;
  */
 public final class EconomyModule implements FlexModule {
 
-    private static final ModuleInfo INFO = ModuleInfo.of("economy", "Economy", "0.81.0")
+    private static final ModuleInfo INFO = ModuleInfo.of("economy", "Economy", "0.82.0")
             .describedAs("A bank, paying and hiring, coins you can carry, a creative-style shop priced from recipes, "
                     + "passive income, live auctions and raffles, and a casino with sounds and animations. Every part is switchable.")
             .by("Raindancer118");
@@ -311,7 +311,6 @@ public final class EconomyModule implements FlexModule {
             settings.onChange(service::settings);
         }
 
-        shop.pluginItems(stack -> context.core().itemFactory().keyOf(stack).isPresent());
         var sellWands = new de.raindancer.modules.economy.service.SellWandService(context.plugin(), shop, messages,
                 context.chat().brand(), context.core().items(), context.core().itemFactory());
         services = new EconomyServices(context.plugin(), server, log, messages, context.chat().brand(), context.core(),
@@ -398,7 +397,7 @@ public final class EconomyModule implements FlexModule {
         ShopItemValuer valuer = new ShopItemValuer(prices::tag, CashTags::isCash, ShopItemValuer::materialName);
         ItemValues.provide(context.plugin(), valuer);
         context.closeWith(() -> ItemValues.retract(valuer));
-        var buyer = new de.raindancer.modules.economy.service.ShopBuyer(shop);
+        var buyer = new de.raindancer.modules.economy.service.ShopBuyer(shop, cash);
         de.raindancer.core.social.economy.ItemSales.provide(context.plugin(), buyer);
         context.closeWith(() -> de.raindancer.core.social.economy.ItemSales.retract(buyer));
         de.raindancer.core.social.economy.CashDesk desk = (player, amount, mostCoins, issuer) ->

@@ -30,7 +30,7 @@ sections:
   - question: What will the shop not take?
     title: Not accepted
     text: |
-      Anything with lore, hidden plugin data or contents (a loaded shulker box excepted in the wand and chests) is not bought; renamed items are valued as themselves. Money, insured items and plugin items are never sold as their material.
+      Practically everything is bought. Items with lore or plugin data, insured items and tokens go at their material's price, a loaded shulker box with its contents, a potion or book the shop does not stock as a bottle or a book. Cash is paid in at its face value. Only what this server closed or marked as never bought stays yours.
       {if:economy:shop.take-worthless}
 
       A flooded item the shop pays nothing for is still taken, for nothing, so you can get rid of it.{/if}
